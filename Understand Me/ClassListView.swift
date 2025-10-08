@@ -14,7 +14,7 @@ struct ClassListView: View {
         ScrollView(showsIndicators: false) {
             ForEach(1...10, id: \.self) { _ in
                 NavigationLink {
-                    
+                    ClassHomeworkView(className: "Swift入門")
                 } label: {
                     classItemView(className: "Swift入門", teacherName: "山田", homeworksCount: 5)
                 }
