@@ -32,15 +32,16 @@ struct HomeView: View {
                         
                         Image(systemName: "arrow.forward")
                             .bold()
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(.accent.opacity(0.3))
                     }
                 }
                 
-                VStack(spacing: 12) {
+                ScrollView(showsIndicators: false ) {
                     HomeworkListItemView(title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
                     HomeworkListItemView(title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
                     HomeworkListItemView(title: "GitHub リポート提出", dueDate: Date(), state: .questionsGenerated)
                 }
+                .frame(height: 300)
             }
             
             
@@ -50,13 +51,13 @@ struct HomeView: View {
                     
                 } label: {
                     HStack {
-                        Text("クラスリスト")
+                        Text("マイクラス")
                             .font(.title2.bold())
                             .padding(.horizontal)
                         
                         Image(systemName: "arrow.forward")
                             .bold()
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(.accent.opacity(0.3))
                     }
                 }
                 .foregroundStyle(.primary)
@@ -64,11 +65,13 @@ struct HomeView: View {
                 LazyVGrid(columns: adaptiveColumn, spacing: 16) {
                     classCell(
                         className: "iOS プログラミング",
-                        teacherName: "山田太郎先生"
+                        teacherName: "山田太郎先生",
+                        homeworksCount: 3
                     )
                     classCell(
                         className: "Android プログラミング",
-                        teacherName: "山田太郎先生"
+                        teacherName: "山田太郎先生",
+                        homeworksCount: 10
                     )
                     classCell(
                         className: "Web プログラミング",
@@ -76,7 +79,8 @@ struct HomeView: View {
                     )
                     classCell(
                         className: "コンテンツ制作",
-                        teacherName: "山田太郎先生"
+                        teacherName: "山田太郎先生",
+                        homeworksCount: 100
                     )
                 }
                 .padding(.horizontal)
@@ -92,10 +96,10 @@ struct HomeView: View {
     private var header: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("こんにちは 👋")
+                Text("こんにちは")
                     .font(.headline)
                     .foregroundColor(.secondary)
-                Text("24cm0112")
+                Text("24cm011288")
                     .font(.title3.bold())
             }
             
@@ -113,16 +117,13 @@ struct HomeView: View {
             .overlay(Circle().stroke(Color.primary.opacity(0.3), lineWidth: 1))
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 25)
-                .fill(.ultraThinMaterial)
-                .shadow(color: .gray.opacity(0.5), radius: 6)
-        )
-        .padding(.horizontal)
+        .padding(.top, 20)
+        .padding(.horizontal, 10)
+        .background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.3))
     }
     
     // MARK: - Class Card
-    private func classCell(className: String, teacherName: String) -> some View {
+    private func classCell(className: String, teacherName: String, homeworksCount: Int = 0) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(className)
                 .font(.headline)
@@ -130,12 +131,33 @@ struct HomeView: View {
             Text(teacherName)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+        
+            
+            HStack {
+                Image(systemName: "graduationcap")
+                    .foregroundStyle(.accent.opacity(0.4))
+                Text("課題")
+                    .fontWeight(.light)
+                
+                Spacer()
+                
+                Text("\(homeworksCount) 件")
+                    .fontWeight(.regular)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(.secAccent.opacity(0.4))
+                    .foregroundColor(.primary)
+                    .cornerRadius(12)
+
+            }
+
         }
+        .lineLimit(1)
         .padding()
         .frame(maxWidth: .infinity, minHeight: 100, alignment: .leading)
         .background(.background)
         .cornerRadius(20)
-        .shadow(color: .primary.opacity(0.2), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.2), radius: 8)
     }
 }
 
