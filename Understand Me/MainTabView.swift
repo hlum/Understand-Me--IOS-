@@ -11,12 +11,22 @@ struct MainTabView: View {
     @State private var selection: Int = 0
     var body: some View {
         TabView(selection: $selection) {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Test")
-                }
-                .tag(0)
+            NavigationStack {
+                HomeView()
+            }
+            .tabItem {
+                Image(systemName: "house.fill")
+                Text("ホーム")
+            }
+            .tag(0)
+            
+            NavigationStack {
+                ClassListView()
+            }
+            .tabItem {
+                Image(systemName: "graduationcap")
+                Text("クラス")
+            }
         }
     }
 }
