@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @State private var selection: Int = 0
+    @State private var selectedTab: Int = 0
     var body: some View {
-        TabView(selection: $selection) {
+        TabView(selection: $selectedTab) {
             NavigationStack {
-                HomeView()
+                HomeView(selectedTab: $selectedTab)
             }
             .tabItem {
                 Image(systemName: "house.fill")
