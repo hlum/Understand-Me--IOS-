@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Binding var selectedTab: Int
     
     private let adaptiveColumn = [
         GridItem(.adaptive(minimum: 160), spacing: 16)
@@ -124,44 +125,50 @@ struct HomeView: View {
     
     // MARK: - Class Card
     private func classCell(className: String, teacherName: String, homeworksCount: Int = 0) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(className)
-                .font(.headline)
+        NavigationLink(destination: {
+            ClassHomeworkView(className: className)
+        }, label: {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(className)
+                    .font(.headline)
 
-            Text(teacherName)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        
+                Text(teacherName)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
             
-            HStack {
-                Image(systemName: "graduationcap")
-                    .foregroundStyle(.accent.opacity(0.4))
-                Text("課題")
-                    .fontWeight(.light)
                 
-                Spacer()
-                
-                Text("\(homeworksCount) 件")
-                    .fontWeight(.regular)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(.secAccent.opacity(0.4))
-                    .foregroundColor(.primary)
-                    .cornerRadius(12)
+                HStack {
+                    Image(systemName: "graduationcap")
+                        .foregroundStyle(.accent.opacity(0.4))
+                    Text("課題")
+                        .fontWeight(.light)
+                    
+                    Spacer()
+                    
+                    Text("\(homeworksCount) 件")
+                        .fontWeight(.regular)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(.secAccent.opacity(0.4))
+                        .foregroundColor(.primary)
+                        .cornerRadius(12)
+
+                }
 
             }
-
-        }
-        .lineLimit(1)
-        .padding()
-        .frame(maxWidth: .infinity, minHeight: 100, alignment: .leading)
-        .background(.background)
-        .cornerRadius(20)
-        .shadow(color: .primary.opacity(0.2), radius: 8)
+            .lineLimit(1)
+            .padding()
+            .frame(maxWidth: .infinity, minHeight: 100, alignment: .leading)
+            .background(.background)
+            .cornerRadius(20)
+            .shadow(color: .primary.opacity(0.2), radius: 8)
+        })
     }
 }
 
 
 #Preview {
-    HomeView()
+    NavigationStack {
+        HomeView(selectedTab: .constant(1))
+    }
 }
