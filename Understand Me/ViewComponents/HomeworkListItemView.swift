@@ -13,7 +13,10 @@ struct HomeworkListItemView: View {
     var state: HomeworkState
     
     var body: some View {
-        HStack {
+        NavigationLink {
+            Text("helo")
+        } label: {
+            
             VStack(alignment: .leading, spacing: 4) {
                 
                 Text(title)
@@ -22,19 +25,13 @@ struct HomeworkListItemView: View {
                 HStack {
                     Image(systemName: "calendar")
                     
-                    Text(formattedDate(dueDate))
+                    Text(formattedDate(dueDate) + "まで")
                         .font(.caption)
                 }
                 .foregroundColor(.secondary)
                 
-                
-                if state == .completed {
-                    Image(systemName: "checkmark.circle")
-                        .bold()
-                        .font(.title)
-                        .foregroundStyle(.green)
-                        .frame(width: 60, height: 60)
-                } else if state == .generatingQuestions {
+               
+                if state == .generatingQuestions {
                     HStack {
                         Text(state.stateDescription)
                             .font(.caption)
@@ -45,10 +42,6 @@ struct HomeworkListItemView: View {
                             .cornerRadius(12)
                             .frame(height: 60)
                         
-                        LottieView(filename: "AI")
-                            .frame(width: 50, height: 50)
-
-
                     }
                     .frame(height: 60)
                     .cornerRadius(40)
@@ -63,9 +56,10 @@ struct HomeworkListItemView: View {
                         .frame(height: 60)
                 }
             }
-            
-            Spacer()
-            
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .foregroundStyle(.foreground)
+        }
+        .overlay(alignment: .trailing, content: {
             if state == .questionsGenerated {
                 Button {
                     
@@ -77,14 +71,22 @@ struct HomeworkListItemView: View {
                         .foregroundColor(.primary)
                         .cornerRadius(70)
                 }
+            } else if state == .generatingQuestions {
+                LottieView(filename: "AI")
+                    .frame(width: 80, height: 80)
+            } else if state == .completed {
+                Image(systemName: "checkmark.circle")
+                    .bold()
+                    .font(.title)
+                    .foregroundStyle(.green)
+                    .frame(width: 60, height: 60)
             }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        })
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(.background)
-                .shadow(color: .primary.opacity(0.3), radius: 1)
+                .shadow(color: .primary.opacity(0.7), radius: 1)
         )
         .padding(.horizontal)
     }
@@ -97,5 +99,7 @@ struct HomeworkListItemView: View {
 }
 
 #Preview {
-    HomeworkListItemView(title: "Test", dueDate: Date(), state: .questionsGenerated)
+    NavigationStack {
+        HomeworkListItemView(title: "Test", dueDate: Date(), state: .generatingQuestions)
+    }
 }
