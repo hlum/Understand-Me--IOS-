@@ -14,10 +14,10 @@ struct HomeworkListItemView: View {
     
     var body: some View {
         NavigationLink {
-            Text("helo")
+            HomeworkDetailView(title: title, description: "description", homeworkState: state, dueDate: dueDate, className: "class name")
         } label: {
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 10) {
                 
                 Text(title)
                     .font(.headline)
@@ -40,10 +40,8 @@ struct HomeworkListItemView: View {
                             .background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.3))
                             .foregroundColor(.primary)
                             .cornerRadius(12)
-                            .frame(height: 60)
                         
                     }
-                    .frame(height: 60)
                     .cornerRadius(40)
                 } else {
                     Text(state.stateDescription)
@@ -53,7 +51,6 @@ struct HomeworkListItemView: View {
                         .background(state.color.opacity(0.15))
                         .foregroundColor(state.color)
                         .cornerRadius(12)
-                        .frame(height: 60)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -65,9 +62,9 @@ struct HomeworkListItemView: View {
                     
                 } label: {
                     Text("回答")
-                        .font(.system(size: 17, weight: .semibold))
-                        .frame(width: 100, height: 45)
-                        .background(.accent.opacity(0.4))
+                        .font(.headline)
+                        .frame(width: 70, height: 45)
+                        .background(.accent.opacity(0.3))
                         .foregroundColor(.primary)
                         .cornerRadius(70)
                 }
@@ -100,6 +97,6 @@ struct HomeworkListItemView: View {
 
 #Preview {
     NavigationStack {
-        HomeworkListItemView(title: "Test", dueDate: Date(), state: .generatingQuestions)
+        HomeworkListItemView(title: "Test", dueDate: Date(), state: .questionsGenerated)
     }
 }

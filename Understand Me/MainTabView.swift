@@ -27,6 +27,14 @@ struct MainTabView: View {
                 Image(systemName: "graduationcap")
                 Text("クラス")
             }
+            
+            NavigationStack {
+                HomeworkListView()
+            }
+            .tabItem {
+                Image(systemName: "list.bullet.rectangle.portrait")
+                Text("課題")
+            }
         }
     }
 }
