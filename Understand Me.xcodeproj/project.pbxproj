@@ -17,9 +17,22 @@
 		7FC8C3132E950FD300B4CF5D /* Understand Me.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Understand Me.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7FBAD6452E98A52D006807B8 /* Exceptions for "Understand Me" folder in "Understand Me" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Understand-Me-Info.plist",
+			);
+			target = 7FC8C3122E950FD300B4CF5D /* Understand Me */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7FC8C3152E950FD300B4CF5D /* Understand Me */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				7FBAD6452E98A52D006807B8 /* Exceptions for "Understand Me" folder in "Understand Me" target */,
+			);
 			path = "Understand Me";
 			sourceTree = "<group>";
 		};
@@ -276,6 +289,7 @@
 				DEVELOPMENT_TEAM = GNG4VLAQ7U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Understand-Me-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -309,6 +323,7 @@
 				DEVELOPMENT_TEAM = GNG4VLAQ7U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Understand-Me-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
