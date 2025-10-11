@@ -13,20 +13,17 @@ class SecretLoader {
     
     private init() {}
     
-    static func fetchSecret(from file: String = "Secrets", forKey key: String) -> String? {
+    func fetchSecret(from file: String = "Secrets", forKey key: String) -> String {
         guard let url = Bundle.main.url(forResource: file, withExtension: "plist") else {
             fatalError("\(file).plist がありません。")
-            return nil
         }
         
         guard let data = try? Data(contentsOf: url) else {
             fatalError("\(file).plist からデータを読み込めません。")
-            return nil
         }
         
         guard let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: String] else {
             fatalError("\(file).plist のデータは型変換できません。")
-            return nil
         }
         
         guard let result = plist[key] else {
