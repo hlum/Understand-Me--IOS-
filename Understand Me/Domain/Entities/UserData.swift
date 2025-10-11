@@ -7,16 +7,23 @@
 
 import Foundation
 
-struct UserData {
+struct UserData: Codable {
     let id: String
     let email: String
     let fcmToken: String?
-    let photoURL: URL?
+    let photoURL: String?
     
-    init(id: String, email: String, fcmToken: String?, photoURL: URL?) {
+    init(id: String, email: String, fcmToken: String?, photoURL: String?) {
         self.id = id
         self.email = email
         self.fcmToken = fcmToken
         self.photoURL = photoURL
+    }
+    
+    enum CodingKeys: String, CodingKey  {
+        case id = "user_id"
+        case email
+        case fcmToken = "fcm_token"
+        case photoURL = "photo_url"
     }
 }
