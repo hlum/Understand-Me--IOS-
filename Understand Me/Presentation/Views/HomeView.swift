@@ -10,11 +10,31 @@ import Combine
 
 class HomeViewModel: ObservableObject {
     private let userDataUseCase: UserDataUseCase
-    @Published var userData: UserData?
+    private let authenticationUseCase: AuthenticationUseCase
+    @Published var userData: UserData? = nil
     
-    init(userData: UserData? = nil, userDataUseCase: UserDataUseCase) {
-        self.userData = userData
+    
+    
+    init(authenticationUseCase: AuthenticationUseCase, userDataUseCase: UserDataUseCase) {
         self.userDataUseCase = userDataUseCase
+        self.authenticationUseCase = authenticationUseCase
+    }
+    
+    
+    
+    @MainActor
+    func loadUserData() async {
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("AuthDataResultを取得できません。")
+            return
+        }
+        
+        do {
+            self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
+        } catch {
+            // TODO: UserにAlertで知らせる
+            print("UserDataの取得に失敗しました。")
+        }
     }
 }
 
@@ -29,10 +49,15 @@ struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
     
     
-    init(selectedTab: Binding<Int>, userData: UserData? = nil) {
+    init(selectedTab: Binding<Int>) {
         self._selectedTab = selectedTab
         
-        self._viewModel = .init(wrappedValue: .init(userData: userData, userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository())))
+        self._viewModel = .init(
+            wrappedValue: .init(
+                authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
+                userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository())
+            )
+        )
     }
     
     var body: some View {
@@ -112,6 +137,9 @@ struct HomeView: View {
         }
         .padding(.vertical)
         .foregroundStyle(.primary)
+        .task {
+            await viewModel.loadUserData()
+        }
     }
     
     // MARK: - Header
@@ -192,6 +220,6 @@ struct HomeView: View {
 
 #Preview {
     NavigationStack {
-        HomeView(selectedTab: .constant(1), userData: .getDummy())
+        HomeView(selectedTab: .constant(1))
     }
 }
