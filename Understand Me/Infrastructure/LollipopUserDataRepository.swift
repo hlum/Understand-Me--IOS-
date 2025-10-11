@@ -11,6 +11,7 @@ enum UserDataRepositoryError: LocalizedError {
     case InvalidURL
     case NoDataFoundInResponse
     case InvalidResponseStatus
+    case UserNotFound
     
     var errorDescription: String? {
         switch self {
@@ -20,6 +21,8 @@ enum UserDataRepositoryError: LocalizedError {
             return "データが返っていません。"
         case .InvalidResponseStatus:
             return "ResponseのStatusがsuccessではありません。"
+        case .UserNotFound:
+            return "指定されたIDのユーザーが見つかりませんでした。"
         }
     }
 }
@@ -60,6 +63,10 @@ class LollipopUserDataRepository: UserDataRepository {
         let response = try decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
+            
+            if response.message.lowercased().contains("ユーザーが存在しません") {
+                throw UserDataRepositoryError.UserNotFound
+            }
             print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
             throw UserDataRepositoryError.InvalidResponseStatus
         }
