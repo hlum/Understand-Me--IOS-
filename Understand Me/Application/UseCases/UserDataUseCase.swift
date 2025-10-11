@@ -17,6 +17,11 @@ class UserDataUseCase {
     
     
     func saveUserData(userData: UserData) async throws {
+        if let _ = try? await userDataRepository.fetchUserData(userID: userData.id) {
+            print("UserDataはすでに保存されています。")
+            return
+        }
+        
         try await userDataRepository.saveUserData(userData: userData)
     }
     
