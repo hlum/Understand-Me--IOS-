@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Binding var selectedTab: Int
+    @Binding var userData: UserData?
     
     private let adaptiveColumn = [
         GridItem(.adaptive(minimum: 160), spacing: 16)
@@ -100,18 +101,20 @@ struct HomeView: View {
                 Text("こんにちは")
                     .font(.headline)
                     .foregroundColor(.secondary)
-                Text("24cm011288")
+                Text(userData?.studentCode ?? "ゲスト")
                     .font(.title3.bold())
             }
             
             Spacer()
             
-            AsyncImage(url: URL(string: "https://e-quester.com/wp-content/uploads/2021/11/placeholder-image-person-jpg.jpg")) { image in
+            AsyncImage(url: URL(string: userData?.photoURL ?? "")) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Color.gray.opacity(0.3)
+                Image(.profilePic)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
             }
             .frame(width: 55, height: 55)
             .clipShape(Circle())
@@ -169,6 +172,6 @@ struct HomeView: View {
 
 #Preview {
     NavigationStack {
-        HomeView(selectedTab: .constant(1))
+        HomeView(selectedTab: .constant(1), userData: .constant(.getDummy()))
     }
 }

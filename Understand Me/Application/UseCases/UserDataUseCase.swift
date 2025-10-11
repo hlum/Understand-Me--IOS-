@@ -16,7 +16,7 @@ class UserDataUseCase {
     
     
     
-    func saveUserData(userData: UserData) async throws {
+    func saveUserDataIfNotExist(userData: UserData) async throws {
         
         let userFromDB = try? await userDataRepository.fetchUserData(userID: userData.id)
         

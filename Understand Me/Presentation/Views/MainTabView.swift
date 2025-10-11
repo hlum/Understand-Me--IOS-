@@ -33,13 +33,18 @@ struct MainTabView: View {
 
         } else {
             tabView
+                .task {
+                    if let authDataResult = self.authDataResult {
+                        await viewModel.loadUserData(userID: authDataResult.id)
+                    }
+                }
         }
     }
     
     private var tabView: some View {
         TabView(selection: $selectedTab) {
             NavigationStack{
-                HomeView(selectedTab: $selectedTab)
+                HomeView(selectedTab: $selectedTab, userData: $viewModel.userData)
             }
             .tabItem {
                 Image(systemName: "house.fill")
