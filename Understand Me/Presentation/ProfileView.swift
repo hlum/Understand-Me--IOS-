@@ -8,6 +8,7 @@
 import SwiftUI
 import Charts
 
+// スコアのChart用のEntity
 struct DataPoint: Identifiable {
     let id = UUID()
     let category: String
@@ -15,12 +16,18 @@ struct DataPoint: Identifiable {
 }
 
 struct ProfileView: View {
+    @Binding var authDataResult: AuthDataResultModel?
     @State private var data: [DataPoint] = [
         DataPoint(category: "1月", value: 100),
         DataPoint(category: "2月", value: 65),
         DataPoint(category: "3月", value: 75),
         DataPoint(category: "4月", value: 80)
     ]
+    @StateObject private var viewModel: ProfileViewModel = ProfileViewModel(
+        authenticationUseCase: AuthenticationUseCase(
+            authenticationRepository: FirebaseAuthenticationRepository()
+        )
+    )
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack {
@@ -142,7 +149,10 @@ struct ProfileView: View {
     @ViewBuilder
     private var logoutBtn: some View {
         Button {
-            
+            viewModel.signOut()
+            withAnimation(.spring) {
+                authDataResult = nil
+            }
         } label: {
             HStack {
                 Image(systemName: "rectangle.portrait.and.arrow.right")
@@ -165,6 +175,6 @@ struct ProfileView: View {
 
 #Preview {
     NavigationStack {
-        ProfileView()
+        ProfileView(authDataResult: .constant(.dummy()))
     }
 }
