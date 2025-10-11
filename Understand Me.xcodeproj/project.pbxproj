@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7FBAD4C42E9888B3006807B8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD4C32E9888B3006807B8 /* FirebaseAuth */; };
+		7FBAD62B2E988DEA006807B8 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD62A2E988DEA006807B8 /* GoogleSignIn */; };
+		7FBAD62D2E988E46006807B8 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD62C2E988E46006807B8 /* GoogleSignInSwift */; };
 		7FC8C3272E95375400B4CF5D /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7FC8C3262E95375400B4CF5D /* Lottie */; };
 /* End PBXBuildFile section */
 
@@ -14,9 +17,22 @@
 		7FC8C3132E950FD300B4CF5D /* Understand Me.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Understand Me.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7FBAD6452E98A52D006807B8 /* Exceptions for "Understand Me" folder in "Understand Me" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Understand-Me-Info.plist",
+			);
+			target = 7FC8C3122E950FD300B4CF5D /* Understand Me */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7FC8C3152E950FD300B4CF5D /* Understand Me */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				7FBAD6452E98A52D006807B8 /* Exceptions for "Understand Me" folder in "Understand Me" target */,
+			);
 			path = "Understand Me";
 			sourceTree = "<group>";
 		};
@@ -28,6 +44,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				7FC8C3272E95375400B4CF5D /* Lottie in Frameworks */,
+				7FBAD4C42E9888B3006807B8 /* FirebaseAuth in Frameworks */,
+				7FBAD62B2E988DEA006807B8 /* GoogleSignIn in Frameworks */,
+				7FBAD62D2E988E46006807B8 /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +90,9 @@
 			name = "Understand Me";
 			packageProductDependencies = (
 				7FC8C3262E95375400B4CF5D /* Lottie */,
+				7FBAD4C32E9888B3006807B8 /* FirebaseAuth */,
+				7FBAD62A2E988DEA006807B8 /* GoogleSignIn */,
+				7FBAD62C2E988E46006807B8 /* GoogleSignInSwift */,
 			);
 			productName = "Understand Me";
 			productReference = 7FC8C3132E950FD300B4CF5D /* Understand Me.app */;
@@ -102,6 +124,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				7FC8C3252E95375400B4CF5D /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				7FBAD6292E988DEA006807B8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7FC8C3142E950FD300B4CF5D /* Products */;
@@ -265,6 +289,7 @@
 				DEVELOPMENT_TEAM = GNG4VLAQ7U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Understand-Me-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -276,7 +301,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "jp.ac.jec.cm0138.Understand-Me";
+				PRODUCT_BUNDLE_IDENTIFIER = jp.ac.jec.24cm0138.understandme;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -298,6 +323,7 @@
 				DEVELOPMENT_TEAM = GNG4VLAQ7U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Understand-Me-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -309,7 +335,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "jp.ac.jec.cm0138.Understand-Me";
+				PRODUCT_BUNDLE_IDENTIFIER = jp.ac.jec.24cm0138.understandme;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -345,6 +371,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.4.0;
+			};
+		};
+		7FBAD6292E988DEA006807B8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
 		7FC8C3252E95375400B4CF5D /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
@@ -356,6 +398,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7FBAD4C32E9888B3006807B8 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		7FBAD62A2E988DEA006807B8 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7FBAD6292E988DEA006807B8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		7FBAD62C2E988E46006807B8 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7FBAD6292E988DEA006807B8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
 		7FC8C3262E95375400B4CF5D /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7FC8C3252E95375400B4CF5D /* XCRemoteSwiftPackageReference "lottie-ios" */;

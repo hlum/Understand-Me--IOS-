@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// MARK: - Homework State
+// 課題の状況
 enum HomeworkState: CaseIterable {
     case notAssigned
     case generatingQuestions
