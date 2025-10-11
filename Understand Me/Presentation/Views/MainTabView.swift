@@ -12,11 +12,21 @@ struct MainTabView: View {
     @State private var selectedTab: Int = 0
     @State private var authDataResult: AuthDataResultModel? = nil
     
+    
+    @StateObject private var viewModel = MainTabViewModel(
+        userDataUseCase: UserDataUseCase(
+            userDataRepository: LollipopUserDataRepository()
+        )
+    )
+    
     var body: some View {
         if authDataResult == nil {
             LoginInView { authDataResult in
-                withAnimation(.spring) {
-                    self.authDataResult = authDataResult
+                Task {
+                    await viewModel.saveUserData(authDataResult: authDataResult)
+                    withAnimation(.spring) {
+                        self.authDataResult = authDataResult
+                    }
                 }
             }
             .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
