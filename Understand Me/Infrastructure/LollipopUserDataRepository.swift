@@ -51,7 +51,7 @@ class LollipopUserDataRepository: UserDataRepository {
     func fetchUserData(userID: String) async throws -> UserData {
         let url = try makeURL("user/get_user.php")
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        components?.queryItems = [URLQueryItem(name: "user_id", value: userID)]
+        components?.queryItems = [URLQueryItem(name: "id", value: userID)]
         
         guard let finalURL = components?.url else {
             throw UserDataRepositoryError.InvalidURL
@@ -75,8 +75,17 @@ class LollipopUserDataRepository: UserDataRepository {
               let jsonData = jsonString.data(using: .utf8) else {
             throw UserDataRepositoryError.NoDataFoundInResponse
         }
-        
-        return try JSONDecoder().decode(UserData.self, from: jsonData)
+
+        do {
+            let userDatas = try JSONDecoder().decode([UserData].self, from: jsonData)
+            if let userData = userDatas.first {
+                return userData
+            }
+            throw UserDataRepositoryError.UserNotFound
+        } catch {
+            print("UserDataのDecodeに失敗。失敗: \(error.localizedDescription)")
+            throw error
+        }
     }
     
     
