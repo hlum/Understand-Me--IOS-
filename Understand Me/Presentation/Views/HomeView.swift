@@ -6,14 +6,34 @@
 //
 
 import SwiftUI
+import Combine
+
+class HomeViewModel: ObservableObject {
+    private let userDataUseCase: UserDataUseCase
+    @Published var userData: UserData?
+    
+    init(userData: UserData? = nil, userDataUseCase: UserDataUseCase) {
+        self.userData = userData
+        self.userDataUseCase = userDataUseCase
+    }
+}
 
 struct HomeView: View {
     @Binding var selectedTab: Int
-    @Binding var userData: UserData?
     
     private let adaptiveColumn = [
         GridItem(.adaptive(minimum: 160), spacing: 16)
     ]
+    
+    
+    @StateObject private var viewModel: HomeViewModel
+    
+    
+    init(selectedTab: Binding<Int>, userData: UserData? = nil) {
+        self._selectedTab = selectedTab
+        
+        self._viewModel = .init(wrappedValue: .init(userData: userData, userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository())))
+    }
     
     var body: some View {
         
@@ -101,13 +121,13 @@ struct HomeView: View {
                 Text("こんにちは")
                     .font(.headline)
                     .foregroundColor(.secondary)
-                Text(userData?.studentCode ?? "ゲスト")
+                Text(viewModel.userData?.studentCode ?? "ゲスト")
                     .font(.title3.bold())
             }
             
             Spacer()
             
-            AsyncImage(url: URL(string: userData?.photoURL ?? "")) { image in
+            AsyncImage(url: URL(string: viewModel.userData?.photoURL ?? "")) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -172,6 +192,6 @@ struct HomeView: View {
 
 #Preview {
     NavigationStack {
-        HomeView(selectedTab: .constant(1), userData: .constant(.getDummy()))
+        HomeView(selectedTab: .constant(1), userData: .getDummy())
     }
 }
