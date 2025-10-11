@@ -21,7 +21,7 @@ struct UserData: Codable {
     }
     
     enum CodingKeys: String, CodingKey  {
-        case id = "user_id"
+        case id
         case email
         case fcmToken = "fcm_token"
         case photoURL = "photo_url"
