@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct LollipopResponse: Codable {
+struct APIResponse: Codable {
     let status: String
     let message: String
-    let dataString: String
+    let dataString: String?
     
     enum CodingKeys: String, CodingKey {
         case status
