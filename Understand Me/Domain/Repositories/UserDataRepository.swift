@@ -10,5 +10,5 @@ import Foundation
 protocol UserDataRepository {
     func saveUserData(userData: UserData) async throws
     func fetchUserData(userID: String) async throws -> UserData
-    func updateFCMToken(userID: String, fcmToken: String) async throws -> UserData
+    func updateFCMToken(userID: String, fcmToken: String) async throws
 }
