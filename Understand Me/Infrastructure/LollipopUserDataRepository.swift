@@ -29,16 +29,15 @@ enum UserDataRepositoryError: LocalizedError {
 
 class LollipopUserDataRepository: UserDataRepository {
     
-    private let secretLoader = SecretLoader.shared
-    
+    private let lollipopAPIUtility: LollipopAPIUtility = LollipopAPIUtility()
     
     func saveUserData(userData: UserData) async throws {
-        let url = try makeURL("user/register.php")
+        let url = try lollipopAPIUtility.makeURL("user/register.php")
         let body = try JSONEncoder().encode(userData)
-        let request = try makeRequest(url: url, method: "POST", body: body)
+        let request = try lollipopAPIUtility.makeRequest(url: url, method: "POST", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try decodeAPIResponse(from: data)
+        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
             print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
@@ -49,7 +48,7 @@ class LollipopUserDataRepository: UserDataRepository {
     
     
     func fetchUserData(userID: String) async throws -> UserData {
-        let url = try makeURL("user/get_user.php")
+        let url = try lollipopAPIUtility.makeURL("user/get_user.php")
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "id", value: userID)]
         
@@ -57,10 +56,10 @@ class LollipopUserDataRepository: UserDataRepository {
             throw UserDataRepositoryError.InvalidURL
         }
         
-        let request = try makeRequest(url: finalURL, method: "GET")
+        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try decodeAPIResponse(from: data)
+        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
             
@@ -91,7 +90,7 @@ class LollipopUserDataRepository: UserDataRepository {
     
     
     func updateFCMToken(userID: String, fcmToken: String) async throws {
-        let url = try makeURL("user/update_fcm_token.php")
+        let url = try lollipopAPIUtility.makeURL("user/update_fcm_token.php")
         
         let bodyDict = [
             "user_id": userID,
@@ -99,10 +98,10 @@ class LollipopUserDataRepository: UserDataRepository {
         ]
         let bodyData = try JSONSerialization.data(withJSONObject: bodyDict)
         
-        let request = try makeRequest(url: url, method: "POST", body: bodyData)
+        let request = try lollipopAPIUtility.makeRequest(url: url, method: "POST", body: bodyData)
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try decodeAPIResponse(from: data)
+        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
             print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
@@ -110,33 +109,4 @@ class LollipopUserDataRepository: UserDataRepository {
         }
     }
 
-    
-    
-    private func makeURL(_ path: String) throws -> URL {
-        let base = secretLoader.fetchSecret(from: "Secrets", forKey: "endpoint")
-        guard let baseURL = URL(string: base)?.appendingPathComponent(path) else {
-            throw UserDataRepositoryError.InvalidURL
-        }
-        return baseURL
-    }
-    
-    
-    
-    private func makeRequest(url: URL, method: String, body: Data? = nil) throws -> URLRequest {
-        let apiKey = secretLoader.fetchSecret(from: "Secrets", forKey: "APIKEY")
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(apiKey, forHTTPHeaderField: "Authorization")
-        request.httpBody = body
-        return request
-    }
-    
-    
-    
-    private func decodeAPIResponse(from data: Data) throws -> APIResponse {
-        try JSONDecoder().decode(APIResponse.self, from: data)
-    }
-    
-    
 }
