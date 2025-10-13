@@ -62,81 +62,84 @@ struct HomeView: View {
     
     var body: some View {
         
-        VStack(alignment: .leading, spacing: 24) {
-            
-            header
-            
-            
-            // MARK: - Upcoming Homework
-            VStack(alignment: .leading, spacing: 12) {
-                Button {
-                    
-                } label: {
-                    HStack {
-                        Text("提出期限が近い課題")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
+        ScrollView(showsIndicators: false) {
+            VStack {
+                
+                header
+                
+                // MARK: - Upcoming Homework
+                VStack(alignment: .leading, spacing: 12) {
+                    Button {
                         
-                        Image(systemName: "arrow.forward")
-                            .bold()
-                            .foregroundStyle(.accent.opacity(0.3))
+                    } label: {
+                        HStack {
+                            Text("提出期限が近い課題")
+                                .font(.title2.bold())
+                                .padding(.horizontal)
+                            
+                            Image(systemName: "arrow.forward")
+                                .bold()
+                                .foregroundStyle(.accent.opacity(0.3))
+                        }
                     }
+                    
+                    ScrollView(showsIndicators: false ) {
+                        VStack {
+                            HomeworkListItemView(title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
+                            HomeworkListItemView(title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
+                            HomeworkListItemView(title: "GitHub リポート提出", dueDate: Date(), state: .questionsGenerated)
+                        }
+                        .padding(.vertical)
+                    }
+                    .frame(height: 300)
                 }
                 
-                ScrollView(showsIndicators: false ) {
-                    HomeworkListItemView(title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
-                    HomeworkListItemView(title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
-                    HomeworkListItemView(title: "GitHub リポート提出", dueDate: Date(), state: .questionsGenerated)
-                }
-                .frame(height: 300)
-            }
-            
-            
-            // MARK: - My Classes
-            VStack(alignment: .leading, spacing: 12) {
-                Button {
-                    
-                } label: {
-                    HStack {
-                        Text("マイクラス")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                        
-                        Image(systemName: "arrow.forward")
-                            .bold()
-                            .foregroundStyle(.accent.opacity(0.3))
-                    }
-                }
-                .foregroundStyle(.primary)
                 
-                LazyVGrid(columns: adaptiveColumn, spacing: 16) {
-                    classCell(
-                        className: "iOS プログラミング",
-                        teacherName: "山田太郎先生",
-                        homeworksCount: 3
-                    )
-                    classCell(
-                        className: "Android プログラミング",
-                        teacherName: "山田太郎先生",
-                        homeworksCount: 10
-                    )
-                    classCell(
-                        className: "Web プログラミング",
-                        teacherName: "山田太郎先生"
-                    )
-                    classCell(
-                        className: "コンテンツ制作",
-                        teacherName: "山田太郎先生",
-                        homeworksCount: 100
-                    )
+                // MARK: - My Classes
+                VStack(alignment: .leading, spacing: 12) {
+                    Button {
+                        
+                    } label: {
+                        HStack {
+                            Text("マイクラス")
+                                .font(.title2.bold())
+                                .padding(.horizontal)
+                            
+                            Image(systemName: "arrow.forward")
+                                .bold()
+                                .foregroundStyle(.accent.opacity(0.3))
+                        }
+                    }
+                    .foregroundStyle(.primary)
+                    
+                    LazyVGrid(columns: adaptiveColumn, spacing: 16) {
+                        classCell(
+                            className: "iOS プログラミング",
+                            teacherName: "山田太郎先生",
+                            homeworksCount: 3
+                        )
+                        classCell(
+                            className: "Android プログラミング",
+                            teacherName: "山田太郎先生",
+                            homeworksCount: 10
+                        )
+                        classCell(
+                            className: "Web プログラミング",
+                            teacherName: "山田太郎先生"
+                        )
+                        classCell(
+                            className: "コンテンツ制作",
+                            teacherName: "山田太郎先生",
+                            homeworksCount: 100
+                        )
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
+                
+                Spacer(minLength: 40)
             }
-            
-            Spacer(minLength: 40)
+            .foregroundStyle(.primary)
         }
-        .padding(.vertical)
-        .foregroundStyle(.primary)
         .task {
             await viewModel.loadUserData()
         }
@@ -171,7 +174,10 @@ struct HomeView: View {
         .padding()
         .padding(.top, 20)
         .padding(.horizontal, 10)
-        .background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.3))
+        .background(
+            LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing)
+                .opacity(0.3)
+        )
     }
     
     // MARK: - Class Card

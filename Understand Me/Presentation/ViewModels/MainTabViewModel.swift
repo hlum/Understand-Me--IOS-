@@ -18,7 +18,7 @@ class MainTabViewModel: ObservableObject {
     
     
     
-    func saveUserData(authDataResult: AuthDataResultModel) async {
+    func saveUserDataIfNotExist(authDataResult: AuthDataResultModel) async {
         do {
             guard let email = authDataResult.email else {
                 print("Emailが取得できません")

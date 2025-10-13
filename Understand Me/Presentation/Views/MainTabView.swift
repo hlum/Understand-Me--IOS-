@@ -23,7 +23,7 @@ struct MainTabView: View {
         if authDataResult == nil {
             LoginInView { authDataResult in
                 Task {
-                    await viewModel.saveUserData(authDataResult: authDataResult)
+                    await viewModel.saveUserDataIfNotExist(authDataResult: authDataResult)
                     withAnimation(.spring) {
                         self.authDataResult = authDataResult
                     }
@@ -44,7 +44,7 @@ struct MainTabView: View {
     private var tabView: some View {
         TabView(selection: $selectedTab) {
             NavigationStack{
-                HomeView(selectedTab: $selectedTab, userData: $viewModel.userData)
+                HomeView(selectedTab: $selectedTab)
             }
             .tabItem {
                 Image(systemName: "house.fill")
@@ -74,7 +74,9 @@ struct MainTabView: View {
             
             
             NavigationStack{
-                ProfileView(authDataResult: $authDataResult)
+                ProfileView {
+                    authDataResult = nil
+                }
             }
             .tabItem {
                 Image(systemName: "person")
