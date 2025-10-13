@@ -12,17 +12,32 @@ struct MainTabView: View {
     @State private var selectedTab: Int = 0
     @State private var authDataResult: AuthDataResultModel? = nil
     
+    
+    @StateObject private var viewModel = MainTabViewModel(
+        userDataUseCase: UserDataUseCase(
+            userDataRepository: LollipopUserDataRepository()
+        )
+    )
+    
     var body: some View {
         if authDataResult == nil {
             LoginInView { authDataResult in
-                withAnimation(.spring) {
-                    self.authDataResult = authDataResult
+                Task {
+                    await viewModel.saveUserDataIfNotExist(authDataResult: authDataResult)
+                    withAnimation(.spring) {
+                        self.authDataResult = authDataResult
+                    }
                 }
             }
             .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
 
         } else {
             tabView
+                .task {
+                    if let authDataResult = self.authDataResult {
+                        await viewModel.loadUserData(userID: authDataResult.id)
+                    }
+                }
         }
     }
     
@@ -59,7 +74,9 @@ struct MainTabView: View {
             
             
             NavigationStack{
-                ProfileView(authDataResult: $authDataResult)
+                ProfileView {
+                    authDataResult = nil
+                }
             }
             .tabItem {
                 Image(systemName: "person")

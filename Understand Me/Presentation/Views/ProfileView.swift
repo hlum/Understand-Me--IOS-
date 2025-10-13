@@ -16,18 +16,27 @@ struct DataPoint: Identifiable {
 }
 
 struct ProfileView: View {
-    @Binding var authDataResult: AuthDataResultModel?
     @State private var data: [DataPoint] = [
         DataPoint(category: "1月", value: 100),
         DataPoint(category: "2月", value: 65),
         DataPoint(category: "3月", value: 75),
         DataPoint(category: "4月", value: 80)
     ]
-    @StateObject private var viewModel: ProfileViewModel = ProfileViewModel(
-        authenticationUseCase: AuthenticationUseCase(
-            authenticationRepository: FirebaseAuthenticationRepository()
+    
+    var onSignOut: () -> ()
+    
+    @StateObject private var viewModel: ProfileViewModel
+    
+    init(onSignOut: @escaping () -> ()) {
+        self.onSignOut = onSignOut
+        self._viewModel = StateObject(
+            wrappedValue: ProfileViewModel(
+                authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
+                userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository())
+            )
         )
-    )
+    }
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack {
@@ -43,12 +52,15 @@ struct ProfileView: View {
         }
         .navigationTitle("プロフィール")
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await viewModel.loadUserData()
+        }
     }
     
     
     @ViewBuilder
     private var profileBasicInfo: some View {
-        AsyncImage(url: URL(string: "https://e-quester.com/wp-content/uploads/2021/11/placeholder-image-person-jpg.jpg")) { image in
+        AsyncImage(url: URL(string: viewModel.userData?.photoURL ?? "")) { image in
             image
                 .resizable()
                 .aspectRatio(contentMode: .fill)
@@ -62,10 +74,10 @@ struct ProfileView: View {
                 .cornerRadius(300)
         }
         
-        Text("田中　太郎")
+        Text(viewModel.userData?.studentCode ?? "ゲスト")
             .font(.title.bold())
         
-        Text(verbatim: "24cm0138@gmail.com")
+        Text(verbatim: viewModel.userData?.email ?? "")
             .foregroundStyle(.gray)
     }
     
@@ -150,9 +162,7 @@ struct ProfileView: View {
     private var logoutBtn: some View {
         Button {
             viewModel.signOut()
-            withAnimation(.spring) {
-                authDataResult = nil
-            }
+            onSignOut()
         } label: {
             HStack {
                 Image(systemName: "rectangle.portrait.and.arrow.right")
@@ -175,6 +185,6 @@ struct ProfileView: View {
 
 #Preview {
     NavigationStack {
-        ProfileView(authDataResult: .constant(.dummy()))
+        ProfileView(onSignOut: {})
     }
 }
