@@ -36,7 +36,7 @@ class MainTabViewModel: ObservableObject {
                 email: email,
                 fcmToken: nil,
                 studentCode: info.studentCode,
-                className: info.className,
+                majorCode: info.className,
                 admissionYear: info.admissionYear,
                 photoURL: authDataResult.photoURL?.absoluteString
             )
