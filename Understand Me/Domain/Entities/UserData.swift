@@ -12,16 +12,16 @@ struct UserData: Codable {
     let email: String
     let fcmToken: String?
     let studentCode: String
-    let className: String
+    let majorCode: String
     let admissionYear: Int
     let photoURL: String?
     
-    init(id: String, email: String, fcmToken: String?, studentCode: String, className: String, admissionYear: Int, photoURL: String?) {
+    init(id: String, email: String, fcmToken: String?, studentCode: String, majorCode: String, admissionYear: Int, photoURL: String?) {
         self.id = id
         self.email = email
         self.fcmToken = fcmToken
         self.studentCode = studentCode
-        self.className = className
+        self.majorCode = majorCode
         self.admissionYear = admissionYear
         self.photoURL = photoURL
     }
@@ -32,7 +32,7 @@ struct UserData: Codable {
         case fcmToken = "fcm_token"
         case photoURL = "photo_url"
         case studentCode = "student_code"
-        case className = "class_name"
+        case majorCode = "major_code"
         case admissionYear = "admission_year"
     }
     
@@ -42,7 +42,7 @@ struct UserData: Codable {
             email: "24cm0138@jec.ac.jp",
             fcmToken: nil,
             studentCode: "24cm0138",
-            className: "24",
+            majorCode: "24",
             admissionYear: 24,
             photoURL: "cm"
         )

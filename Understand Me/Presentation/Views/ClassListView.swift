@@ -8,20 +8,28 @@
 import SwiftUI
 
 struct ClassListView: View {
+    
+    @StateObject private var viewModel = ClassListViewModel(
+        classUseCase: ClassUseCase(classRepository: LollipopClassRepository()),
+        authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository())
+    )
     let colors: [Color] = [.accent, .secAccent, .blue, .brown, .orange, .cyan, .gray, .green, .indigo, .mint]
     
     var body: some View {
         ScrollView(showsIndicators: false) {
-            ForEach(1...10, id: \.self) { _ in
+            ForEach(viewModel.classes) { classItem in
                 NavigationLink {
-                    ClassHomeworkView(className: "Swift入門")
+                    ClassHomeworkView(className: classItem.name)
                 } label: {
-                    classItemView(className: "Swift入門", teacherName: "山田", homeworksCount: 5)
+                    classItemView(className: classItem.name, teacherName: classItem.teacherId, homeworksCount: 5)
                 }
             }
         }
         .navigationTitle("クラス一覧")
         .foregroundStyle(.primary)
+        .task {
+            await viewModel.loadClasses()
+        }
     }
     
     @ViewBuilder
@@ -41,6 +49,7 @@ struct ClassListView: View {
                 Text(className)
                     .font(.system(size: 20, weight: .bold))
                     .padding(.bottom, 4)
+                    .lineLimit(1)
                 
                 
                 VStack(alignment: .leading) {

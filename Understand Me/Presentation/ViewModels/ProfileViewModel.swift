@@ -34,7 +34,7 @@ class ProfileViewModel: ObservableObject {
             self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
         } catch {
             // TODO: UserにAlertで知らせる
-            print("UserDataの取得に失敗しました。")
+            print("ProfileViewModel.loadUserData: UserDataの取得に失敗しました。")
         }
     }
 

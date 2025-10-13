@@ -36,7 +36,7 @@ class MainTabViewModel: ObservableObject {
                 email: email,
                 fcmToken: nil,
                 studentCode: info.studentCode,
-                className: info.className,
+                majorCode: info.className,
                 admissionYear: info.admissionYear,
                 photoURL: authDataResult.photoURL?.absoluteString
             )
@@ -55,7 +55,7 @@ class MainTabViewModel: ObservableObject {
             self.userData = try await userDataUseCase.fetchUserData(userID: userID)
         } catch {
             // TODO: Userにエラーを知らせる
-            print("UserDataの取得に失敗しました。\(error.localizedDescription)")
+            print("MainTabViewModel.loadUseData: UserDataの取得に失敗しました。\(error.localizedDescription)")
         }
     }
     
