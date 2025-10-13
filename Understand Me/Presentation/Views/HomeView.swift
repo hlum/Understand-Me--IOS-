@@ -6,6 +6,37 @@
 //
 
 import SwiftUI
+import Combine
+
+class HomeViewModel: ObservableObject {
+    private let userDataUseCase: UserDataUseCase
+    private let authenticationUseCase: AuthenticationUseCase
+    @Published var userData: UserData? = nil
+    
+    
+    
+    init(authenticationUseCase: AuthenticationUseCase, userDataUseCase: UserDataUseCase) {
+        self.userDataUseCase = userDataUseCase
+        self.authenticationUseCase = authenticationUseCase
+    }
+    
+    
+    
+    @MainActor
+    func loadUserData() async {
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("AuthDataResultを取得できません。")
+            return
+        }
+        
+        do {
+            self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
+        } catch {
+            // TODO: UserにAlertで知らせる
+            print("UserDataの取得に失敗しました。")
+        }
+    }
+}
 
 struct HomeView: View {
     @Binding var selectedTab: Int
@@ -14,83 +45,104 @@ struct HomeView: View {
         GridItem(.adaptive(minimum: 160), spacing: 16)
     ]
     
+    
+    @StateObject private var viewModel: HomeViewModel
+    
+    
+    init(selectedTab: Binding<Int>) {
+        self._selectedTab = selectedTab
+        
+        self._viewModel = .init(
+            wrappedValue: .init(
+                authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
+                userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository())
+            )
+        )
+    }
+    
     var body: some View {
         
-        VStack(alignment: .leading, spacing: 24) {
-            
-            header
-            
-            
-            // MARK: - Upcoming Homework
-            VStack(alignment: .leading, spacing: 12) {
-                Button {
-                    
-                } label: {
-                    HStack {
-                        Text("提出期限が近い課題")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
+        ScrollView(showsIndicators: false) {
+            VStack {
+                
+                header
+                
+                // MARK: - Upcoming Homework
+                VStack(alignment: .leading, spacing: 12) {
+                    Button {
                         
-                        Image(systemName: "arrow.forward")
-                            .bold()
-                            .foregroundStyle(.accent.opacity(0.3))
+                    } label: {
+                        HStack {
+                            Text("提出期限が近い課題")
+                                .font(.title2.bold())
+                                .padding(.horizontal)
+                            
+                            Image(systemName: "arrow.forward")
+                                .bold()
+                                .foregroundStyle(.accent.opacity(0.3))
+                        }
                     }
+                    
+                    ScrollView(showsIndicators: false ) {
+                        VStack {
+                            HomeworkListItemView(title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
+                            HomeworkListItemView(title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
+                            HomeworkListItemView(title: "GitHub リポート提出", dueDate: Date(), state: .questionsGenerated)
+                        }
+                        .padding(.vertical)
+                    }
+                    .frame(height: 300)
                 }
                 
-                ScrollView(showsIndicators: false ) {
-                    HomeworkListItemView(title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
-                    HomeworkListItemView(title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
-                    HomeworkListItemView(title: "GitHub リポート提出", dueDate: Date(), state: .questionsGenerated)
-                }
-                .frame(height: 300)
-            }
-            
-            
-            // MARK: - My Classes
-            VStack(alignment: .leading, spacing: 12) {
-                Button {
-                    
-                } label: {
-                    HStack {
-                        Text("マイクラス")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                        
-                        Image(systemName: "arrow.forward")
-                            .bold()
-                            .foregroundStyle(.accent.opacity(0.3))
-                    }
-                }
-                .foregroundStyle(.primary)
                 
-                LazyVGrid(columns: adaptiveColumn, spacing: 16) {
-                    classCell(
-                        className: "iOS プログラミング",
-                        teacherName: "山田太郎先生",
-                        homeworksCount: 3
-                    )
-                    classCell(
-                        className: "Android プログラミング",
-                        teacherName: "山田太郎先生",
-                        homeworksCount: 10
-                    )
-                    classCell(
-                        className: "Web プログラミング",
-                        teacherName: "山田太郎先生"
-                    )
-                    classCell(
-                        className: "コンテンツ制作",
-                        teacherName: "山田太郎先生",
-                        homeworksCount: 100
-                    )
+                // MARK: - My Classes
+                VStack(alignment: .leading, spacing: 12) {
+                    Button {
+                        
+                    } label: {
+                        HStack {
+                            Text("マイクラス")
+                                .font(.title2.bold())
+                                .padding(.horizontal)
+                            
+                            Image(systemName: "arrow.forward")
+                                .bold()
+                                .foregroundStyle(.accent.opacity(0.3))
+                        }
+                    }
+                    .foregroundStyle(.primary)
+                    
+                    LazyVGrid(columns: adaptiveColumn, spacing: 16) {
+                        classCell(
+                            className: "iOS プログラミング",
+                            teacherName: "山田太郎先生",
+                            homeworksCount: 3
+                        )
+                        classCell(
+                            className: "Android プログラミング",
+                            teacherName: "山田太郎先生",
+                            homeworksCount: 10
+                        )
+                        classCell(
+                            className: "Web プログラミング",
+                            teacherName: "山田太郎先生"
+                        )
+                        classCell(
+                            className: "コンテンツ制作",
+                            teacherName: "山田太郎先生",
+                            homeworksCount: 100
+                        )
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
+                
+                Spacer(minLength: 40)
             }
-            
-            Spacer(minLength: 40)
+            .foregroundStyle(.primary)
         }
-        .padding(.vertical)
-        .foregroundStyle(.primary)
+        .task {
+            await viewModel.loadUserData()
+        }
     }
     
     // MARK: - Header
@@ -100,18 +152,20 @@ struct HomeView: View {
                 Text("こんにちは")
                     .font(.headline)
                     .foregroundColor(.secondary)
-                Text("24cm011288")
+                Text(viewModel.userData?.studentCode ?? "ゲスト")
                     .font(.title3.bold())
             }
             
             Spacer()
             
-            AsyncImage(url: URL(string: "https://e-quester.com/wp-content/uploads/2021/11/placeholder-image-person-jpg.jpg")) { image in
+            AsyncImage(url: URL(string: viewModel.userData?.photoURL ?? "")) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Color.gray.opacity(0.3)
+                Image(.profilePic)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
             }
             .frame(width: 55, height: 55)
             .clipShape(Circle())
@@ -120,7 +174,10 @@ struct HomeView: View {
         .padding()
         .padding(.top, 20)
         .padding(.horizontal, 10)
-        .background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.3))
+        .background(
+            LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing)
+                .opacity(0.3)
+        )
     }
     
     // MARK: - Class Card
