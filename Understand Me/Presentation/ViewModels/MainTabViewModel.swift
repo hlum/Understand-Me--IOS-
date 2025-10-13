@@ -55,7 +55,7 @@ class MainTabViewModel: ObservableObject {
             self.userData = try await userDataUseCase.fetchUserData(userID: userID)
         } catch {
             // TODO: Userにエラーを知らせる
-            print("UserDataの取得に失敗しました。\(error.localizedDescription)")
+            print("MainTabViewModel.loadUseData: UserDataの取得に失敗しました。\(error.localizedDescription)")
         }
     }
     

@@ -33,7 +33,7 @@ class HomeViewModel: ObservableObject {
             self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
         } catch {
             // TODO: UserにAlertで知らせる
-            print("UserDataの取得に失敗しました。")
+            print("HomeViewModel.loadUserData(): UserDataの取得に失敗しました。")
         }
     }
 }
