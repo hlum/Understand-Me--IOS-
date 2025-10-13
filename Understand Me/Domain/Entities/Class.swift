@@ -8,7 +8,7 @@
 import Foundation
 
 // 授業のエンティティー
-struct Class: Codable {
+struct Class: Identifiable, Codable {
     let id: String
     let teacherId: String // 担当先生名
     let name: String // 授業名
