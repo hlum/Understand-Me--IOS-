@@ -15,7 +15,7 @@ struct HomeworkListItemView: View {
     
     var body: some View {
         NavigationLink {
-            HomeworkDetailView(title: title, description: "description", homeworkState: state, dueDate: dueDate, className: "class name")
+            HomeworkDetailView(id: id)
         } label: {
             
             VStack(alignment: .leading, spacing: 10) {
@@ -58,7 +58,7 @@ struct HomeworkListItemView: View {
             .foregroundStyle(.foreground)
         }
         .overlay(alignment: .trailing, content: {
-            if state == .questionsGenerated {
+            if state == .questionGenerated {
                 Button {
                     
                 } label: {
@@ -99,6 +99,6 @@ struct HomeworkListItemView: View {
 
 #Preview {
     NavigationStack {
-        HomeworkListItemView(id: "", title: "Test", dueDate: Date(), state: .questionsGenerated)
+        HomeworkListItemView(id: "", title: "Test", dueDate: Date(), state: .questionGenerated)
     }
 }

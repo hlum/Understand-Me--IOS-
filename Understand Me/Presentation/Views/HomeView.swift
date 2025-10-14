@@ -87,7 +87,7 @@ struct HomeView: View {
                         VStack {
                             HomeworkListItemView(id: "afsdf", title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
                             HomeworkListItemView(id: "asdf", title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
-                            HomeworkListItemView(id: "asdfa", title: "GitHub リポート提出", dueDate: Date(), state: .questionsGenerated)
+                            HomeworkListItemView(id: "asdfa", title: "GitHub リポート提出", dueDate: Date(), state: .questionGenerated)
                         }
                         .padding(.vertical)
                     }
@@ -192,26 +192,6 @@ struct HomeView: View {
                 Text(teacherName)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-            
-                
-                HStack {
-                    Image(systemName: "graduationcap")
-                        .foregroundStyle(.accent.opacity(0.4))
-                    Text("課題")
-                        .fontWeight(.light)
-                    
-                    Spacer()
-                    
-                    Text("\(homeworksCount) 件")
-                        .fontWeight(.regular)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(.secAccent.opacity(0.4))
-                        .foregroundColor(.primary)
-                        .cornerRadius(12)
-
-                }
-
             }
             .lineLimit(1)
             .padding()

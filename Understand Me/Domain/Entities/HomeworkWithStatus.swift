@@ -10,13 +10,17 @@ import Foundation
 struct HomeworkWithStatus: Identifiable, Decodable {
     var id: String
     let title: String
+    let description: String
     let dueDateString: String
+    let classID: String
     let githubURL: String?
     let submissionState: HomeworkState
     
     enum CodingKeys: String, CodingKey {
         case id
         case title
+        case description
+        case classID = "class_id"
         case dueDateString = "due_date"
         case githubURL = "github_file_link"
         case submissionState = "submission_state"

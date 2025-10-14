@@ -29,6 +29,18 @@ class LollipopHomeworkRepository: HomeworkRepository {
     }
     
     
+    func fetchHomework(id: String) async throws -> HomeworkWithStatus {
+        let queryItems = [
+            URLQueryItem(name: "id", value: id)
+        ]
+        
+        if let homework = try await fetchHomeworks(with: queryItems).first {
+            return homework
+        }
+        throw URLError(.badServerResponse)
+    }
+    
+    
     
     private func fetchHomeworks(with queryItems: [URLQueryItem]) async throws -> [HomeworkWithStatus] {
         let url = try lollipopAPIUtility.makeURL("homework/get_homework_with_status.php")
@@ -53,7 +65,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
               let jsonData = jsonString.data(using: .utf8) else {
             throw URLError(.badServerResponse)
         }
-        print(jsonString)
+
         do {
             
             let decoder = JSONDecoder()
