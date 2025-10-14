@@ -13,14 +13,14 @@ class LollipopHomeworkRepository: HomeworkRepository {
     
     
     
-    func fetchHomeworks(studentID: String) async throws -> [Homework] {
+    func fetchHomeworks(studentID: String) async throws -> [HomeworkWithStatus] {
         let queryItems = [URLQueryItem(name: "student_id", value: studentID)]
         return try await fetchHomeworks(with: queryItems)
     }
     
     
     
-    func fetchHomeworksFromClass(classID: String, studentID: String) async throws -> [Homework] {
+    func fetchHomeworksFromClass(classID: String, studentID: String) async throws -> [HomeworkWithStatus] {
         let queryItems = [
             URLQueryItem(name: "class_id", value: classID),
             URLQueryItem(name: "student_id", value: studentID)
@@ -30,8 +30,8 @@ class LollipopHomeworkRepository: HomeworkRepository {
     
     
     
-    private func fetchHomeworks(with queryItems: [URLQueryItem]) async throws -> [Homework] {
-        let url = try lollipopAPIUtility.makeURL("homework/get_homework.php")
+    private func fetchHomeworks(with queryItems: [URLQueryItem]) async throws -> [HomeworkWithStatus] {
+        let url = try lollipopAPIUtility.makeURL("homework/get_homework_with_status.php")
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.queryItems = queryItems
         
@@ -53,14 +53,29 @@ class LollipopHomeworkRepository: HomeworkRepository {
               let jsonData = jsonString.data(using: .utf8) else {
             throw URLError(.badServerResponse)
         }
-        
+        print(jsonString)
         do {
-            let homeworks = try JSONDecoder().decode([Homework].self, from: jsonData)
+            
+            let decoder = JSONDecoder()
+            let homeworks = try decoder.decode([HomeworkWithStatus].self, from: jsonData)
+            
             return homeworks
+        }catch let DecodingError.keyNotFound(key, context) {
+            print("❌ Missing key: '\(key.stringValue)' in \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
+            print("   Debug Description: \(context.debugDescription)")
+            print("   Coding Path: \(context.codingPath)")
+        } catch let DecodingError.typeMismatch(type, context) {
+            print("❌ Type mismatch for type '\(type)' at \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
+            print("   Debug Description: \(context.debugDescription)")
+        } catch let DecodingError.valueNotFound(value, context) {
+            print("❌ Value not found for type '\(value)' at \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
+            print("   Debug Description: \(context.debugDescription)")
+        } catch let DecodingError.dataCorrupted(context) {
+            print("❌ Data corrupted: \(context.debugDescription)")
         } catch {
-            print("HomeworkのDecodeに失敗。失敗: \(error.localizedDescription)")
-            throw error
+            print("⚠️ Unknown decoding error: \(error)")
         }
+        return []
     }
     
     

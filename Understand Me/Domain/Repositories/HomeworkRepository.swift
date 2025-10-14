@@ -8,6 +8,6 @@
 import Foundation
 
 protocol HomeworkRepository {
-    func fetchHomeworks(studentID: String) async throws -> [Homework]
-    func fetchHomeworksFromClass(classID: String, studentID: String) async throws -> [Homework]
+    func fetchHomeworks(studentID: String) async throws -> [HomeworkWithStatus]
+    func fetchHomeworksFromClass(classID: String, studentID: String) async throws -> [HomeworkWithStatus]
 }

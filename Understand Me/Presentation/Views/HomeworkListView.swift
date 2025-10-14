@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct HomeworkListView: View {
+    @StateObject private var viewModel = HomeworkListViewModel(
+        homeworkUseCase: HomeworkUseCase(homeworkRepository: LollipopHomeworkRepository()),
+        authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository())
+    )
     @State private var searchText = ""
     @State private var selectedFilter: HomeworkState? = nil
 
@@ -35,18 +39,9 @@ struct HomeworkListView: View {
 
             ScrollView {
                 VStack(spacing: 12) {
-                    HomeworkListItemView(title: "Test", dueDate: Date(), state: .questionsGenerated)
-                    HomeworkListItemView(title: "課題A", dueDate: Date(), state: .completed)
-                    HomeworkListItemView(title: "課題B", dueDate: Date(), state: .notAssigned)
-                    HomeworkListItemView(title: "Test", dueDate: Date(), state: .generatingQuestions)
-                    HomeworkListItemView(title: "課題A", dueDate: Date(), state: .completed)
-                    HomeworkListItemView(title: "課題B", dueDate: Date(), state: .notAssigned)
-                    HomeworkListItemView(title: "Test", dueDate: Date(), state: .generatingQuestions)
-                    HomeworkListItemView(title: "課題A", dueDate: Date(), state: .completed)
-                    HomeworkListItemView(title: "課題B", dueDate: Date(), state: .notAssigned)
-                    HomeworkListItemView(title: "Test", dueDate: Date(), state: .generatingQuestions)
-                    HomeworkListItemView(title: "課題A", dueDate: Date(), state: .completed)
-                    HomeworkListItemView(title: "課題B", dueDate: Date(), state: .notAssigned)
+                    ForEach(viewModel.homeworks) { homework in
+                        HomeworkListItemView(title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                    }
                 }
                 .padding()
             }
@@ -54,6 +49,9 @@ struct HomeworkListView: View {
         .navigationTitle("全ての課題")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "課題を検索")
+        .task {
+            await viewModel.loadHomeworks()
+        }
     }
 }
 

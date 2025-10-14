@@ -16,13 +16,13 @@ class HomeworkUseCase {
     
     
     
-    func fetchHomeworks(studentID: String) async throws -> [Homework] {
+    func fetchHomeworks(studentID: String) async throws -> [HomeworkWithStatus] {
         try await homeworkRepository.fetchHomeworks(studentID: studentID)
     }
     
     
     
-    func fetchHomeworks(studentID: String, classID: String) async throws -> [Homework] {
+    func fetchHomeworks(studentID: String, classID: String) async throws -> [HomeworkWithStatus] {
         try await homeworkRepository.fetchHomeworksFromClass(classID: classID, studentID: studentID)
     }
 }

@@ -7,30 +7,24 @@
 
 import Foundation
 
-struct Homework: Decodable {
-    let id: String
-    let teacherID: String
-    let classID: String
+struct HomeworkWithStatus: Identifiable, Decodable {
+    var id: String
     let title: String
-    let description: String
-    let dueDate: Date
-    
+    let dueDateString: String
+    let githubURL: String?
+    let submissionState: HomeworkState
     
     enum CodingKeys: String, CodingKey {
-        case id, title, description
-        case teacherID = "teacher_id"
-        case classID = "class_id"
-        case dueDate = "due_date"
+        case id
+        case title
+        case dueDateString = "due_date"
+        case githubURL = "github_file_link"
+        case submissionState = "submission_state"
     }
     
-    static func getDummy() -> Self {
-        return Homework(
-            id: UUID().uuidString,
-            teacherID: UUID().uuidString,
-            classID: UUID().uuidString,
-            title: "Test Title",
-            description: "Test Description",
-            dueDate: Date()
-        )
+    var dueDate: Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: dueDateString)
     }
 }

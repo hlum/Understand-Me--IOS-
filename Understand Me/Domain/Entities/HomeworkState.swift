@@ -8,7 +8,7 @@
 import SwiftUI
 
 // 課題の状況
-enum HomeworkState: CaseIterable {
+enum HomeworkState: String, Codable, CaseIterable {
     case notAssigned
     case generatingQuestions
     case questionsGenerated
