@@ -85,9 +85,9 @@ struct HomeView: View {
                     
                     ScrollView(showsIndicators: false ) {
                         VStack {
-                            HomeworkListItemView(title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
-                            HomeworkListItemView(title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
-                            HomeworkListItemView(title: "GitHub リポート提出", dueDate: Date(), state: .questionsGenerated)
+                            HomeworkListItemView(id: "afsdf", title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
+                            HomeworkListItemView(id: "asdf", title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
+                            HomeworkListItemView(id: "asdfa", title: "GitHub リポート提出", dueDate: Date(), state: .questionsGenerated)
                         }
                         .padding(.vertical)
                     }
@@ -183,7 +183,7 @@ struct HomeView: View {
     // MARK: - Class Card
     private func classCell(className: String, teacherName: String, homeworksCount: Int = 0) -> some View {
         NavigationLink(destination: {
-            ClassHomeworkView(className: className)
+            ClassHomeworkView(classID: className)
         }, label: {
             VStack(alignment: .leading, spacing: 6) {
                 Text(className)

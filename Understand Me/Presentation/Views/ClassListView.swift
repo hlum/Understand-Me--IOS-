@@ -19,7 +19,7 @@ struct ClassListView: View {
         ScrollView(showsIndicators: false) {
             ForEach(viewModel.classes) { classItem in
                 NavigationLink {
-                    ClassHomeworkView(className: classItem.name)
+                    ClassHomeworkView(classID: classItem.id)
                 } label: {
                     classItemView(className: classItem.name, teacherName: classItem.teacherId, homeworksCount: 5)
                 }

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeworkListItemView: View {
+    var id: String
     var title: String
     var dueDate: Date
     var state: HomeworkState
@@ -87,6 +88,7 @@ struct HomeworkListItemView: View {
         )
         .padding(.horizontal)
     }
+
     
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
@@ -97,6 +99,6 @@ struct HomeworkListItemView: View {
 
 #Preview {
     NavigationStack {
-        HomeworkListItemView(title: "Test", dueDate: Date(), state: .questionsGenerated)
+        HomeworkListItemView(id: "", title: "Test", dueDate: Date(), state: .questionsGenerated)
     }
 }

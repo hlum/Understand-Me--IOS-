@@ -26,6 +26,8 @@ class LollipopClassRepository: ClassRepository {
     
     private let lollipopAPIUtility: LollipopAPIUtility = LollipopAPIUtility()
 
+    
+    
     func fetchAll(studentID: String) async throws -> [Class] {
         let url = try lollipopAPIUtility.makeURL("class/get_class.php")
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
@@ -55,6 +57,49 @@ class LollipopClassRepository: ClassRepository {
         do {
             let classes = try JSONDecoder().decode([Class].self, from: jsonData)
             return classes
+        } catch {
+            print("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    
+    
+    func fetch(id: String) async throws -> Class {
+        let url = try lollipopAPIUtility.makeURL("class/get_class.php")
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.queryItems = [
+            URLQueryItem(name: "id", value: id)
+        ]
+        
+        guard let finalURL = components?.url else {
+            throw ClassRepositoryError.InvalidURL
+        }
+        
+        
+        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+
+        guard response.status == "success" else {
+            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            throw ClassRepositoryError.NoDataFoundInResponse
+        }
+        
+        guard let jsonString = response.dataString,
+              let jsonData = jsonString.data(using: .utf8) else {
+            throw ClassRepositoryError.NoDataFoundInResponse
+        }
+
+        do {
+            let classData = try JSONDecoder().decode([Class].self, from: jsonData)
+            if let firstClass = classData.first {
+                return firstClass
+            }
+            print("LollipopClassRepository.fetch() Classが見つかりません。")
+            throw ClassRepositoryError.NoDataFoundInResponse
+            
         } catch {
             print("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
             throw error
