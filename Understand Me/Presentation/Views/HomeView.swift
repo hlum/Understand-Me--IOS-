@@ -11,13 +11,20 @@ import Combine
 class HomeViewModel: ObservableObject {
     private let userDataUseCase: UserDataUseCase
     private let authenticationUseCase: AuthenticationUseCase
+    private let homeworkUseCase: HomeworkUseCase
+    
     @Published var userData: UserData? = nil
+    @Published var homeworks: [HomeworkWithStatus] = []
     
     
-    
-    init(authenticationUseCase: AuthenticationUseCase, userDataUseCase: UserDataUseCase) {
+    init(
+        authenticationUseCase: AuthenticationUseCase,
+        userDataUseCase: UserDataUseCase,
+        homeworkUseCase: HomeworkUseCase
+    ) {
         self.userDataUseCase = userDataUseCase
         self.authenticationUseCase = authenticationUseCase
+        self.homeworkUseCase = homeworkUseCase
     }
     
     
@@ -34,6 +41,21 @@ class HomeViewModel: ObservableObject {
         } catch {
             // TODO: UserにAlertで知らせる
             print("HomeViewModel.loadUserData(): UserDataの取得に失敗しました。")
+        }
+    }
+    
+    
+    
+    func loadHomeworks() async {
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("AuthDataResultを取得できません。")
+            return
+        }
+        do {
+            self.homeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id)
+            self.homeworks.sort { $0.dueDate ?? Date() < $1.dueDate ?? Date()}
+        } catch {
+            print("HomeViewModel.loadHomeworks(): 宿題の取得に失敗しました。")
         }
     }
 }
@@ -55,7 +77,12 @@ struct HomeView: View {
         self._viewModel = .init(
             wrappedValue: .init(
                 authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
-                userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository())
+                userDataUseCase: UserDataUseCase(
+                    userDataRepository: LollipopUserDataRepository()
+                ),
+                homeworkUseCase: HomeworkUseCase(
+                    homeworkRepository: LollipopHomeworkRepository()
+                    )
             )
         )
     }
@@ -85,9 +112,9 @@ struct HomeView: View {
                     
                     ScrollView(showsIndicators: false ) {
                         VStack {
-                            HomeworkListItemView(id: "afsdf", title: "Android Compose 基礎", dueDate: Date(), state: .generatingQuestions)
-                            HomeworkListItemView(id: "asdf", title: "HTML・CSS 実装課題", dueDate: Date(), state: .notAssigned)
-                            HomeworkListItemView(id: "asdfa", title: "GitHub リポート提出", dueDate: Date(), state: .questionGenerated)
+                            ForEach(viewModel.homeworks) { homework in
+                                HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                            }
                         }
                         .padding(.vertical)
                     }
@@ -142,6 +169,7 @@ struct HomeView: View {
         }
         .task {
             await viewModel.loadUserData()
+            await viewModel.loadHomeworks()
         }
     }
     
