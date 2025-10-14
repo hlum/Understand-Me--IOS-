@@ -8,17 +8,17 @@
 import SwiftUI
 
 // 課題の状況
-enum HomeworkState: CaseIterable {
+enum HomeworkState: String, Codable, CaseIterable {
     case notAssigned
     case generatingQuestions
-    case questionsGenerated
+    case questionGenerated
     case completed
     
     var color: Color {
         switch self {
         case .notAssigned: return .red
         case .generatingQuestions: return .yellow
-        case .questionsGenerated: return .blue
+        case .questionGenerated: return .blue
         case .completed: return .green
         }
     }
@@ -27,7 +27,7 @@ enum HomeworkState: CaseIterable {
         switch self {
         case .notAssigned: return "未提出"
         case .generatingQuestions: return "問題生成中"
-        case .questionsGenerated: return "問題生成完了"
+        case .questionGenerated: return "問題生成完了"
         case .completed: return "提出完了"
         }
     }

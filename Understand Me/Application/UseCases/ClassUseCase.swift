@@ -16,6 +16,12 @@ class ClassUseCase {
     
     
     
+    func fetchClass(id: String) async throws -> Class {
+        try await classRepository.fetch(id: id)
+    }
+    
+    
+    
     func fetchClassList(studentID: String) async throws -> [Class] {
         try await classRepository.fetchAll(studentID: studentID)
     }

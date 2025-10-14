@@ -6,51 +6,114 @@
 //
 
 import SwiftUI
+import Combine
+
+class HomeworkDetailViewModel: ObservableObject {
+    @Published var homework: HomeworkWithStatus?
+    @Published var classDetail: Class?
+    
+    private let homeworkUseCase: HomeworkUseCase
+    private let classUseCase: ClassUseCase
+    
+    init(homeworkUseCase: HomeworkUseCase, classUseCase: ClassUseCase) {
+        self.homeworkUseCase = homeworkUseCase
+        self.classUseCase = classUseCase
+    }
+    
+    
+    @MainActor
+    func loadInfoOfHomework(homeworkID: String) async {
+        await loadHomework(id: homeworkID)
+        if let homework = self.homework {
+            await loadClassDetail(classID: homework.classID)
+        }
+    }
+    
+    
+    @MainActor
+    private func loadHomework(id: String) async {
+        do {
+            homework = try await homeworkUseCase.fetchHomework(id: id)
+        } catch {
+            print("HomeworkDetailViewModel.loadHomework: 宿題の取得に失敗しました。\(error.localizedDescription)")
+        }
+    }
+    
+    
+    
+    @MainActor
+    private func loadClassDetail(classID: String) async {
+        do {
+            self.classDetail = try await classUseCase.fetchClass(id: classID)
+        } catch {
+            print("HomeworkDetailViewModel.loadClassDetail: クラス情報の取得に失敗しました。\(error.localizedDescription)")
+        }
+    }
+    
+    
+    
+}
 
 struct HomeworkDetailView: View {
-    var title: String
-    var description: String
-    var homeworkState: HomeworkState
-    var dueDate: Date
-    var className: String
+    var id: String
     
+    @StateObject private var viewModel: HomeworkDetailViewModel = HomeworkDetailViewModel(homeworkUseCase: HomeworkUseCase(homeworkRepository: LollipopHomeworkRepository()), classUseCase: ClassUseCase(classRepository: LollipopClassRepository()))
     @State private var homeworkLinkTxt: String = ""
     
     var body: some View {
-        ScrollView {
-            
-            homeworkTitleDescription
-            
-            Divider()
-            
-            if homeworkState == .notAssigned {
-                githubTxtFieldAndBtn
-            } else if homeworkState == .generatingQuestions {
-                nekoThinking
-            } else if homeworkState == .questionsGenerated {
-                answerQuizBtn
-            } else if homeworkState == .completed {
-                VStack {
-                    NavigationLink {
-                        
-                    } label: {
-                        Text("回答履歴を見る")
-                            .font(.headline)
-                            .foregroundStyle(.white)
+        Group {
+            if let homework = viewModel.homework,
+               let classInfo = viewModel.classDetail
+            {
+                ScrollView {
+                    if let classInfo = viewModel.classDetail {
+                        homeworkTitleDescription(homework: homework, classInfo: classInfo)
+                    } else {
+                        ProgressView()
+                            .progressViewStyle(.circular)
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 55)
-                    .background(.accent)
-                    .cornerRadius(70)
-                }
-                .padding()
+                    Divider()
+                    
+                    
+                    if homework.submissionState == .notAssigned {
+                        githubTxtFieldAndBtn
+                    } else if homework.submissionState == .generatingQuestions {
+                        nekoThinking
+                    } else if homework.submissionState == .questionGenerated {
+                        answerQuizBtn
+                    } else if homework.submissionState == .completed {
+                        VStack {
+                            NavigationLink {
+                                
+                            } label: {
+                                Text("回答履歴を見る")
+                                    .font(.headline)
+                                    .foregroundStyle(.white)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 55)
+                            .background(.accent)
+                            .cornerRadius(70)
+                        }
+                        .padding()
 
+                    }
+                    
+                    Spacer()
+                }
+                .navigationTitle("課題の詳細")
+                .navigationBarTitleDisplayMode(.inline)
+                .refreshable {
+                    await viewModel.loadInfoOfHomework(homeworkID: id)
+                }
+            } else {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .task {
+                        await viewModel.loadInfoOfHomework(homeworkID: id)
+                    }
             }
-            
-            Spacer()
         }
-        .navigationTitle("課題の詳細")
-        .navigationBarTitleDisplayMode(.inline)
     }
     
     private var answerQuizBtn: some View {
@@ -72,24 +135,24 @@ struct HomeworkDetailView: View {
         }
     }
     
-    private var homeworkTitleDescription: some View {
+    private func homeworkTitleDescription(homework: HomeworkWithStatus, classInfo: Class) -> some View {
         VStack(alignment: .leading) {
-            Text(title)
+            Text(homework.title)
                 .font(.title.bold())
                 .padding(.bottom, 7)
             
             HStack {
                 Image(systemName: "graduationcap")
-                Text(className)
+                Text(classInfo.name)
             }
             
             HStack {
                 Image(systemName: "calendar")
-                Text("締切：" + formattedDate(dueDate))
+                Text("締切：" + formattedDate(homework.dueDate ?? Date()))
             }
             .padding(.bottom, 12)
             
-            Text(description)
+            Text(homework.description)
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -160,6 +223,6 @@ struct HomeworkDetailView: View {
 
 #Preview {
     NavigationStack {
-        HomeworkDetailView(title: "リアクティブプログラミング基礎", description: "この課題では、リアクティブプログラミングの基本的な概念とRxJSの利用法を学びます。以下のトピックをカバーします。 1. オブザーバブルとオブザーバーの作成 2. オペレーターの利用", homeworkState: .completed, dueDate: Date(), className: "IOS プログラミング")
+        HomeworkDetailView(id:"")
     }
 }

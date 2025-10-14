@@ -8,19 +8,38 @@
 import SwiftUI
 
 struct ClassHomeworkView: View {
-    var className: String
+    
+    @StateObject private var viewModel: ClassHomeworkViewModel
+    
+    var classID: String
+    
+    
+    init(classID: String) {
+        self.classID = classID
+        _viewModel = StateObject(wrappedValue: ClassHomeworkViewModel(
+            homeworkUseCase: HomeworkUseCase(homeworkRepository: LollipopHomeworkRepository()),
+            authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
+            classUseCase: ClassUseCase(classRepository: LollipopClassRepository()),
+            classID: classID
+        ))
+    }
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
-            ForEach(0..<10) { _ in
-                HomeworkListItemView(title: "Test", dueDate: Date(), state: HomeworkState.allCases.randomElement()!)
+            ForEach(viewModel.homeworks) { homework in
+                HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
             }
         }
-        .navigationTitle(className)
+        .navigationTitle(viewModel.classInfo?.name ?? "クラスの課題")
+        .task {
+            await viewModel.loadClassInfos()
+            await viewModel.loadHomeworks(classID: classID)
+        }
     }
 }
 
 #Preview {
     NavigationStack {
-        ClassHomeworkView(className: "IOS プログラミング")
+        ClassHomeworkView(classID: "IOS プログラミング")
     }
 }
