@@ -10,14 +10,16 @@ import SwiftUI
 struct HomeworkDetailView: View {
     var id: String
     
-    @StateObject private var viewModel: HomeworkDetailViewModel = HomeworkDetailViewModel(homeworkUseCase: HomeworkUseCase(homeworkRepository: LollipopHomeworkRepository()), classUseCase: ClassUseCase(classRepository: LollipopClassRepository()))
-    @State private var homeworkLinkTxt: String = ""
+    @StateObject private var viewModel: HomeworkDetailViewModel = HomeworkDetailViewModel(
+        homeworkUseCase: HomeworkUseCase(homeworkRepository: LollipopHomeworkRepository()),
+        classUseCase: ClassUseCase(classRepository: LollipopClassRepository()),
+        projectUseCase: ProjectUseCase(projectRepository: LollipopProjectRepository()),
+        authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository())
+    )
     
     var body: some View {
         Group {
-            if let homework = viewModel.homework,
-               let classInfo = viewModel.classDetail
-            {
+            if let homework = viewModel.homework {
                 ScrollView {
                     if let classInfo = viewModel.classDetail {
                         homeworkTitleDescription(homework: homework, classInfo: classInfo)
@@ -131,7 +133,7 @@ struct HomeworkDetailView: View {
             
             TextField(
                 "例: https: //github.com/your-username/your-repository",
-                text: $homeworkLinkTxt
+                text: $viewModel.homeworkLinkTxt
             )
             .padding()
             .frame(height: 55)
@@ -150,7 +152,9 @@ struct HomeworkDetailView: View {
                 .frame(height: 10)
             
             Button {
-                
+                Task {
+                    await viewModel.uploadProject()
+                }
             } label: {
                 Text("提出する")
                     .font(.headline)

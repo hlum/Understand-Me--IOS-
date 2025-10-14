@@ -12,23 +12,19 @@ class LollipopProjectRepository: ProjectRepository {
     
     
     
-    func uploadProject(project: Project) async throws {
+    func uploadProject(userID: String, homeworkID: String, githubURLString: String) async throws {
         let url = try lollipopAPIUtility.makeURL("project/add_project.php")
-        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        let body = try JSONEncoder().encode([
+            "user_id": userID,
+            "homework_id": homeworkID,
+            "github_file_link": githubURLString
+        ])
         
-        components?.queryItems = [
-            URLQueryItem(name: "user_id", value: project.userID),
-            URLQueryItem(name: "homework_id", value: project.homeworkID),
-            URLQueryItem(name: "github_file_link", value: project.githubURL),
-            ]
-        
-        guard let finalURL = components?.url else {
-            throw URLError(.badURL)
-        }
-        
-        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "POST")
+        let request = try lollipopAPIUtility.makeRequest(url: url, method: "PATCH", body: body)
+
         let (data, _) = try await URLSession.shared.data(for: request)
         
+        print("レスポンスデータ: " + String(data: data, encoding: .utf8)!)
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
