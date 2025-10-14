@@ -8,5 +8,5 @@
 import Foundation
 
 protocol ProjectRepository {
-    func uploadProject(project: Project) async throws
+    func uploadProject(userID: String, homeworkID: String, githubURLString: String) async throws
 }
