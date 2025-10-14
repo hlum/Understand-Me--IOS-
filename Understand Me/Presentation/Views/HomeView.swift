@@ -12,19 +12,23 @@ class HomeViewModel: ObservableObject {
     private let userDataUseCase: UserDataUseCase
     private let authenticationUseCase: AuthenticationUseCase
     private let homeworkUseCase: HomeworkUseCase
+    private let classUseCase: ClassUseCase
     
     @Published var userData: UserData? = nil
     @Published var homeworks: [HomeworkWithStatus] = []
+    @Published var classes: [Class] = []
     
     
     init(
         authenticationUseCase: AuthenticationUseCase,
         userDataUseCase: UserDataUseCase,
-        homeworkUseCase: HomeworkUseCase
+        homeworkUseCase: HomeworkUseCase,
+        classUseCase: ClassUseCase
     ) {
         self.userDataUseCase = userDataUseCase
         self.authenticationUseCase = authenticationUseCase
         self.homeworkUseCase = homeworkUseCase
+        self.classUseCase = classUseCase
     }
     
     
@@ -46,6 +50,7 @@ class HomeViewModel: ObservableObject {
     
     
     
+    @MainActor
     func loadHomeworks() async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             print("AuthDataResultを取得できません。")
@@ -57,6 +62,22 @@ class HomeViewModel: ObservableObject {
         } catch {
             print("HomeViewModel.loadHomeworks(): 宿題の取得に失敗しました。")
         }
+    }
+    
+    
+    
+    @MainActor
+    func loadClasses() async {
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("AuthDataResultを取得できません。")
+            return
+        }
+        do {
+            self.classes = try await classUseCase.fetchClassList(studentID: authDataResult.id)
+        } catch {
+            print("HomeViewModel.loadClasses(): クラスの取得に失敗しました。")
+        }
+        
     }
 }
 
@@ -82,7 +103,7 @@ struct HomeView: View {
                 ),
                 homeworkUseCase: HomeworkUseCase(
                     homeworkRepository: LollipopHomeworkRepository()
-                    )
+                ), classUseCase: ClassUseCase(classRepository: LollipopClassRepository())
             )
         )
     }
@@ -140,25 +161,13 @@ struct HomeView: View {
                     .foregroundStyle(.primary)
                     
                     LazyVGrid(columns: adaptiveColumn, spacing: 16) {
-                        classCell(
-                            className: "iOS プログラミング",
-                            teacherName: "山田太郎先生",
-                            homeworksCount: 3
-                        )
-                        classCell(
-                            className: "Android プログラミング",
-                            teacherName: "山田太郎先生",
-                            homeworksCount: 10
-                        )
-                        classCell(
-                            className: "Web プログラミング",
-                            teacherName: "山田太郎先生"
-                        )
-                        classCell(
-                            className: "コンテンツ制作",
-                            teacherName: "山田太郎先生",
-                            homeworksCount: 100
-                        )
+                        ForEach(viewModel.classes) { classItem in
+                            classCell(
+                                classID: classItem.id,
+                                className: classItem.name,
+                                teacherName: classItem.teacherId
+                            )
+                        }
                     }
                     .padding(.horizontal)
                 }
@@ -170,6 +179,7 @@ struct HomeView: View {
         .task {
             await viewModel.loadUserData()
             await viewModel.loadHomeworks()
+            await viewModel.loadClasses()
         }
     }
     
@@ -209,21 +219,21 @@ struct HomeView: View {
     }
     
     // MARK: - Class Card
-    private func classCell(className: String, teacherName: String, homeworksCount: Int = 0) -> some View {
+    private func classCell(classID: String, className: String, teacherName: String) -> some View {
         NavigationLink(destination: {
-            ClassHomeworkView(classID: className)
+            ClassHomeworkView(classID: classID)
         }, label: {
             VStack(alignment: .leading, spacing: 6) {
                 Text(className)
                     .font(.headline)
-
+                
                 Text(teacherName)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
             .lineLimit(1)
             .padding()
-            .frame(maxWidth: .infinity, minHeight: 100, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
             .background(.background)
             .cornerRadius(20)
             .shadow(color: .primary.opacity(0.2), radius: 8)
