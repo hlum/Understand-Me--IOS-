@@ -114,7 +114,9 @@ struct ChoiceButton: View {
             Text(choice.choiceText)
                 .font(.body)
                 .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
                 .foregroundStyle(.primary)
+                .lineLimit(nil)
             Spacer()
             
             if submitted {
@@ -123,10 +125,12 @@ struct ChoiceButton: View {
             } else if isSelected {
                 Image(systemName: "circle.fill")
                     .foregroundStyle(.blue)
+            } else {
+                Image(systemName: "circle.fill")
+                    .opacity(0.0001)
             }
         }
         .padding()
-        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(isSelected ? Color.blue.opacity(0.15) : Color.gray.opacity(0.1))
