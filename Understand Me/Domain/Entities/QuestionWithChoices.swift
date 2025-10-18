@@ -28,6 +28,20 @@ struct QuestionWithChoices: Codable, Identifiable {
         case createdAt = "created_at"
         case choices
     }
+    
+    
+    static func getDummy() -> Self {
+        return QuestionWithChoices(
+            id: UUID().uuidString,
+            jobID: UUID().uuidString,
+            projectID: UUID().uuidString,
+            homeworkID: UUID().uuidString,
+            userID: UUID().uuidString,
+            questionText: "TESTの質問文です。",
+            createdAt: Date().description,
+            choices: [.getDummy(), .getDummy(), .getDummy(), .getDummy()]
+        )
+    }
 }
 
 struct Choice: Codable, Identifiable {
@@ -39,5 +53,13 @@ struct Choice: Codable, Identifiable {
         case id = "choice_id"
         case choiceText = "choice_text"
         case isCorrect = "is_correct"
+    }
+    
+    static func getDummy() -> Self {
+        return Choice(
+            id: UUID().uuidString,
+            choiceText: "選択肢のテキストです。",
+            isCorrect: Bool.random()
+        )
     }
 }
