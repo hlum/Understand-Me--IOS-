@@ -16,8 +16,8 @@ class HomeworkUseCase {
     
     
     
-    func fetchHomework(id: String) async throws -> HomeworkWithStatus {
-        try await homeworkRepository.fetchHomework(id: id)
+    func fetchHomework(id: String, studentID: String) async throws -> HomeworkWithStatus {
+        try await homeworkRepository.fetchHomework(id: id, studentID: studentID)
     }
     
     

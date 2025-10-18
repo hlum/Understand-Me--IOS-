@@ -75,7 +75,13 @@ class HomeworkDetailViewModel: ObservableObject {
     @MainActor
     private func loadHomework(id: String) async {
         do {
-            homework = try await homeworkUseCase.fetchHomework(id: id)
+            
+            guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+                print("HomeworkDetailViewModel.loadHomework: ログインしているユーザーがいません。")
+                return
+            }
+            
+            homework = try await homeworkUseCase.fetchHomework(id: id, studentID: authDataResult.id)
         } catch {
             print("HomeworkDetailViewModel.loadHomework: 宿題の取得に失敗しました。\(error.localizedDescription)")
         }

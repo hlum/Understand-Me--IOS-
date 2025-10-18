@@ -43,7 +43,7 @@ class MainTabViewModel: ObservableObject {
             
             try await userDataUseCase.saveUserDataIfNotExist(userData: userData)
         } catch {
-            print("UserDataの保存に失敗しました。")
+            print("UserDataの保存に失敗しました。\(error.localizedDescription)")
         }
     }
     
@@ -60,24 +60,40 @@ class MainTabViewModel: ObservableObject {
     }
     
     
-    
+    // メールから学年と学科コードを取得する、もしメールが学校のメールじゃない場合ダミーを返す
     func extractStudentInfo(from email: String) -> (studentCode: String, className: String, admissionYear: Int)? {
-        // Example: "24cm0138@jec.ac.jp"
-        guard let atIndex = email.firstIndex(of: "@") else { return nil }
+        // Example valid format: "24cm0138@jec.ac.jp"
+        guard let atIndex = email.firstIndex(of: "@") else {
+            return ("99zz", "zz", 99)
+        }
         
         // Get part before "@"
-        let localPart = String(email[..<atIndex]) // "24cm0138"
+        let localPart = String(email[..<atIndex]) // e.g., "24cm0138"
+        
+        // Must have at least 4 characters to include year + class
+        guard localPart.count >= 4 else {
+            return ("99zz", "zz", 99)
+        }
         
         // admissionYear = first 2 chars
         let yearPart = String(localPart.prefix(2)) // "24"
-        guard let admissionYear = Int(yearPart) else { return nil }
+        guard let admissionYear = Int(yearPart) else {
+            return ("99zz", "zz", 99)
+        }
         
-        // Extract class name: find alphabet part after year
-        let letters = localPart.dropFirst(2).prefix { $0.isLetter }
-        let className = String(letters) // "cm"
+        // Extract class name: next 2 letters after the year
+        let startIndex = localPart.index(localPart.startIndex, offsetBy: 2)
+        let classPart = localPart[startIndex...]
+        let letters = classPart.prefix(while: { $0.isLetter })
+        let className = String(letters)
+        
+        // Class name must be exactly 2 letters (e.g., "cm")
+        guard className.count == 2 else {
+            return ("99zz", "zz", 99)
+        }
         
         // studentCode is the full before "@"
-        let studentCode = localPart // "24cm0138"
+        let studentCode = localPart
         
         return (studentCode, className, admissionYear)
     }

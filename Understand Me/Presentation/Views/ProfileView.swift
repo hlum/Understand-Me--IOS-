@@ -74,7 +74,8 @@ struct ProfileView: View {
                 .cornerRadius(300)
         }
         
-        Text(viewModel.userData?.studentCode ?? "ゲスト")
+        
+        Text(viewModel.userData?.displayName ?? "")
             .font(.title.bold())
         
         Text(verbatim: viewModel.userData?.email ?? "")

@@ -16,6 +16,14 @@ struct UserData: Codable {
     let admissionYear: Int
     let photoURL: String?
     
+    
+    var displayName: String {
+        if studentCode == "99zz"{
+            return "Guest"
+        }
+        return studentCode
+    }
+    
     init(id: String, email: String, fcmToken: String?, studentCode: String, majorCode: String, admissionYear: Int, photoURL: String?) {
         self.id = id
         self.email = email
@@ -35,6 +43,8 @@ struct UserData: Codable {
         case majorCode = "major_code"
         case admissionYear = "admission_year"
     }
+    
+    
     
     static func getDummy() -> Self {
         return UserData(

@@ -29,9 +29,10 @@ class LollipopHomeworkRepository: HomeworkRepository {
     }
     
     
-    func fetchHomework(id: String) async throws -> HomeworkWithStatus {
+    func fetchHomework(id: String, studentID: String) async throws -> HomeworkWithStatus {
         let queryItems = [
-            URLQueryItem(name: "id", value: id)
+            URLQueryItem(name: "id", value: id),
+            URLQueryItem(name: "student_id", value: studentID)
         ]
         
         if let homework = try await fetchHomeworks(with: queryItems).first {

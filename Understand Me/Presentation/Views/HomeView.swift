@@ -190,7 +190,7 @@ struct HomeView: View {
                 Text("こんにちは")
                     .font(.headline)
                     .foregroundColor(.secondary)
-                Text(viewModel.userData?.studentCode ?? "ゲスト")
+                Text(viewModel.userData?.displayName ?? "ゲスト")
                     .font(.title3.bold())
             }
             
