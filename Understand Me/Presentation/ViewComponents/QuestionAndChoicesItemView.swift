@@ -58,6 +58,7 @@ struct QuestionAndChoicesItemView: View {
                     if !submitted {
                         submitted = true
                     } else {
+                        submitted = false
                         onClickNext()
                     }
                 }
