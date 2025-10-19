@@ -59,8 +59,8 @@ struct HomeworkListItemView: View {
         }
         .overlay(alignment: .trailing, content: {
             if state == .questionGenerated {
-                Button {
-                    
+                NavigationLink {
+                    QuestionsView(homeworkID: id)
                 } label: {
                     Text("回答")
                         .font(.headline)

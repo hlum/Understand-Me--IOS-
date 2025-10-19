@@ -35,11 +35,11 @@ struct HomeworkDetailView: View {
                     } else if homework.submissionState == .generatingQuestions {
                         nekoThinking
                     } else if homework.submissionState == .questionGenerated {
-                        answerQuizBtn
+                        answerQuizBtn(homeworkID: homework.id)
                     } else if homework.submissionState == .completed {
                         VStack {
                             NavigationLink {
-                                
+
                             } label: {
                                 Text("回答履歴を見る")
                                     .font(.headline)
@@ -64,16 +64,17 @@ struct HomeworkDetailView: View {
             } else {
                 ProgressView()
                     .progressViewStyle(.circular)
-                    .task {
-                        await viewModel.loadInfoOfHomework(homeworkID: id)
-                    }
             }
+            
+        }
+        .task(id: id) {
+            await viewModel.loadInfoOfHomework(homeworkID: id)
         }
     }
     
-    private var answerQuizBtn: some View {
+    private func answerQuizBtn(homeworkID: String) -> some View {
         NavigationLink {
-            
+            QuestionsView(homeworkID: homeworkID)
         } label: {
             HStack {
                 LottieView(filename: "AI")

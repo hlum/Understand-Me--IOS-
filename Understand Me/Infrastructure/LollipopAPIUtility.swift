@@ -13,7 +13,7 @@ class LollipopAPIUtility {
     func makeURL(_ path: String) throws -> URL {
         let base = secretLoader.fetchSecret(from: "Secrets", forKey: "endpoint")
         guard let baseURL = URL(string: base)?.appendingPathComponent(path) else {
-            throw UserDataRepositoryError.InvalidURL
+            throw LollipopError.InvalidURL
         }
         return baseURL
     }

@@ -30,7 +30,7 @@ struct ClassHomeworkView: View {
                 HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
             }
         }
-        .navigationTitle(viewModel.classInfo?.name ?? "クラスの課題")
+        .navigationTitle(viewModel.classInfo?.name ?? "")
         .task {
             await viewModel.loadClassInfos()
             await viewModel.loadHomeworks(classID: classID)
