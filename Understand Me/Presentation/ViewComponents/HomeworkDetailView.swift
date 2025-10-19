@@ -64,10 +64,11 @@ struct HomeworkDetailView: View {
             } else {
                 ProgressView()
                     .progressViewStyle(.circular)
-                    .task {
-                        await viewModel.loadInfoOfHomework(homeworkID: id)
-                    }
             }
+            
+        }
+        .task(id: id) {
+            await viewModel.loadInfoOfHomework(homeworkID: id)
         }
     }
     
