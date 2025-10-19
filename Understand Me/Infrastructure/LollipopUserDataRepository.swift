@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum UserDataRepositoryError: LocalizedError {
+enum LollipopError: LocalizedError {
     case InvalidURL
     case NoDataFoundInResponse
     case InvalidResponseStatus
@@ -41,7 +41,7 @@ class LollipopUserDataRepository: UserDataRepository {
         
         guard response.status == "success" else {
             print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
-            throw UserDataRepositoryError.InvalidResponseStatus
+            throw LollipopError.InvalidResponseStatus
         }
     }
     
@@ -53,7 +53,7 @@ class LollipopUserDataRepository: UserDataRepository {
         components?.queryItems = [URLQueryItem(name: "id", value: userID)]
         
         guard let finalURL = components?.url else {
-            throw UserDataRepositoryError.InvalidURL
+            throw LollipopError.InvalidURL
         }
         
         let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
@@ -64,15 +64,15 @@ class LollipopUserDataRepository: UserDataRepository {
         guard response.status == "success" else {
             
             if response.message.lowercased().contains("ユーザーが存在しません") {
-                throw UserDataRepositoryError.UserNotFound
+                throw LollipopError.UserNotFound
             }
             print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
-            throw UserDataRepositoryError.InvalidResponseStatus
+            throw LollipopError.InvalidResponseStatus
         }
 
         guard let jsonString = response.dataString,
               let jsonData = jsonString.data(using: .utf8) else {
-            throw UserDataRepositoryError.NoDataFoundInResponse
+            throw LollipopError.NoDataFoundInResponse
         }
 
         do {
@@ -80,7 +80,7 @@ class LollipopUserDataRepository: UserDataRepository {
             if let userData = userDatas.first {
                 return userData
             }
-            throw UserDataRepositoryError.UserNotFound
+            throw LollipopError.UserNotFound
         } catch {
             print("UserDataのDecodeに失敗。失敗: \(error.localizedDescription)")
             throw error
@@ -105,7 +105,7 @@ class LollipopUserDataRepository: UserDataRepository {
         
         guard response.status == "success" else {
             print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
-            throw UserDataRepositoryError.InvalidResponseStatus
+            throw LollipopError.InvalidResponseStatus
         }
     }
 
