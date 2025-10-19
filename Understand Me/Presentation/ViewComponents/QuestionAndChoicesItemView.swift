@@ -13,12 +13,12 @@ struct QuestionAndChoicesItemView: View {
     @State private var submitted = false
     
     var isLastQuestion: Bool
-    var onClickNext: () -> ()
+    var onClickNext: (_ selectedChoiceID: String) -> ()
     
     init(
         questionAndChoices: QuestionWithChoices,
         isLastQuestion: Bool,
-        onClickNext: @escaping () -> Void
+        onClickNext: @escaping (_ selectedChoiceID: String) -> Void
     ) {
         self.questionAndChoices = questionAndChoices
         self.isLastQuestion = isLastQuestion
@@ -59,7 +59,7 @@ struct QuestionAndChoicesItemView: View {
                         submitted = true
                     } else {
                         submitted = false
-                        onClickNext()
+                        onClickNext(selectedChoiceID!)
                     }
                 }
             } label: {
@@ -144,6 +144,6 @@ struct ChoiceButton: View {
 
 #Preview {
     NavigationStack {
-        QuestionAndChoicesItemView(questionAndChoices: .getDummy(), isLastQuestion: true, onClickNext: {})
+        QuestionAndChoicesItemView(questionAndChoices: .getDummy(), isLastQuestion: true, onClickNext: { selectedChoiceID in })
     }
 }

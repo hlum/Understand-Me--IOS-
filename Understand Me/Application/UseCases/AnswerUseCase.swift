@@ -17,8 +17,8 @@ class AnswerUseCase {
     
     
     
-    func addAnswer(answer: Answer, totalQuestions: Int) async throws {
-        try await answerRepository.postAnswer(answer: answer, totalQuestions: totalQuestions)
+    func addAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws {
+        try await answerRepository.postAnswer(answer: answer, homeworkID: homeworkID, totalQuestions: totalQuestions)
     }
     
 }

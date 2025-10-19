@@ -13,6 +13,12 @@ struct Answer: Identifiable, Codable {
     let userID: String
     let selectedChoiceID: String
     
+    init(questionID: String, userID: String, selectedChoiceID: String) {
+        self.id = UUID().uuidString
+        self.questionID = questionID
+        self.userID = userID
+        self.selectedChoiceID = selectedChoiceID
+    }
     
     enum CodingKeys: String, CodingKey {
         case id

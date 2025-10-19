@@ -14,10 +14,11 @@ class LollipopAnswerRepository: AnswerRepository {
     
     
     
-    func postAnswer(answer: Answer, totalQuestions: Int) async throws {
+    func postAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws {
         let endPoint = try lollipopUtility.makeURL("answer/add_answer.php")
         let body = try JSONEncoder().encode([
             "question_id": answer.questionID,
+            "homework_id": homeworkID,
             "user_id": answer.userID,
             "selected_choice_id": answer.selectedChoiceID,
             "total_questions": "\(totalQuestions)"
