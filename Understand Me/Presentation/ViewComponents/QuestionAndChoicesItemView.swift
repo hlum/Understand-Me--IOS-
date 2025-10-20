@@ -7,28 +7,28 @@
 
 import SwiftUI
 
+import SwiftUI
+
+// MARK: - Mode Enum
+enum QuestionViewMode {
+    case answering
+    case review
+}
+
 struct QuestionAndChoicesItemView: View {
     var questionAndChoices: QuestionWithChoices
+    var mode: QuestionViewMode = .answering
+    var isLastQuestion: Bool = false
+    var onClickNext: ((_ selectedChoiceID: String) -> Void)? = nil
+    var selectedChoiceIDFromServer: String? = nil // for review mode
+    
     @State private var selectedChoiceID: String? = nil
     @State private var submitted = false
-    
-    var isLastQuestion: Bool
-    var onClickNext: (_ selectedChoiceID: String) -> ()
-    
-    init(
-        questionAndChoices: QuestionWithChoices,
-        isLastQuestion: Bool,
-        onClickNext: @escaping (_ selectedChoiceID: String) -> Void
-    ) {
-        self.questionAndChoices = questionAndChoices
-        self.isLastQuestion = isLastQuestion
-        self.onClickNext = onClickNext
-    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             
-            // MARK: Question Text
+            // MARK: Question
             Text(questionAndChoices.questionText)
                 .font(.title3.bold())
                 .foregroundStyle(.primary)
@@ -39,11 +39,11 @@ struct QuestionAndChoicesItemView: View {
                 ForEach(questionAndChoices.choices) { choice in
                     ChoiceButton(
                         choice: choice,
-                        isSelected: selectedChoiceID == choice.id,
-                        submitted: submitted
+                        isSelected: isChoiceSelected(choice),
+                        submitted: isSubmitted
                     )
                     .onTapGesture {
-                        if !submitted {
+                        if mode == .answering && !submitted {
                             withAnimation(.spring()) {
                                 selectedChoiceID = choice.id
                             }
@@ -52,28 +52,31 @@ struct QuestionAndChoicesItemView: View {
                 }
             }
             
-            // MARK: Submit Button
-            Button {
-                withAnimation(.easeInOut) {
-                    if !submitted {
-                        submitted = true
-                    } else {
-                        submitted = false
-                        onClickNext(selectedChoiceID!)
+            // MARK: Button (only for answering mode)
+            if mode == .answering {
+                Button {
+                    withAnimation(.easeInOut) {
+                        if !submitted {
+                            submitted = true
+                        } else {
+                            submitted = false
+                            if let id = selectedChoiceID {
+                                onClickNext?(id)
+                            }
+                        }
                     }
+                } label: {
+                    Text(buttonLabel)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 55)
+                        .background(buttonColor)
+                        .cornerRadius(14)
                 }
-            } label: {
-                Text(buttonLabel)
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 55)
-                    .background(buttonColor)
-                    .cornerRadius(14)
+                .disabled(selectedChoiceID == nil && !submitted)
+                .opacity(selectedChoiceID == nil && !submitted ? 0.6 : 1)
             }
-            .disabled(selectedChoiceID == nil && !submitted)
-            .opacity(selectedChoiceID == nil && !submitted ? 0.6 : 1)
-            
         }
         .padding(20)
         .background(
@@ -82,9 +85,27 @@ struct QuestionAndChoicesItemView: View {
                 .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
         )
         .padding()
+        .onAppear {
+            if mode == .review {
+                submitted = true
+                selectedChoiceID = selectedChoiceIDFromServer
+            }
+        }
     }
     
-    // MARK: Dynamic Button Text
+    // MARK: Helpers
+    private func isChoiceSelected(_ choice: Choice) -> Bool {
+        if mode == .answering {
+            return selectedChoiceID == choice.id
+        } else {
+            return selectedChoiceIDFromServer == choice.id
+        }
+    }
+    
+    private var isSubmitted: Bool {
+        mode == .review || submitted
+    }
+    
     private var buttonLabel: String {
         if !submitted {
             return "回答を送信"
@@ -93,7 +114,6 @@ struct QuestionAndChoicesItemView: View {
         }
     }
     
-    // MARK: Dynamic Button Color
     private var buttonColor: Color {
         if !submitted {
             return .blue
@@ -103,7 +123,7 @@ struct QuestionAndChoicesItemView: View {
     }
 }
 
-
+// MARK: - Choice Button
 struct ChoiceButton: View {
     let choice: Choice
     let isSelected: Bool
@@ -117,11 +137,17 @@ struct ChoiceButton: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .foregroundStyle(.primary)
                 .lineLimit(nil)
+            
             Spacer()
             
             if submitted {
-                Image(systemName: choice.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(choice.isCorrect ? .green : .red)
+                if choice.isCorrect {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                } else if isSelected {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.red)
+                }
             } else if isSelected {
                 Image(systemName: "circle.fill")
                     .foregroundStyle(.blue)
@@ -141,6 +167,8 @@ struct ChoiceButton: View {
         )
     }
 }
+
+
 
 #Preview {
     NavigationStack {
