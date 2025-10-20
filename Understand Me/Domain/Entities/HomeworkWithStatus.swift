@@ -32,7 +32,7 @@ struct HomeworkWithStatus: Identifiable, Decodable {
         return formatter.date(from: dueDateString)
     }
     
-    static func getDummy() -> HomeworkWithStatus {
+    static func getDummy(submissionState: HomeworkState = HomeworkState.allCases.randomElement() ?? .completed) -> HomeworkWithStatus {
         return HomeworkWithStatus(
             id: UUID().uuidString,
             title: "Test Dummy",
@@ -40,7 +40,7 @@ struct HomeworkWithStatus: Identifiable, Decodable {
             dueDateString: "10-1-2",
             classID: UUID().uuidString,
             githubURL: "https:safasfdajsv;nmaskdvn",
-            submissionState: HomeworkState.allCases.randomElement() ?? .completed
+            submissionState: submissionState
         )
     }
 }

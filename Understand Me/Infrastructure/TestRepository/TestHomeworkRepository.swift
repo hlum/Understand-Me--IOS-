@@ -8,8 +8,12 @@
 import Foundation
 
 class TestHomeworkRepository: HomeworkRepository {
+    func retryQuestionGeneration(homeworkID: String, studentID: String) async throws {
+        return
+    }
+    
     func fetchHomework(id: String, studentID: String) async throws -> HomeworkWithStatus {
-        return .getDummy()
+        return .getDummy(submissionState: .failed)
     }
     
     func fetchHomeworks(studentID: String) async throws -> [HomeworkWithStatus] {

@@ -68,7 +68,6 @@ class LollipopHomeworkRepository: HomeworkRepository {
         }
 
         do {
-            print(jsonString)
             let decoder = JSONDecoder()
             let homeworks = try decoder.decode([HomeworkWithStatus].self, from: jsonData)
             
@@ -89,6 +88,27 @@ class LollipopHomeworkRepository: HomeworkRepository {
             print("⚠️ Unknown decoding error: \(error)")
         }
         return []
+    }
+    
+    
+    func retryQuestionGeneration(homeworkID: String, studentID: String) async throws {
+        let url = try lollipopAPIUtility.makeURL("job/retry_job.php")
+        
+        let body = try JSONEncoder().encode([
+            "homework_id": homeworkID,
+            "user_id": studentID
+        ])
+        
+        let request = try lollipopAPIUtility.makeRequest(url: url, method: "PATCH", body: body)
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        
+        guard response.status == "success" else {
+            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            throw LollipopError.InvalidResponseStatus
+        }
     }
     
     

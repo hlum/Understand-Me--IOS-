@@ -30,4 +30,9 @@ class HomeworkUseCase {
     func fetchHomeworks(studentID: String, classID: String) async throws -> [HomeworkWithStatus] {
         try await homeworkRepository.fetchHomeworksFromClass(classID: classID, studentID: studentID)
     }
+    
+    
+    func retryQuestionGeneration(homeworkID: String, studentID: String) async throws {
+        try await homeworkRepository.retryQuestionGeneration(homeworkID: homeworkID, studentID: studentID)
+    }
 }

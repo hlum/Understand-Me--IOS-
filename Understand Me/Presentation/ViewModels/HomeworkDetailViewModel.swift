@@ -66,7 +66,25 @@ class HomeworkDetailViewModel: ObservableObject {
                 githubURLString: homeworkLinkTxt
             )
         } catch {
+            // TODO: Alert the user and impl retry methods
             print("HomeworkDetailViewModel.uploadProject: プロジェクトのアップロードに失敗しました。\(error.localizedDescription)")
+        }
+    }
+    
+    
+    
+    func retryQuestionGeneration(homeworkID: String) async  {
+        
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
+            return
+        }
+        
+        do {
+            try await homeworkUseCase.retryQuestionGeneration(homeworkID: homeworkID, studentID: authDataResult.id)
+        } catch {
+            // TODO: Alert the user
+            print("HomeworkDetailViewModel.retryQuestionGeneration: リトライ失敗.\(error.localizedDescription)")
         }
     }
     

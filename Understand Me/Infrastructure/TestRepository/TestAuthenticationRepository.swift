@@ -8,7 +8,7 @@
 import Foundation
 
 class TestAuthenticationRepository: AuthenticationRepository {
-    var currentUser: AuthDataResultModel? = nil
+    var currentUser: AuthDataResultModel? = AuthDataResultModel.dummy()
     
     func signInWithGoogle(token: Token) async throws -> AuthDataResultModel {
         currentUser = .dummy()
