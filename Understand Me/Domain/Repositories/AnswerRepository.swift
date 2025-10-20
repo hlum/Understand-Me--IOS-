@@ -9,4 +9,5 @@ import Foundation
 
 protocol AnswerRepository {
     func postAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws
+    func fetchAnswers(homeworkID: String, userID: String) async throws -> [Answer]
 }

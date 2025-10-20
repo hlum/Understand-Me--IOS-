@@ -36,6 +36,46 @@ class LollipopAnswerRepository: AnswerRepository {
             throw LollipopError.InvalidResponseStatus
         }
     }
+    
+    
+    
+    func fetchAnswers(homeworkID: String, userID: String) async throws -> [Answer] {
+        let url = try lollipopUtility.makeURL("answer/get_answers_with_homeworkID.php")
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.queryItems = [
+            URLQueryItem(name: "homework_id", value: homeworkID),
+            URLQueryItem(name: "user_id", value: userID)
+        ]
+        
+        guard let finalURL = components?.url else {
+            throw LollipopError.InvalidURL
+        }
+
+        let request = try lollipopUtility.makeRequest(url: finalURL, method: "GET")
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        
+        guard response.status == "success" else {
+            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            throw LollipopError.InvalidResponseStatus
+        }
+        
+        
+        guard let jsonString = response.dataString,
+              let jsonData = jsonString.data(using: .utf8) else {
+            throw LollipopError.NoDataFoundInResponse
+        }
+        
+        do {
+            let answers = try JSONDecoder().decode([Answer].self, from: jsonData)
+            return answers
+        } catch {
+            print("AnswerのDecodeに失敗。失敗: \(error.localizedDescription)")
+            throw error
+        }
+        
+    }
 
     
 }
