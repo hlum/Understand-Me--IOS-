@@ -39,7 +39,7 @@ struct HomeworkDetailView: View {
                     } else if homework.submissionState == .completed {
                         VStack {
                             NavigationLink {
-
+                                QuestionsView(homeworkID: homework.id, mode: .review)
                             } label: {
                                 Text("回答履歴を見る")
                                     .font(.headline)
