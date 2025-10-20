@@ -13,13 +13,15 @@ enum HomeworkState: String, Codable, CaseIterable {
     case generatingQuestions
     case questionGenerated
     case completed
+    case failed
     
     var color: Color {
         switch self {
-        case .notAssigned: return .red
+        case .notAssigned: return .gray
         case .generatingQuestions: return .yellow
         case .questionGenerated: return .blue
         case .completed: return .green
+        case .failed: return .red
         }
     }
     
@@ -29,6 +31,7 @@ enum HomeworkState: String, Codable, CaseIterable {
         case .generatingQuestions: return "問題生成中"
         case .questionGenerated: return "問題生成完了"
         case .completed: return "提出完了"
+        case .failed: return "生成失敗"
         }
     }
 }

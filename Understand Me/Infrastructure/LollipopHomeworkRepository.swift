@@ -68,7 +68,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         }
 
         do {
-            
+            print(jsonString)
             let decoder = JSONDecoder()
             let homeworks = try decoder.decode([HomeworkWithStatus].self, from: jsonData)
             
