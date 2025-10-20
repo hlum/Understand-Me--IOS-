@@ -52,7 +52,7 @@ struct QuestionAndChoicesItemView: View {
                 }
             }
             
-            // MARK: Button (only for answering mode)
+            // MARK: Next Button
             if mode == .answering {
                 Button {
                     withAnimation(.easeInOut) {
@@ -76,6 +76,7 @@ struct QuestionAndChoicesItemView: View {
                 }
                 .disabled(selectedChoiceID == nil && !submitted)
                 .opacity(selectedChoiceID == nil && !submitted ? 0.6 : 1)
+                
             }
         }
         .padding(20)

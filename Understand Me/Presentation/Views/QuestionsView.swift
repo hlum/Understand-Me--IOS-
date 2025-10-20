@@ -11,7 +11,7 @@ import Combine
 class QuestionsViewModel: ObservableObject {
     @Published var questionsWithChoices: [QuestionWithChoices] = []
     @Published var currentIndex = 0
-    
+    @Published var questionIDAndSelectedChoiceID: [String: String] = [:] // questionID: selectedChoiceID
     private var authenticationUseCase: AuthenticationUseCase
     private var questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase
     private var answerUseCase: AnswerUseCase
@@ -52,7 +52,7 @@ class QuestionsViewModel: ObservableObject {
             print("QuestionsViewModel.postAnswer: ログイン中のUserがありません。")
             return
         }
-
+        
         let answer = Answer(
             questionID: questionID,
             userID: authDataResult.id,
@@ -67,11 +67,17 @@ class QuestionsViewModel: ObservableObject {
             // TODO: Show error to the user
         }
     }
+    
+    
+    
+    func loadAnswersForReview(questionID: String) async {
+        
+    }
 }
 
 struct QuestionsView: View {
     @Environment(\.dismiss) var dismiss
-        
+    
     @StateObject private var viewModel = QuestionsViewModel(
         authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
         questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase(questionsWithChoicesRepository: LollipopQuestionsWithChoicesRepository()),
@@ -79,6 +85,7 @@ struct QuestionsView: View {
     )
     
     var homeworkID: String
+    var mode: QuestionViewMode = .answering
     
     var body: some View {
         VStack {
@@ -86,34 +93,47 @@ struct QuestionsView: View {
                 ProgressView()
                     .progressViewStyle(.circular)
             } else {
-                QuestionAndChoicesItemView(
-                    questionAndChoices: viewModel.questionsWithChoices[viewModel.currentIndex],
-                    isLastQuestion: viewModel.currentIndex == viewModel.questionsWithChoices.count - 1,
-                    onClickNext: { selectedChoiceID in
-                        Task {
-                            await viewModel.postAnswer(
-                                questionID: viewModel.questionsWithChoices[viewModel.currentIndex].id,
-                                homeworkID: viewModel.questionsWithChoices[viewModel.currentIndex].homeworkID,
-                                selectedChoiceID: selectedChoiceID
-                            )
-                            
-                            if viewModel.currentIndex < viewModel.questionsWithChoices.count - 1 {
-                                withAnimation(.snappy) {
-                                    viewModel.currentIndex += 1
+                if mode == .answering {
+                    QuestionAndChoicesItemView(
+                        questionAndChoices: viewModel.questionsWithChoices[viewModel.currentIndex],
+                        mode: mode,
+                        isLastQuestion: viewModel.currentIndex == viewModel.questionsWithChoices.count - 1,
+                        onClickNext: { selectedChoiceID in
+                            Task {
+                                await viewModel.postAnswer(
+                                    questionID: viewModel.questionsWithChoices[viewModel.currentIndex].id,
+                                    homeworkID: viewModel.questionsWithChoices[viewModel.currentIndex].homeworkID,
+                                    selectedChoiceID: selectedChoiceID
+                                )
+                                
+                                
+                                if viewModel.currentIndex < viewModel.questionsWithChoices.count - 1 {
+                                    withAnimation(.snappy) {
+                                        viewModel.currentIndex += 1
+                                    }
+                                } else {
+                                    // Quiz 終了、前のViewに戻る
+                                    dismiss()
+                                    
                                 }
-                            } else {
-                                // Quiz 終了、前のViewに戻る
-                                dismiss()
-
                             }
+                        })
+                } else {
+                    ScrollView(.vertical) {
+                        ForEach(viewModel.questionsWithChoices) { questionWithChoices in
+                            QuestionAndChoicesItemView(
+                                questionAndChoices: questionWithChoices,
+                                mode: .review,
+                                selectedChoiceIDFromServer: "cho_68f270f49274f1.15924140"
+                            )
                         }
-                    })
-
+                    }
+                }
             }
             
             Spacer()
         }
-        .navigationTitle("質問一覧")
+        .navigationTitle(mode == .answering ? "質問一覧" : "回答履歴")
         .task {
             await viewModel.loadALlQuestionsWithChoices(homeworkID: homeworkID)
         }
