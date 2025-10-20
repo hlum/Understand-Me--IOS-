@@ -21,4 +21,9 @@ class AnswerUseCase {
         try await answerRepository.postAnswer(answer: answer, homeworkID: homeworkID, totalQuestions: totalQuestions)
     }
     
+    
+    func fetchAnswers(homeworkID: String, userID: String) async throws -> [Answer] {
+        return try await answerRepository.fetchAnswers(homeworkID: homeworkID, userID: userID)
+    }
+    
 }

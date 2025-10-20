@@ -70,8 +70,20 @@ class QuestionsViewModel: ObservableObject {
     
     
     
-    func loadAnswersForReview(questionID: String) async {
-        
+    func loadAnswersForReview(homeworkID: String) async {
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("QuestionsViewModel.postAnswer: ログイン中のUserがありません。")
+            return
+        }
+        do {
+            let answers = try await answerUseCase.fetchAnswers(homeworkID: homeworkID, userID: authDataResult.id)
+            answers.forEach { answer in
+                self.questionIDAndSelectedChoiceID[answer.questionID] = answer.selectedChoiceID
+            }
+        } catch {
+            // TODO: Show error to the user
+            print("QuestionsViewModel.loadAnswersForReview: \(error.localizedDescription)")
+        }
     }
 }
 
@@ -124,9 +136,12 @@ struct QuestionsView: View {
                             QuestionAndChoicesItemView(
                                 questionAndChoices: questionWithChoices,
                                 mode: .review,
-                                selectedChoiceIDFromServer: "cho_68f270f49274f1.15924140"
+                                selectedChoiceIDFromServer: viewModel.questionIDAndSelectedChoiceID[questionWithChoices.id]
                             )
                         }
+                    }
+                    .task {
+                        await viewModel.loadAnswersForReview(homeworkID: homeworkID)
                     }
                 }
             }
