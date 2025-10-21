@@ -9,13 +9,20 @@ import SwiftUI
 
 struct HomeworkDetailView: View {
     var id: String
+    @StateObject private var viewModel: HomeworkDetailViewModel
     
-    @StateObject private var viewModel: HomeworkDetailViewModel = HomeworkDetailViewModel(
-        homeworkUseCase: HomeworkUseCase(homeworkRepository: LollipopHomeworkRepository()),
-        classUseCase: ClassUseCase(classRepository: LollipopClassRepository()),
-        projectUseCase: ProjectUseCase(projectRepository: LollipopProjectRepository()),
-        authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository())
-    )
+    
+    init(
+        id: String,
+        homeworkUseCase: HomeworkUseCase = .init(homeworkRepository: LollipopHomeworkRepository()),
+        classUseCase: ClassUseCase = .init(classRepository: LollipopClassRepository()),
+        projectUseCase: ProjectUseCase = .init(projectRepository: LollipopProjectRepository()),
+        authenticationUseCase: AuthenticationUseCase = .init(authenticationRepository: FirebaseAuthenticationRepository())
+    ) {
+        self._viewModel = .init(wrappedValue: .init(homeworkUseCase: homeworkUseCase, classUseCase: classUseCase, projectUseCase: projectUseCase, authenticationUseCase: authenticationUseCase))
+        
+        self.id = id
+    }
     
     var body: some View {
         Group {
@@ -31,27 +38,15 @@ struct HomeworkDetailView: View {
                     
                     
                     if homework.submissionState == .notAssigned {
-                        githubTxtFieldAndBtn
+                        githubTxtFieldAndBtn(homeworkID: homework.id)
                     } else if homework.submissionState == .generatingQuestions {
                         nekoThinking
                     } else if homework.submissionState == .questionGenerated {
                         answerQuizBtn(homeworkID: homework.id)
+                    }else if homework.submissionState == .failed {
+                        failedState(homeworkID: homework.id)
                     } else if homework.submissionState == .completed {
-                        VStack {
-                            NavigationLink {
-                                QuestionsView(homeworkID: homework.id, mode: .review)
-                            } label: {
-                                Text("回答履歴を見る")
-                                    .font(.headline)
-                                    .foregroundStyle(.white)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 55)
-                            .background(.accent)
-                            .cornerRadius(70)
-                        }
-                        .padding()
-
+                        reviewNavBtn(homeworkID: homework.id)
                     }
                     
                     Spacer()
@@ -72,6 +67,67 @@ struct HomeworkDetailView: View {
         }
     }
     
+    
+    private func failedState(homeworkID: String) -> some View {
+        VStack {
+            
+            Button {
+                Task {
+                    await viewModel.retryQuestionGeneration(homeworkID: homeworkID)
+                    await viewModel.loadInfoOfHomework(homeworkID: homeworkID)
+                }
+            } label: {
+                Text("生成やり直す")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 55)
+            .background(.accent)
+            .cornerRadius(70)
+            .padding()
+            
+            
+            Button {
+                Task {
+                    await viewModel.cancelHomeworkSubmission(homeworkID: homeworkID)
+                    await viewModel.loadInfoOfHomework(homeworkID: homeworkID)
+                }
+            } label: {
+                Text("提出を取り消す")
+                    .font(.headline)
+                    .foregroundStyle(.red)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 55)
+            .background(
+                RoundedRectangle(cornerRadius: 70)
+                    .stroke(style: .init())
+            )
+            .cornerRadius(70)
+            .padding(.horizontal)
+        }
+        
+    }
+    
+    
+    private func reviewNavBtn(homeworkID: String) -> some View {
+        VStack {
+            NavigationLink {
+                QuestionsView(homeworkID: homeworkID, mode: .review)
+            } label: {
+                Text("回答履歴を見る")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 55)
+            .background(.accent)
+            .cornerRadius(70)
+        }
+        .padding()
+    }
+    
     private func answerQuizBtn(homeworkID: String) -> some View {
         NavigationLink {
             QuestionsView(homeworkID: homeworkID)
@@ -90,6 +146,7 @@ struct HomeworkDetailView: View {
             .padding()
         }
     }
+    
     
     private func homeworkTitleDescription(homework: HomeworkWithStatus, classInfo: Class) -> some View {
         VStack(alignment: .leading) {
@@ -127,7 +184,8 @@ struct HomeworkDetailView: View {
         .frame(maxWidth: .infinity)
     }
     
-    private var githubTxtFieldAndBtn: some View {
+    
+    private func githubTxtFieldAndBtn(homeworkID: String) -> some View {
         VStack(alignment: .leading) {
             Text("GitHubリポジトリ　URL")
                 .font(.headline)
@@ -155,6 +213,7 @@ struct HomeworkDetailView: View {
             Button {
                 Task {
                     await viewModel.uploadProject()
+                    await viewModel.loadInfoOfHomework(homeworkID: homeworkID)
                 }
             } label: {
                 Text("提出する")
@@ -181,6 +240,12 @@ struct HomeworkDetailView: View {
 
 #Preview {
     NavigationStack {
-        HomeworkDetailView(id:"")
+        HomeworkDetailView(
+            id:"",
+            homeworkUseCase: HomeworkUseCase(homeworkRepository: TestHomeworkRepository()),
+            classUseCase: ClassUseCase(classRepository: TestClassRepository()),
+            projectUseCase: ProjectUseCase(projectRepository: TestProjectRepository()),
+            authenticationUseCase: AuthenticationUseCase(authenticationRepository: TestAuthenticationRepository())
+        )
     }
 }
