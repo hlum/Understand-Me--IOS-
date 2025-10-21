@@ -112,4 +112,23 @@ class LollipopHomeworkRepository: HomeworkRepository {
     }
     
     
+    func cancelHomeworkSubmission(homeworkID: String, studentID: String) async throws {
+        let url = try lollipopAPIUtility.makeURL("homework/delete_submitted_homework.php")
+        let body = try JSONEncoder().encode([
+            "user_id": studentID,
+            "homework_id": homeworkID
+        ])
+        
+        let request = try lollipopAPIUtility.makeRequest(url: url, method: "DELETE", body: body)
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        
+        guard response.status == "success" else {
+            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            throw LollipopError.InvalidResponseStatus
+        }
+
+    }
+    
+    
 }

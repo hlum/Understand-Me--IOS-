@@ -12,4 +12,5 @@ protocol HomeworkRepository {
     func fetchHomeworks(studentID: String) async throws -> [HomeworkWithStatus]
     func fetchHomeworksFromClass(classID: String, studentID: String) async throws -> [HomeworkWithStatus]
     func retryQuestionGeneration(homeworkID: String, studentID: String) async throws
+    func cancelHomeworkSubmission(homeworkID: String, studentID: String) async throws
 }

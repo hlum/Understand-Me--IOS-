@@ -76,7 +76,7 @@ class HomeworkDetailViewModel: ObservableObject {
     func retryQuestionGeneration(homeworkID: String) async  {
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
+            print("HomeworkDetailViewModel.retryQuestionGeneration: ログインしているユーザーがいません。")
             return
         }
         
@@ -87,6 +87,23 @@ class HomeworkDetailViewModel: ObservableObject {
             print("HomeworkDetailViewModel.retryQuestionGeneration: リトライ失敗.\(error.localizedDescription)")
         }
     }
+    
+    
+    
+    func cancelHomeworkSubmission(homeworkID: String) async {
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
+            return
+        }
+        
+        do {
+            try await homeworkUseCase.cancelHomeworkSubmission(homeworkID: homeworkID, studentID: authDataResult.id)
+        } catch {
+            // TODO: Alert the user
+            print("HomeworkDetailViewModel.cancelHomeworkSubmission: 取り消し失敗.\(error.localizedDescription)")
+        } 
+    }
+    
     
     
     

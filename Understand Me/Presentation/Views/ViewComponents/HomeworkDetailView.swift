@@ -38,7 +38,7 @@ struct HomeworkDetailView: View {
                     
                     
                     if homework.submissionState == .notAssigned {
-                        githubTxtFieldAndBtn
+                        githubTxtFieldAndBtn(homeworkID: homework.id)
                     } else if homework.submissionState == .generatingQuestions {
                         nekoThinking
                     } else if homework.submissionState == .questionGenerated {
@@ -89,7 +89,10 @@ struct HomeworkDetailView: View {
             
             
             Button {
-                
+                Task {
+                    await viewModel.cancelHomeworkSubmission(homeworkID: homeworkID)
+                    await viewModel.loadInfoOfHomework(homeworkID: homeworkID)
+                }
             } label: {
                 Text("提出を取り消す")
                     .font(.headline)
@@ -181,7 +184,8 @@ struct HomeworkDetailView: View {
         .frame(maxWidth: .infinity)
     }
     
-    private var githubTxtFieldAndBtn: some View {
+    
+    private func githubTxtFieldAndBtn(homeworkID: String) -> some View {
         VStack(alignment: .leading) {
             Text("GitHubリポジトリ　URL")
                 .font(.headline)
@@ -209,6 +213,7 @@ struct HomeworkDetailView: View {
             Button {
                 Task {
                     await viewModel.uploadProject()
+                    await viewModel.loadInfoOfHomework(homeworkID: homeworkID)
                 }
             } label: {
                 Text("提出する")

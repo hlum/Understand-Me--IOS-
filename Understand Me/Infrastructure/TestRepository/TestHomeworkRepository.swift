@@ -8,6 +8,11 @@
 import Foundation
 
 class TestHomeworkRepository: HomeworkRepository {
+    func cancelHomeworkSubmission(homeworkID: String, studentID: String) async throws {
+        print("Cancel")
+        return
+    }
+    
     func retryQuestionGeneration(homeworkID: String, studentID: String) async throws {
         return
     }
