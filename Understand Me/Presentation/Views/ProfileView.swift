@@ -31,8 +31,9 @@ struct ProfileView: View {
         self.onSignOut = onSignOut
         self._viewModel = StateObject(
             wrappedValue: ProfileViewModel(
-                authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
-                userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository())
+                authenticationUseCase: AuthenticationUseCase(authenticationRepository:FirebaseAuthenticationRepository()),
+                userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository()),
+                resultUseCase: ResultUseCase(resultRepo: LollipopResultRepository())
             )
         )
     }
@@ -109,6 +110,9 @@ struct ProfileView: View {
                 .frame(width: 10, height: 10)
             Text("平均スコア")
                 .font(.caption)
+        }
+        .task {
+            await viewModel.loadResults(year: 2025)
         }
     }
     

@@ -9,15 +9,22 @@ import Combine
 
 class ProfileViewModel: ObservableObject {
     @Published var userData: UserData?
+    @Published var results: [Result] = []
     @Published var errorMessage: String = ""
     @Published var showError: Bool = false
     
     private let authenticationUseCase: AuthenticationUseCase
     private let userDataUseCase: UserDataUseCase
+    private let resultUseCase: ResultUseCase
     
-    init(authenticationUseCase: AuthenticationUseCase, userDataUseCase: UserDataUseCase) {
+    init(
+        authenticationUseCase: AuthenticationUseCase,
+        userDataUseCase: UserDataUseCase,
+        resultUseCase: ResultUseCase
+    ) {
         self.authenticationUseCase = authenticationUseCase
         self.userDataUseCase = userDataUseCase
+        self.resultUseCase = resultUseCase
     }
     
     
@@ -38,6 +45,22 @@ class ProfileViewModel: ObservableObject {
         }
     }
 
+    
+    
+    @MainActor
+    func loadResults(year: Int) async {
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("AuthDataResultを取得できません。")
+            return
+        }
+        
+        do {
+            self.results = try await resultUseCase.fetchResults(userID: authDataResult.id, year: year)
+        } catch {
+            // TODO: UserにAlertで知らせる
+            print("ProfileViewModel.loadResults: Resultの取得に失敗しました。")
+        }
+    }
     
     
     func signOut() {
