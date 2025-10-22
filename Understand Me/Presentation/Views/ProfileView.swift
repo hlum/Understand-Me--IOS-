@@ -8,32 +8,26 @@
 import SwiftUI
 import Charts
 
-// スコアのChart用のEntity
-struct DataPoint: Identifiable {
-    let id = UUID()
-    let category: String
-    let value: Double
-}
 
 struct ProfileView: View {
-    @State private var data: [DataPoint] = [
-        DataPoint(category: "1月", value: 100),
-        DataPoint(category: "2月", value: 65),
-        DataPoint(category: "3月", value: 75),
-        DataPoint(category: "4月", value: 80)
-    ]
+    @State private var data: [AverageResultPerMonth] = AverageResultPerMonth.getDummy()
     
     var onSignOut: () -> ()
     
     @StateObject private var viewModel: ProfileViewModel
     
-    init(onSignOut: @escaping () -> ()) {
+    init(
+        authenticationUseCase: AuthenticationUseCase = AuthenticationUseCase(authenticationRepository:FirebaseAuthenticationRepository()),
+        userDataUseCase: UserDataUseCase = UserDataUseCase(userDataRepository: LollipopUserDataRepository()),
+        resultUseCase: ResultUseCase = ResultUseCase(resultRepo: LollipopResultRepository()),
+        onSignOut: @escaping () -> ()
+    ) {
         self.onSignOut = onSignOut
         self._viewModel = StateObject(
             wrappedValue: ProfileViewModel(
-                authenticationUseCase: AuthenticationUseCase(authenticationRepository:FirebaseAuthenticationRepository()),
-                userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository()),
-                resultUseCase: ResultUseCase(resultRepo: LollipopResultRepository())
+                authenticationUseCase: authenticationUseCase,
+                userDataUseCase: userDataUseCase,
+                resultUseCase: resultUseCase
             )
         )
     }
@@ -90,20 +84,42 @@ struct ProfileView: View {
             .font(.title2.bold())
             .frame(maxWidth: .infinity, alignment: .leading)
         
-        Chart {
-            ForEach(data) { dataPoint in
-                
-                BarMark(
-                    x: .value("Category", dataPoint.category),
-                    y: .value("Value", dataPoint.value)
+        Chart(data) { dataPoint in
+            BarMark(
+                x: .value("月", dataPoint.month),
+                y: .value("スコア", dataPoint.averageScore)
+            )
+            
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [.secAccent.opacity(1), .accent.opacity(0.8), .accent.opacity(0.8)],
+                    startPoint: .bottom,
+                    endPoint: .top
                 )
-                .foregroundStyle(.accent)
+            )
+            .cornerRadius(5)
+        }
+        .padding(30)
+        .chartScrollableAxes(.horizontal)
+        .chartXScale(range: .plotDimension(padding: 20))
+        .chartXVisibleDomain(length: 12 * 30 * 24 * 60 * 60)
+        .chartXAxis {
+            AxisMarks(preset: .aligned, values: data.map { $0.month }) { date in
+                AxisValueLabel(format: .dateTime.month(.defaultDigits))
             }
         }
-        .frame(height: 200)
-        .chartYScale(domain: 0...100)
-        .padding()
-        
+        .chartYAxis {
+            AxisMarks { value in
+                AxisGridLine()
+                AxisValueLabel()
+            }
+        }
+        .frame(height: 240)
+        .chartYScale(domain: 0...120)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(radius: 2)
+
         HStack {
             Circle()
                 .fill(.accent)
@@ -190,6 +206,11 @@ struct ProfileView: View {
 
 #Preview {
     NavigationStack {
-        ProfileView(onSignOut: {})
+        ProfileView(
+            authenticationUseCase: AuthenticationUseCase(authenticationRepository: TestAuthenticationRepository()),
+            userDataUseCase: UserDataUseCase(userDataRepository: TestUserRepository()),
+            resultUseCase: ResultUseCase(resultRepo: TestResultRepository())
+            ,onSignOut: {}
+        )
     }
 }
