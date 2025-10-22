@@ -27,6 +27,18 @@ struct Result: Decodable {
     }
     
     
+    init(id: String, userID: String, homeworkID: String, totalQuestions: Int, correctAnswers: Int, score: Int, evaluatedAt: Date) {
+        self.id = id
+        self.userID = userID
+        self.homeworkID = homeworkID
+        self.totalQuestions = totalQuestions
+        self.correctAnswers = correctAnswers
+        self.score = score
+        self.evaluatedAt = evaluatedAt
+    }
+    
+    
+    
     // Date形式でパースするためのカスタムイニシャライザ
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -53,4 +65,19 @@ struct Result: Decodable {
         
         self.evaluatedAt = date
     }
+    
+    
+    
+    static func getDummy() -> Result {
+        return Result(
+            id: UUID().uuidString,
+            userID: UUID().uuidString,
+            homeworkID: UUID().uuidString,
+            totalQuestions: 10,
+            correctAnswers: 8,
+            score: 80,
+            evaluatedAt: Date()
+        )
+    }
+
 }

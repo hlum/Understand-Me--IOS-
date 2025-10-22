@@ -10,7 +10,8 @@ import Combine
 
 
 // Graph に表示する月ごとの平均点数
-struct AverageResultPerMonth {
+struct AverageResultPerMonth: Identifiable {
+    let id: String = UUID().uuidString
     let month: Date
     let averageScore: Double
     
@@ -33,7 +34,7 @@ struct AverageResultPerMonth {
         let now = Date()
         let calendar = Calendar.current
         var dummyData: [AverageResultPerMonth] = []
-        for i in 0..<6 {
+        for i in 0..<36 {
             if let monthDate = calendar.date(byAdding: .month, value: -i, to: now) {
                 let averageScore = Double.random(in: 60...100)
                 let averageResult = AverageResultPerMonth(
