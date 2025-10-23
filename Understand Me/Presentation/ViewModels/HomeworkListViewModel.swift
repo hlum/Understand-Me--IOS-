@@ -7,7 +7,7 @@
 
 import Foundation
 import Combine
-
+import SwiftUI
 
 enum HomeworkFilterOption: Hashable, CaseIterable {
     case all
@@ -29,7 +29,8 @@ enum HomeworkFilterOption: Hashable, CaseIterable {
 
 
 class HomeworkListViewModel: ObservableObject {
-    @Published var homeworks: [HomeworkWithStatus] = []
+    @Published var allHomeworks: [HomeworkWithStatus] = []
+    @Published var filteredHomeworks: [HomeworkWithStatus] = []
     
     @Published var selectedFilter: HomeworkFilterOption = .all
     
@@ -52,9 +53,23 @@ class HomeworkListViewModel: ObservableObject {
         }
         
         do {
-            self.homeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id)
+            self.allHomeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id).sorted(by: { $0.dueDate! < $1.dueDate! })
         } catch {
             print("HomeworkListViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
         }
     }
+    
+    
+    @MainActor
+    func filterHomeworks() {
+        withAnimation(.easeInOut) {
+            switch selectedFilter {
+            case .all:
+                filteredHomeworks = allHomeworks
+            case .state(let homeworkState):
+                filteredHomeworks = allHomeworks.filter { $0.submissionState == homeworkState }
+            }
+        }
+    }
+    
 }
