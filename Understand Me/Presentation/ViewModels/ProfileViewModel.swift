@@ -12,6 +12,8 @@ class ProfileViewModel: ObservableObject {
     @Published var userData: UserData?
     @Published var results: [Result] = []
     @Published var averageResultsPerMonth: [AverageResultPerMonth] = []
+    @Published var averageScoreOfAllResults: Int = 0
+
     // グラフに表示するデータの年
     @Published var currentYearForGraph: Int = Calendar.current.component(.year, from: Date())
     
@@ -63,7 +65,6 @@ class ProfileViewModel: ObservableObject {
         
         do {
             self.results = try await resultUseCase.fetchResults(userID: authDataResult.id, year: currentYearForGraph)
-            await self.loadAverageResultsPerMonth()
         } catch {
             // TODO: UserにAlertで知らせる
             print("ProfileViewModel.loadResults: Resultの取得に失敗しました。")
@@ -72,7 +73,21 @@ class ProfileViewModel: ObservableObject {
     
     
     @MainActor
-    func loadAverageResultsPerMonth() async {
+    func loadAverageScoreOfAllResults() {
+        guard !results.isEmpty else {
+            return
+        }
+        
+        let totalScore = results.reduce(0) { partialResult, result in
+            partialResult + result.score
+        }
+        
+        self.averageScoreOfAllResults = totalScore / results.count
+    }
+    
+    
+    @MainActor
+    func loadAverageResultsPerMonth() {
         guard !results.isEmpty else {
             return
         }

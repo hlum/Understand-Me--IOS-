@@ -63,6 +63,8 @@ struct ProfileView: View {
         .task {
             await viewModel.loadUserData()
             await viewModel.loadResults()
+            viewModel.loadAverageResultsPerMonth()
+            viewModel.loadAverageScoreOfAllResults()
         }
     }
     
@@ -239,7 +241,7 @@ struct ProfileView: View {
                     .font(.title2)
                     .foregroundStyle(.secAccent)
                 
-                Text("13")
+                Text("\(viewModel.results.count)")
                     .font(.headline)
                 
                 Text("完了した課題")
@@ -259,7 +261,7 @@ struct ProfileView: View {
                     .font(.title2)
                     .foregroundStyle(.accent)
                 
-                Text("80")
+                Text("\(viewModel.averageScoreOfAllResults)点")
                     .font(.headline)
                 
                 Text("平均スコア")
