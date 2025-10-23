@@ -10,11 +10,26 @@ import Charts
 
 
 struct ProfileView: View {
-    @State private var data: [AverageResultPerMonth] = AverageResultPerMonth.getDummy()
+    @State private var averageResultsPerMonth: [AverageResultPerMonth] = AverageResultPerMonth.getDummy()
+    
+    // ユーザがドラッグて選択した日付
+    @State private var rawSelectedDate: Date? = nil
+    
+    // 選択された月の平均結果
+    var selectedAverageResult: AverageResultPerMonth? {
+        // ドラッグで選択されたに付けがなければ、resultも空
+        guard let rawSelectedDate else { return nil }
+        
+        let calendar = Calendar.current
+        
+        // 平均結果配列から、選択された月と同じ月の日付を持つデータを返す
+        return averageResultsPerMonth.first { calendar.isDate($0.month, equalTo: rawSelectedDate, toGranularity: .month)}
+    }
     
     var onSignOut: () -> ()
     
     @StateObject private var viewModel: ProfileViewModel
+    
     
     init(
         authenticationUseCase: AuthenticationUseCase = AuthenticationUseCase(authenticationRepository:FirebaseAuthenticationRepository()),
@@ -80,46 +95,75 @@ struct ProfileView: View {
     
     @ViewBuilder
     private var graphInfo: some View {
+        
         Text("学業進捗")
             .font(.title2.bold())
             .frame(maxWidth: .infinity, alignment: .leading)
         
-        Chart(data) { dataPoint in
-            BarMark(
-                x: .value("月", dataPoint.month),
-                y: .value("スコア", dataPoint.averageScore)
-            )
-            
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [.secAccent.opacity(1), .accent.opacity(0.8), .accent.opacity(0.8)],
-                    startPoint: .bottom,
-                    endPoint: .top
+        
+        Chart {
+            ForEach(averageResultsPerMonth) { dataPoint in
+                // ユーザがグラフをドラッグして選択しているかどうか
+                let userDraggingGraph = selectedAverageResult != nil
+                let isSelectedBar = selectedAverageResult?.month == dataPoint.month
+                
+                
+                BarMark(
+                    x: .value("月", dataPoint.month),
+                    y: .value("スコア", dataPoint.averageScore)
                 )
-            )
-            .cornerRadius(5)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.secAccent.opacity(1), .accent.opacity(0.8), .accent.opacity(0.8)],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                )
+                .cornerRadius(5)
+                // 選択されているバーのみ不透明にする
+                .opacity(!userDraggingGraph || isSelectedBar ? 1 : 0.3)
+            }
+            
+            
+            if let selectedAverageResult {
+                RuleMark(x: .value("選択された月", selectedAverageResult.month, unit: .month), yStart: 10)
+                    .foregroundStyle(.secondary.opacity(0.5))
+                    .annotation(position: .top, overflowResolution:.init(x: .fit(to: .chart), y: .disabled)){
+                        
+                        VStack {
+                            Text("\(Int(selectedAverageResult.averageScore))点")
+                                .font(.subheadline)
+                            Text(selectedAverageResult.month, format: .dateTime.month(.twoDigits).year())
+                                .font(.system(size: 8))
+                        }
+                        .padding(5)
+                        .background(.accent.opacity(0.5))
+                        .cornerRadius(10)
+                    }
+            }
         }
-        .padding(30)
-        .chartScrollableAxes(.horizontal)
+        .chartYScale(domain: 0...120)
+        .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
+        //            .chartScrollableAxes(.horizontal)
         .chartXScale(range: .plotDimension(padding: 20))
-        .chartXVisibleDomain(length: 12 * 30 * 24 * 60 * 60)
+        //            .chartXVisibleDomain(length: 12 * 30 * 24 * 60 * 60)
         .chartXAxis {
-            AxisMarks(preset: .aligned, values: data.map { $0.month }) { date in
+            AxisMarks(values: averageResultsPerMonth.map { $0.month }) { date in
                 AxisValueLabel(format: .dateTime.month(.defaultDigits))
             }
         }
         .chartYAxis {
             AxisMarks { value in
-                AxisGridLine()
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [5]))
                 AxisValueLabel()
             }
         }
-        .frame(height: 240)
-        .chartYScale(domain: 0...120)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .padding(30)
+        .frame(height: 280)
         .shadow(radius: 2)
-
+        
+        
+        
         HStack {
             Circle()
                 .fill(.accent)
