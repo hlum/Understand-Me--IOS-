@@ -10,8 +10,6 @@ import Charts
 
 
 struct ProfileView: View {
-    @State private var averageResultsPerMonth: [AverageResultPerMonth] = AverageResultPerMonth.getDummy()
-    
     // ユーザがドラッグて選択した日付
     @State private var rawSelectedDate: Date? = nil
     
@@ -23,7 +21,7 @@ struct ProfileView: View {
         let calendar = Calendar.current
         
         // 平均結果配列から、選択された月と同じ月の日付を持つデータを返す
-        return averageResultsPerMonth.first { calendar.isDate($0.month, equalTo: rawSelectedDate, toGranularity: .month)}
+        return viewModel.averageResultsPerMonth.first { calendar.isDate($0.month, equalTo: rawSelectedDate, toGranularity: .month)}
     }
     
     var onSignOut: () -> ()
@@ -64,6 +62,7 @@ struct ProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadUserData()
+            await viewModel.loadResults()
         }
     }
     
@@ -101,27 +100,30 @@ struct ProfileView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         
         
+        
+        
         Chart {
             // 選択された月の平均スコアを示すルールマーク
             if let selectedAverageResult {
                 RuleMark(x: .value("選択された月", selectedAverageResult.month, unit: .month))
-                    .foregroundStyle(.secAccent.opacity(0.5))
+                    .foregroundStyle(.secAccent)
                     .annotation(position: .top, overflowResolution:.init(x: .fit(to: .chart), y: .disabled)){
                         
                         VStack {
                             Text("\(Int(selectedAverageResult.averageScore))点")
-                                .font(.system(size: 16).bold())
-                            Text(selectedAverageResult.month, format: .dateTime.month(.twoDigits).year())
-                                .font(.system(size: 14))
+                                .font(.system(size: 20).bold())
+                            //                            Text(selectedAverageResult.month, format: .dateTime.month(.twoDigits).year())
+                            //                                .font(.system(size: 14))
                         }
-                        .padding(5)
-                        .background(.accent.opacity(0.5))
+                        .foregroundStyle(.white)
+                        .padding(10)
+                        .background(.accent)
                         .cornerRadius(10)
                     }
             }
             
             
-            ForEach(averageResultsPerMonth) { dataPoint in
+            ForEach(viewModel.averageResultsPerMonth) { dataPoint in
                 // ユーザがグラフをドラッグして選択しているかどうか
                 let userDraggingGraph = selectedAverageResult != nil
                 let isSelectedBar = selectedAverageResult?.month == dataPoint.month
@@ -145,30 +147,77 @@ struct ProfileView: View {
         }
         .chartYScale(domain: 0...120)
         .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
-//                    .chartScrollableAxes(.horizontal)
+        //                    .chartScrollableAxes(.horizontal)
         .chartXScale(range: .plotDimension(padding: 10))
-//        .chartXVisibleDomain(length: 12 * 30 * 24 * 60 * 60)
-//        .chartXAxis {
-//            AxisMarks(values: averageResultsPerMonth.map { $0.month }) { date in
-//                AxisValueLabel(format: .dateTime.month(.defaultDigits))
-//            }
-//        }
+        //        .chartXVisibleDomain(length: 12 * 30 * 24 * 60 * 60)
+        //        .chartXAxis {
+        //            AxisMarks(values: averageResultsPerMonth.map { $0.month }) { date in
+        //                AxisValueLabel(format: .dateTime.month(.defaultDigits))
+        //            }
+        //        }
         .chartXAxis {
             AxisMarks(values: .stride(by: .month)) { value in  // Changed to use .stride
                 AxisValueLabel(format: .dateTime.month(.defaultDigits), centered: true)
             }
         }
-
+        
         .chartYAxis {
             AxisMarks { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [5]))
                 AxisValueLabel()
             }
         }
-        .padding(30)
-        .frame(height: 280)
-        .shadow(radius: 2)
-        
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(lineWidth: 2)
+                .foregroundStyle(.gray.opacity(0.2))
+        )
+        .frame(height: 260)
+        .overlay(alignment: .top) {
+            HStack {
+                Button {
+                    Task {
+                        withAnimation(.bouncy) {
+                            viewModel.currentYearForGraph -= 1
+                        }
+                        await viewModel.loadAverageResultsPerMonth()
+                        
+                    }
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                        .padding(5)
+                        .foregroundStyle(.primary)
+                        .frame(width: 60, height: 40)
+                }
+                
+                Spacer()
+                Text("\(viewModel.currentYearForGraph)年")
+                    .font(.headline)
+                    .padding(.top, 5)
+                    .foregroundStyle(.foreground)
+                
+                Spacer()
+                
+                Button {
+                    Task {
+                        withAnimation(.bouncy) {
+                            viewModel.currentYearForGraph += 1
+                        }
+                            await viewModel.loadAverageResultsPerMonth()
+                        
+                        
+                    }
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.headline)
+                        .padding(5)
+                        .foregroundStyle(.primary)
+                        .frame(width: 60, height: 40)
+                }
+            }
+        }
         
         
         HStack {
@@ -178,9 +227,7 @@ struct ProfileView: View {
             Text("平均スコア")
                 .font(.caption)
         }
-        .task {
-            await viewModel.loadResults(year: 2025)
-        }
+        .padding(.bottom, 10)
     }
     
     
