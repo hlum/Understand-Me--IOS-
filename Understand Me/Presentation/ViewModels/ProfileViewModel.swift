@@ -6,18 +6,31 @@
 //
 import Foundation
 import Combine
+import SwiftUI
 
 class ProfileViewModel: ObservableObject {
     @Published var userData: UserData?
+    @Published var results: [Result] = []
+    @Published var averageResultsPerMonth: [AverageResultPerMonth] = []
+    // グラフに表示するデータの年
+    @Published var currentYearForGraph: Int = Calendar.current.component(.year, from: Date())
+    
+    
     @Published var errorMessage: String = ""
     @Published var showError: Bool = false
     
     private let authenticationUseCase: AuthenticationUseCase
     private let userDataUseCase: UserDataUseCase
+    private let resultUseCase: ResultUseCase
     
-    init(authenticationUseCase: AuthenticationUseCase, userDataUseCase: UserDataUseCase) {
+    init(
+        authenticationUseCase: AuthenticationUseCase,
+        userDataUseCase: UserDataUseCase,
+        resultUseCase: ResultUseCase
+    ) {
         self.authenticationUseCase = authenticationUseCase
         self.userDataUseCase = userDataUseCase
+        self.resultUseCase = resultUseCase
     }
     
     
@@ -37,7 +50,37 @@ class ProfileViewModel: ObservableObject {
             print("ProfileViewModel.loadUserData: UserDataの取得に失敗しました。")
         }
     }
-
+    
+    
+    
+    @MainActor
+    func loadResults() async {
+        
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            print("AuthDataResultを取得できません。")
+            return
+        }
+        
+        do {
+            self.results = try await resultUseCase.fetchResults(userID: authDataResult.id, year: currentYearForGraph)
+            await self.loadAverageResultsPerMonth()
+        } catch {
+            // TODO: UserにAlertで知らせる
+            print("ProfileViewModel.loadResults: Resultの取得に失敗しました。")
+        }
+    }
+    
+    
+    @MainActor
+    func loadAverageResultsPerMonth() async {
+        guard !results.isEmpty else {
+            return
+        }
+        
+        withAnimation(.easeInOut) {
+            self.averageResultsPerMonth = resultUseCase.calculateAverageResultsPerMonth(results: results, year: currentYearForGraph)
+        }
+    }
     
     
     func signOut() {

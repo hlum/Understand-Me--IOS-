@@ -8,10 +8,53 @@
 import Foundation
 import Combine
 
+
+// Graph に表示する月ごとの平均点数
+struct AverageResultPerMonth: Identifiable {
+    let id: String = UUID().uuidString
+    let month: Date
+    let averageScore: Double
+    
+    init(month: Date, averageScore: Double) {
+        self.month = month
+        self.averageScore = averageScore
+    }
+    
+    
+    init(resultsOfOneMonth: [Result]) {
+        self.month = resultsOfOneMonth.first?.evaluatedAt ?? Date()
+        let totalScore = resultsOfOneMonth.reduce(0.0) { partialResult, result in
+            partialResult + Double(result.score)
+        }
+        self.averageScore = totalScore / Double(resultsOfOneMonth.count)
+    }
+    
+    
+    static func getDummy() -> [AverageResultPerMonth] {
+        let now = Date()
+        let calendar = Calendar.current
+        var dummyData: [AverageResultPerMonth] = []
+        for i in 0..<12 {
+            if let monthDate = calendar.date(byAdding: .month, value: -i, to: now) {
+                let averageScore = Double.random(in: 60...100)
+                let averageResult = AverageResultPerMonth(
+                    month: monthDate,
+                    averageScore: averageScore
+                )
+                dummyData.append(averageResult)
+            }
+        }
+        
+        return dummyData
+        
+    }
+}
+
 class HomeworkDetailViewModel: ObservableObject {
     @Published var homework: HomeworkWithStatus?
     @Published var classDetail: Class?
     @Published var homeworkLinkTxt: String = ""
+    @Published var resultsPerMonth: [AverageResultPerMonth] = []
     
     private let homeworkUseCase: HomeworkUseCase
     private let classUseCase: ClassUseCase
@@ -101,7 +144,7 @@ class HomeworkDetailViewModel: ObservableObject {
         } catch {
             // TODO: Alert the user
             print("HomeworkDetailViewModel.cancelHomeworkSubmission: 取り消し失敗.\(error.localizedDescription)")
-        } 
+        }
     }
     
     

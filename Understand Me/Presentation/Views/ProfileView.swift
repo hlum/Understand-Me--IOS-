@@ -8,31 +8,39 @@
 import SwiftUI
 import Charts
 
-// スコアのChart用のEntity
-struct DataPoint: Identifiable {
-    let id = UUID()
-    let category: String
-    let value: Double
-}
 
 struct ProfileView: View {
-    @State private var data: [DataPoint] = [
-        DataPoint(category: "1月", value: 100),
-        DataPoint(category: "2月", value: 65),
-        DataPoint(category: "3月", value: 75),
-        DataPoint(category: "4月", value: 80)
-    ]
+    // ユーザがドラッグて選択した日付
+    @State private var rawSelectedDate: Date? = nil
+    
+    // 選択された月の平均結果
+    var selectedAverageResult: AverageResultPerMonth? {
+        // ドラッグで選択されたに付けがなければ、resultも空
+        guard let rawSelectedDate else { return nil }
+        
+        let calendar = Calendar.current
+        
+        // 平均結果配列から、選択された月と同じ月の日付を持つデータを返す
+        return viewModel.averageResultsPerMonth.first { calendar.isDate($0.month, equalTo: rawSelectedDate, toGranularity: .month)}
+    }
     
     var onSignOut: () -> ()
     
     @StateObject private var viewModel: ProfileViewModel
     
-    init(onSignOut: @escaping () -> ()) {
+    
+    init(
+        authenticationUseCase: AuthenticationUseCase = AuthenticationUseCase(authenticationRepository:FirebaseAuthenticationRepository()),
+        userDataUseCase: UserDataUseCase = UserDataUseCase(userDataRepository: LollipopUserDataRepository()),
+        resultUseCase: ResultUseCase = ResultUseCase(resultRepo: LollipopResultRepository()),
+        onSignOut: @escaping () -> ()
+    ) {
         self.onSignOut = onSignOut
         self._viewModel = StateObject(
             wrappedValue: ProfileViewModel(
-                authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
-                userDataUseCase: UserDataUseCase(userDataRepository: LollipopUserDataRepository())
+                authenticationUseCase: authenticationUseCase,
+                userDataUseCase: userDataUseCase,
+                resultUseCase: resultUseCase
             )
         )
     }
@@ -54,6 +62,7 @@ struct ProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadUserData()
+            await viewModel.loadResults()
         }
     }
     
@@ -85,23 +94,131 @@ struct ProfileView: View {
     
     @ViewBuilder
     private var graphInfo: some View {
+        
         Text("学業進捗")
             .font(.title2.bold())
             .frame(maxWidth: .infinity, alignment: .leading)
         
+        
+        
+        
         Chart {
-            ForEach(data) { dataPoint in
+            // 選択された月の平均スコアを示すルールマーク
+            if let selectedAverageResult {
+                RuleMark(x: .value("選択された月", selectedAverageResult.month, unit: .month))
+                    .foregroundStyle(.secAccent)
+                    .annotation(position: .top, overflowResolution:.init(x: .fit(to: .chart), y: .disabled)){
+                        
+                        VStack {
+                            Text("\(Int(selectedAverageResult.averageScore))点")
+                                .font(.system(size: 20).bold())
+                            //                            Text(selectedAverageResult.month, format: .dateTime.month(.twoDigits).year())
+                            //                                .font(.system(size: 14))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(10)
+                        .background(.accent)
+                        .cornerRadius(10)
+                    }
+            }
+            
+            
+            ForEach(viewModel.averageResultsPerMonth) { dataPoint in
+                // ユーザがグラフをドラッグして選択しているかどうか
+                let userDraggingGraph = selectedAverageResult != nil
+                let isSelectedBar = selectedAverageResult?.month == dataPoint.month
+                
                 
                 BarMark(
-                    x: .value("Category", dataPoint.category),
-                    y: .value("Value", dataPoint.value)
+                    x: .value("月", dataPoint.month, unit: .month),
+                    y: .value("スコア", dataPoint.averageScore)
                 )
-                .foregroundStyle(.accent)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.secAccent, .accent, .accent],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                )
+                .cornerRadius(5)
+                // 選択されているバーのみ不透明にする
+                .opacity(!userDraggingGraph || isSelectedBar ? 1 : 0.3)
             }
         }
-        .frame(height: 200)
-        .chartYScale(domain: 0...100)
-        .padding()
+        .chartYScale(domain: 0...120)
+        .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
+        //                    .chartScrollableAxes(.horizontal)
+        .chartXScale(range: .plotDimension(padding: 10))
+        //        .chartXVisibleDomain(length: 12 * 30 * 24 * 60 * 60)
+        //        .chartXAxis {
+        //            AxisMarks(values: averageResultsPerMonth.map { $0.month }) { date in
+        //                AxisValueLabel(format: .dateTime.month(.defaultDigits))
+        //            }
+        //        }
+        .chartXAxis {
+            AxisMarks(values: .stride(by: .month)) { value in  // Changed to use .stride
+                AxisValueLabel(format: .dateTime.month(.defaultDigits), centered: true)
+            }
+        }
+        
+        .chartYAxis {
+            AxisMarks { value in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [5]))
+                AxisValueLabel()
+            }
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(lineWidth: 2)
+                .foregroundStyle(.gray.opacity(0.2))
+        )
+        .frame(height: 260)
+        .overlay(alignment: .top) {
+            HStack {
+                Button {
+                    Task {
+                        withAnimation(.bouncy) {
+                            viewModel.currentYearForGraph -= 1
+                        }
+                        await viewModel.loadAverageResultsPerMonth()
+                        
+                    }
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                        .padding(5)
+                        .foregroundStyle(.primary)
+                        .frame(width: 60, height: 40)
+                }
+                
+                Spacer()
+                Text("\(viewModel.currentYearForGraph)年")
+                    .font(.headline)
+                    .padding(.top, 5)
+                    .foregroundStyle(.foreground)
+                
+                Spacer()
+                
+                Button {
+                    Task {
+                        withAnimation(.bouncy) {
+                            viewModel.currentYearForGraph += 1
+                        }
+                            await viewModel.loadAverageResultsPerMonth()
+                        
+                        
+                    }
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.headline)
+                        .padding(5)
+                        .foregroundStyle(.primary)
+                        .frame(width: 60, height: 40)
+                }
+            }
+        }
+        
         
         HStack {
             Circle()
@@ -110,6 +227,7 @@ struct ProfileView: View {
             Text("平均スコア")
                 .font(.caption)
         }
+        .padding(.bottom, 10)
     }
     
     
@@ -186,6 +304,11 @@ struct ProfileView: View {
 
 #Preview {
     NavigationStack {
-        ProfileView(onSignOut: {})
+        ProfileView(
+            authenticationUseCase: AuthenticationUseCase(authenticationRepository: TestAuthenticationRepository()),
+            userDataUseCase: UserDataUseCase(userDataRepository: TestUserRepository()),
+            resultUseCase: ResultUseCase(resultRepo: TestResultRepository())
+            ,onSignOut: {}
+        )
     }
 }
