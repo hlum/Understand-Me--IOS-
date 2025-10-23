@@ -22,6 +22,7 @@ struct HomeworkListView: View {
                     ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
                         FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
                             viewModel.selectedFilter = option
+                            viewModel.filterHomeworks()
                         }
                     }
                 }
@@ -31,13 +32,17 @@ struct HomeworkListView: View {
             .cornerRadius(10)
             
             
-            ScrollView {
-                VStack(spacing: 12) {
-                    ForEach(viewModel.homeworks) { homework in
-                        HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+            if !viewModel.filteredHomeworks.isEmpty{
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(viewModel.filteredHomeworks) { homework in
+                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                        }
                     }
-                }
-                .padding()
+                    .padding()
+            }
+            } else {
+                ContentUnavailableView("該当する課題はありません。", systemImage: "book.closed")
             }
         }
         .navigationTitle("全ての課題")
@@ -45,6 +50,7 @@ struct HomeworkListView: View {
         .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "課題を検索")
         .task {
             await viewModel.loadHomeworks()
+            viewModel.filterHomeworks()
         }
     }
 }
