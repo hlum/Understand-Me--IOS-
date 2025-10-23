@@ -13,30 +13,24 @@ struct HomeworkListView: View {
         authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository())
     )
     @State private var searchText = ""
-    @State private var selectedFilter: HomeworkState? = nil
-
+    
     var body: some View {
         VStack(spacing: 0) {
-
+            
+            ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    FilterButton(title: "すべて", isSelected: selectedFilter == nil) {
-                        selectedFilter = nil
-                    }
-                    FilterButton(title: "未提出", isSelected: selectedFilter == .notAssigned) {
-                        selectedFilter = .notAssigned
-                    }
-                    FilterButton(title: "生成中", isSelected: selectedFilter == .generatingQuestions) {
-                        selectedFilter = .generatingQuestions
-                    }
-                    FilterButton(title: "完了", isSelected: selectedFilter == .completed) {
-                        selectedFilter = .completed
+                    ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
+                        FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
+                            viewModel.selectedFilter = option
+                        }
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .cornerRadius(10)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(10)
+            .cornerRadius(10)
             
-
+            
             ScrollView {
                 VStack(spacing: 12) {
                     ForEach(viewModel.homeworks) { homework in
@@ -60,7 +54,7 @@ struct FilterButton: View {
     var title: String
     var isSelected: Bool
     var action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             Text(title)
