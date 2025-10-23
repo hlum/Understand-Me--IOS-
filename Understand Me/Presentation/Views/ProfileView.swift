@@ -105,14 +105,14 @@ struct ProfileView: View {
             // 選択された月の平均スコアを示すルールマーク
             if let selectedAverageResult {
                 RuleMark(x: .value("選択された月", selectedAverageResult.month, unit: .month))
-                    .foregroundStyle(.secondary.opacity(0.5))
+                    .foregroundStyle(.secAccent.opacity(0.5))
                     .annotation(position: .top, overflowResolution:.init(x: .fit(to: .chart), y: .disabled)){
                         
                         VStack {
                             Text("\(Int(selectedAverageResult.averageScore))点")
-                                .font(.subheadline)
+                                .font(.system(size: 16).bold())
                             Text(selectedAverageResult.month, format: .dateTime.month(.twoDigits).year())
-                                .font(.system(size: 8))
+                                .font(.system(size: 14))
                         }
                         .padding(5)
                         .background(.accent.opacity(0.5))
@@ -133,7 +133,7 @@ struct ProfileView: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [.secAccent.opacity(1), .accent.opacity(0.8), .accent.opacity(0.8)],
+                        colors: [.secAccent, .accent, .accent],
                         startPoint: .bottom,
                         endPoint: .top
                     )
@@ -155,9 +155,7 @@ struct ProfileView: View {
 //        }
         .chartXAxis {
             AxisMarks(values: .stride(by: .month)) { value in  // Changed to use .stride
-                if let date = value.as(Date.self) {
-                    AxisValueLabel(format: .dateTime.month(.defaultDigits), centered: true)
-                }
+                AxisValueLabel(format: .dateTime.month(.defaultDigits), centered: true)
             }
         }
 
