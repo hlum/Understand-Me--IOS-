@@ -34,7 +34,7 @@ struct AverageResultPerMonth: Identifiable {
         let now = Date()
         let calendar = Calendar.current
         var dummyData: [AverageResultPerMonth] = []
-        for i in 0..<36 {
+        for i in 0..<12 {
             if let monthDate = calendar.date(byAdding: .month, value: -i, to: now) {
                 let averageScore = Double.random(in: 60...100)
                 let averageResult = AverageResultPerMonth(

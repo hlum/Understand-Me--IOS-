@@ -102,31 +102,9 @@ struct ProfileView: View {
         
         
         Chart {
-            ForEach(averageResultsPerMonth) { dataPoint in
-                // ユーザがグラフをドラッグして選択しているかどうか
-                let userDraggingGraph = selectedAverageResult != nil
-                let isSelectedBar = selectedAverageResult?.month == dataPoint.month
-                
-                
-                BarMark(
-                    x: .value("月", dataPoint.month),
-                    y: .value("スコア", dataPoint.averageScore)
-                )
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.secAccent.opacity(1), .accent.opacity(0.8), .accent.opacity(0.8)],
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                )
-                .cornerRadius(5)
-                // 選択されているバーのみ不透明にする
-                .opacity(!userDraggingGraph || isSelectedBar ? 1 : 0.3)
-            }
-            
-            
+            // 選択された月の平均スコアを示すルールマーク
             if let selectedAverageResult {
-                RuleMark(x: .value("選択された月", selectedAverageResult.month, unit: .month), yStart: 10)
+                RuleMark(x: .value("選択された月", selectedAverageResult.month, unit: .month))
                     .foregroundStyle(.secondary.opacity(0.5))
                     .annotation(position: .top, overflowResolution:.init(x: .fit(to: .chart), y: .disabled)){
                         
@@ -141,17 +119,48 @@ struct ProfileView: View {
                         .cornerRadius(10)
                     }
             }
+            
+            
+            ForEach(averageResultsPerMonth) { dataPoint in
+                // ユーザがグラフをドラッグして選択しているかどうか
+                let userDraggingGraph = selectedAverageResult != nil
+                let isSelectedBar = selectedAverageResult?.month == dataPoint.month
+                
+                
+                BarMark(
+                    x: .value("月", dataPoint.month, unit: .month),
+                    y: .value("スコア", dataPoint.averageScore)
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.secAccent.opacity(1), .accent.opacity(0.8), .accent.opacity(0.8)],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                )
+                .cornerRadius(5)
+                // 選択されているバーのみ不透明にする
+                .opacity(!userDraggingGraph || isSelectedBar ? 1 : 0.3)
+            }
         }
         .chartYScale(domain: 0...120)
         .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
-        //            .chartScrollableAxes(.horizontal)
-        .chartXScale(range: .plotDimension(padding: 20))
-        //            .chartXVisibleDomain(length: 12 * 30 * 24 * 60 * 60)
+//                    .chartScrollableAxes(.horizontal)
+        .chartXScale(range: .plotDimension(padding: 10))
+//        .chartXVisibleDomain(length: 12 * 30 * 24 * 60 * 60)
+//        .chartXAxis {
+//            AxisMarks(values: averageResultsPerMonth.map { $0.month }) { date in
+//                AxisValueLabel(format: .dateTime.month(.defaultDigits))
+//            }
+//        }
         .chartXAxis {
-            AxisMarks(values: averageResultsPerMonth.map { $0.month }) { date in
-                AxisValueLabel(format: .dateTime.month(.defaultDigits))
+            AxisMarks(values: .stride(by: .month)) { value in  // Changed to use .stride
+                if let date = value.as(Date.self) {
+                    AxisValueLabel(format: .dateTime.month(.defaultDigits), centered: true)
+                }
             }
         }
+
         .chartYAxis {
             AxisMarks { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [5]))
