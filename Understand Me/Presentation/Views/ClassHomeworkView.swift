@@ -51,13 +51,17 @@ struct ClassHomeworkView: View {
             .cornerRadius(10)
             
             
-            ScrollView(showsIndicators: false) {
-                VStack {
-                    ForEach(viewModel.homeworks) { homework in
-                        HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+            if !viewModel.filteredHomeworks.isEmpty {
+                ScrollView(showsIndicators: false) {
+                    VStack {
+                        ForEach(viewModel.filteredHomeworks) { homework in
+                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                        }
                     }
+                    .padding(.top, 10)
                 }
-                .padding(.top, 10)
+            } else {
+                ContentUnavailableView("該当する課題がありません。", systemImage: "book.closed") 
             }
         }
         .navigationTitle(viewModel.classInfo?.name ?? "")
@@ -65,6 +69,7 @@ struct ClassHomeworkView: View {
         .task {
             await viewModel.loadClassInfos()
             await viewModel.loadHomeworks(classID: classID)
+            viewModel.filterHomeworks()
         }
     }
 }
