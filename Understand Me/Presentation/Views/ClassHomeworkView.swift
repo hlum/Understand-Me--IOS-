@@ -28,7 +28,6 @@ struct ClassHomeworkView: View {
         ))
     }
     
-    @State private var selectedFilter: HomeworkFilterOption = .all
     
     var body: some View {
         
@@ -37,8 +36,11 @@ struct ClassHomeworkView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
-                        FilterButton(title: option.displayName, isSelected: selectedFilter == option) {
-                            
+                        FilterButton(title: option.displayName, isSelected: viewModel.selectedFilterOption == option) {
+                            withAnimation(.easeInOut) {
+                                viewModel.selectedFilterOption = option
+                                viewModel.filterHomeworks()
+                            }
                         }
                     }
                 }
