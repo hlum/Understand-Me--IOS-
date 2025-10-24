@@ -11,6 +11,8 @@ import Combine
 class ClassHomeworkViewModel: ObservableObject {
     @Published var homeworks: [HomeworkWithStatus] = []
     @Published var classInfo: Class? = nil
+    @Published var filteredHomeworks: [HomeworkWithStatus] = []
+    @Published var selectedFilterOption: HomeworkFilterOption = .all
     
     private var homeworkUseCase: HomeworkUseCase
     private var authenticationUseCase: AuthenticationUseCase
@@ -52,6 +54,17 @@ class ClassHomeworkViewModel: ObservableObject {
             self.homeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id, classID: classID)
         } catch {
             print("ClassHomeworkViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
+        }
+    }
+    
+    
+    @MainActor
+    func filterHomeworks() {
+        switch selectedFilterOption {
+        case .all:
+            filteredHomeworks = homeworks
+        case .state(let state):
+            filteredHomeworks = homeworks.filter { $0.submissionState == state }
         }
     }
 }

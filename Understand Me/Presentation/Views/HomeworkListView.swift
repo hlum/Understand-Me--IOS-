@@ -13,37 +13,36 @@ struct HomeworkListView: View {
         authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository())
     )
     @State private var searchText = ""
-    @State private var selectedFilter: HomeworkState? = nil
-
+    
     var body: some View {
         VStack(spacing: 0) {
-
-                HStack(spacing: 10) {
-                    FilterButton(title: "すべて", isSelected: selectedFilter == nil) {
-                        selectedFilter = nil
-                    }
-                    FilterButton(title: "未提出", isSelected: selectedFilter == .notAssigned) {
-                        selectedFilter = .notAssigned
-                    }
-                    FilterButton(title: "生成中", isSelected: selectedFilter == .generatingQuestions) {
-                        selectedFilter = .generatingQuestions
-                    }
-                    FilterButton(title: "完了", isSelected: selectedFilter == .completed) {
-                        selectedFilter = .completed
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .cornerRadius(10)
             
-
-            ScrollView {
-                VStack(spacing: 12) {
-                    ForEach(viewModel.homeworks) { homework in
-                        HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
+                        FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
+                            viewModel.selectedFilter = option
+                            viewModel.filterHomeworks()
+                        }
                     }
                 }
-                .padding()
+            }
+            .frame(maxWidth: .infinity)
+            .padding(10)
+            .cornerRadius(10)
+            
+            
+            if !viewModel.filteredHomeworks.isEmpty{
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(viewModel.filteredHomeworks) { homework in
+                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                        }
+                    }
+                    .padding()
+            }
+            } else {
+                ContentUnavailableView("該当する課題はありません。", systemImage: "book.closed")
             }
         }
         .navigationTitle("全ての課題")
@@ -51,6 +50,7 @@ struct HomeworkListView: View {
         .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "課題を検索")
         .task {
             await viewModel.loadHomeworks()
+            viewModel.filterHomeworks()
         }
     }
 }
@@ -60,7 +60,7 @@ struct FilterButton: View {
     var title: String
     var isSelected: Bool
     var action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             Text(title)

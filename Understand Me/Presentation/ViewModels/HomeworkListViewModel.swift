@@ -7,9 +7,32 @@
 
 import Foundation
 import Combine
+import SwiftUI
+
+enum HomeworkFilterOption: Hashable, CaseIterable {
+    case all
+    case state(HomeworkState)
+    
+    var displayName: String {
+        switch self {
+        case .all:
+            return "すべて"
+        case .state(let homeworkState):
+            return homeworkState.stateDescription
+        }
+    }
+    
+    static var allCases: [HomeworkFilterOption] {
+        return [.all] + HomeworkState.allCases.map { .state($0) }
+    }
+}
+
 
 class HomeworkListViewModel: ObservableObject {
-    @Published var homeworks: [HomeworkWithStatus] = []
+    @Published var allHomeworks: [HomeworkWithStatus] = []
+    @Published var filteredHomeworks: [HomeworkWithStatus] = []
+    
+    @Published var selectedFilter: HomeworkFilterOption = .all
     
     private var homeworkUseCase: HomeworkUseCase
     private var authenticationUseCase: AuthenticationUseCase
@@ -30,9 +53,23 @@ class HomeworkListViewModel: ObservableObject {
         }
         
         do {
-            self.homeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id)
+            self.allHomeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id).sorted(by: { $0.dueDate! < $1.dueDate! })
         } catch {
             print("HomeworkListViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
         }
     }
+    
+    
+    @MainActor
+    func filterHomeworks() {
+        withAnimation(.easeInOut) {
+            switch selectedFilter {
+            case .all:
+                filteredHomeworks = allHomeworks
+            case .state(let homeworkState):
+                filteredHomeworks = allHomeworks.filter { $0.submissionState == homeworkState }
+            }
+        }
+    }
+    
 }
