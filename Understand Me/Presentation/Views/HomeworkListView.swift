@@ -8,11 +8,20 @@
 import SwiftUI
 
 struct HomeworkListView: View {
-    @StateObject private var viewModel = HomeworkListViewModel(
-        homeworkUseCase: HomeworkUseCase(homeworkRepository: LollipopHomeworkRepository()),
-        authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository())
-    )
+    @StateObject private var viewModel: HomeworkListViewModel
     @State private var searchText = ""
+    
+    
+    init(homeworkRepo: HomeworkRepository = LollipopHomeworkRepository(),
+            authRepo: AuthenticationRepository = FirebaseAuthenticationRepository()
+    ) {
+        self._viewModel = .init(
+            wrappedValue: .init(
+                homeworkUseCase: HomeworkUseCase(homeworkRepository: homeworkRepo),
+                authenticationUseCase: AuthenticationUseCase(authenticationRepository: authRepo)
+            )
+        )
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -47,7 +56,7 @@ struct HomeworkListView: View {
         }
         .navigationTitle("全ての課題")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "課題を検索")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "課題を検索")
         .task {
             await viewModel.loadHomeworks()
             viewModel.filterHomeworks()
@@ -77,6 +86,6 @@ struct FilterButton: View {
 
 #Preview {
     NavigationStack {
-        HomeworkListView()
+        HomeworkListView(homeworkRepo: TestHomeworkRepository(), authRepo: TestAuthenticationRepository())
     }
 }
