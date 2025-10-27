@@ -131,15 +131,17 @@ struct HomeView: View {
                         }
                     }
                     
-                    ScrollView(showsIndicators: false ) {
-                        VStack {
-                            ForEach(viewModel.homeworks) { homework in
-                                HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                    if !viewModel.homeworks.isEmpty {
+                        ScrollView(showsIndicators: false ) {
+                            VStack {
+                                ForEach(viewModel.homeworks) { homework in
+                                    HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                                }
                             }
+                            .padding(.vertical)
                         }
-                        .padding(.vertical)
+                        .frame(height: 300)
                     }
-                    .frame(height: 300)
                 }
                 
                 
