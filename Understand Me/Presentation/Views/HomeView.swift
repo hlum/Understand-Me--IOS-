@@ -128,6 +128,8 @@ struct HomeView: View {
                             Image(systemName: "arrow.forward")
                                 .bold()
                                 .foregroundStyle(.accent.opacity(0.3))
+                            
+                            Spacer()
                         }
                     }
                     
