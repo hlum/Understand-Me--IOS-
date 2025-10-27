@@ -58,7 +58,7 @@ class HomeViewModel: ObservableObject {
         }
         do {
             self.homeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id)
-            self.homeworks.sort { $0.dueDate ?? Date() < $1.dueDate ?? Date()}
+            self.homeworks.sort { $0.dueDate ?? .distantFuture < $1.dueDate ?? .distantFuture}
         } catch {
             print("HomeViewModel.loadHomeworks(): 宿題の取得に失敗しました。")
         }
