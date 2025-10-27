@@ -9,7 +9,6 @@ import SwiftUI
 
 struct HomeworkListView: View {
     @StateObject private var viewModel: HomeworkListViewModel
-    @State private var searchText = ""
     
     
     init(homeworkRepo: HomeworkRepository = LollipopHomeworkRepository(),
@@ -31,7 +30,7 @@ struct HomeworkListView: View {
                     ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
                         FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
                             viewModel.selectedFilter = option
-                            viewModel.filterHomeworks()
+                            viewModel.filterAndSearch()
                         }
                     }
                 }
@@ -56,10 +55,10 @@ struct HomeworkListView: View {
         }
         .navigationTitle("全ての課題")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "課題を検索")
+        .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "課題を検索")
         .task {
             await viewModel.loadHomeworks()
-            viewModel.filterHomeworks()
+            viewModel.filterAndSearch()
         }
     }
 }

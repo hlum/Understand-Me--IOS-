@@ -29,13 +29,19 @@ enum HomeworkFilterOption: Hashable, CaseIterable {
 
 
 class HomeworkListViewModel: ObservableObject {
-    @Published var allHomeworks: [HomeworkWithStatus] = []
-    @Published var filteredHomeworks: [HomeworkWithStatus] = []
-    
-    @Published var selectedFilter: HomeworkFilterOption = .all
-    
+    // MARK: Dependencies
     private var homeworkUseCase: HomeworkUseCase
     private var authenticationUseCase: AuthenticationUseCase
+    
+    // MARK: Published State
+    @Published var allHomeworks: [HomeworkWithStatus] = []
+    @Published var filteredHomeworks: [HomeworkWithStatus] = []
+    @Published var searchText = ""
+    @Published var selectedFilter: HomeworkFilterOption = .all
+    
+    private var cancellables: Set<AnyCancellable> = []
+    
+    
     
     init(
         homeworkUseCase: HomeworkUseCase,
@@ -43,8 +49,26 @@ class HomeworkListViewModel: ObservableObject {
     ) {
         self.homeworkUseCase = homeworkUseCase
         self.authenticationUseCase = authenticationUseCase
+        self.observeSearchTextChange()
     }
     
+    
+    
+    func observeSearchTextChange() {
+        $searchText
+            .dropFirst()
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main) // ⏱ wait 300ms after last keystroke
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.filterAndSearch()
+            }
+            .store(in: &cancellables)
+    }
+    
+    
+    
+    // MARK: Data Loading
     @MainActor
     func loadHomeworks() async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
@@ -59,17 +83,62 @@ class HomeworkListViewModel: ObservableObject {
         }
     }
     
+ 
+    
+}
+
+// MARK: Filtering Logic
+extension HomeworkListViewModel {
     
     @MainActor
-    func filterHomeworks() {
-        withAnimation(.easeInOut) {
-            switch selectedFilter {
-            case .all:
-                filteredHomeworks = allHomeworks
-            case .state(let homeworkState):
-                filteredHomeworks = allHomeworks.filter { $0.submissionState == homeworkState }
-            }
+    func filterAndSearch() {
+        var result = allHomeworks
+        
+        if selectedFilter != .all {
+            result = filterHomeworks()
+        }
+        
+        filteredHomeworks = searchHomeworks(homeworks: result)
+    }
+    
+    
+    
+    func filterHomeworks() -> [HomeworkWithStatus] {
+        var filteredHomeworks: [HomeworkWithStatus] = []
+        
+        switch selectedFilter {
+        case .all:
+            filteredHomeworks = allHomeworks
+        case .state(let homeworkState):
+            filteredHomeworks = allHomeworks.filter { $0.submissionState == homeworkState }
+        }
+        
+        return filteredHomeworks
+    }
+    
+    
+    
+    func searchHomeworks(homeworks: [HomeworkWithStatus]) -> [HomeworkWithStatus] {
+        guard !searchText.isEmpty else { return homeworks }
+        
+        
+        // 半角、全角、スペース、! を無視する
+        func normalize(_ text: String) -> String {
+            text
+                .folding(options: [.diacriticInsensitive, .widthInsensitive, .caseInsensitive], locale: .current)
+                .replacingOccurrences(of: "\\p{P}|\\s", with: "", options: .regularExpression)
+        }
+        
+        let normalizedSearchText = normalize(searchText)
+        
+        return homeworks.filter {
+            let normalizedTitle = normalize($0.title)
+            let normalizedDescription = normalize($0.description)
+            
+            return normalizedTitle.contains(normalizedSearchText) ||
+            normalizedDescription.contains(normalizedSearchText)
         }
     }
+    
     
 }
