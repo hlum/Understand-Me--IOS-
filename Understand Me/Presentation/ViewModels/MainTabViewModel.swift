@@ -26,7 +26,7 @@ class MainTabViewModel: ObservableObject {
     
     private func setupFCMTokenObserver() {
         fcmTokenObserver = NotificationCenter.default.addObserver(
-            forName: Notification.Name("FCMTokenRefreshed"),
+            forName: .fcmTokenRefreshed,
             object: nil,
             queue: .main
         ) { [weak self] notification in

@@ -8,6 +8,10 @@
 import Foundation
 import FirebaseMessaging
 
+extension Notification.Name {
+    static let fcmTokenRefreshed = Notification.Name("FCMTokenRefreshed")
+}
+
 class FCMTokenManager {
     static let shared = FCMTokenManager()
     
@@ -33,9 +37,9 @@ class FCMTokenManager {
         do {
             let token = try await getFCMToken()
             try await userDataUseCase.updateFCMToken(userID: userID, fcmToken: token)
-            print("FCMトークンが正常に更新されました: \(token)")
+            NSLog("FCMトークンが正常に更新されました: %@", token)
         } catch {
-            print("FCMトークンの更新に失敗しました: \(error.localizedDescription)")
+            NSLog("FCMトークンの更新に失敗しました: %@", error.localizedDescription)
         }
     }
 }

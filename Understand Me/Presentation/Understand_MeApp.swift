@@ -26,9 +26,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             options: authOptions,
             completionHandler: { granted, error in
                 if let error = error {
-                    print("通知許可の取得に失敗しました: \(error.localizedDescription)")
+                    NSLog("通知許可の取得に失敗しました: %@", error.localizedDescription)
                 } else if granted {
-                    print("通知許可が付与されました")
+                    NSLog("通知許可が付与されました")
                 }
             }
         )
@@ -48,15 +48,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else {
-            print("FCMトークンがnilです")
+            NSLog("FCMトークンがnilです")
             return
         }
         
-        print("FCMトークンを受信しました: \(fcmToken)")
+        NSLog("FCMトークンを受信しました: %@", fcmToken)
         
         // Post notification when token is refreshed
         NotificationCenter.default.post(
-            name: Notification.Name("FCMTokenRefreshed"),
+            name: .fcmTokenRefreshed,
             object: nil,
             userInfo: ["token": fcmToken]
         )
