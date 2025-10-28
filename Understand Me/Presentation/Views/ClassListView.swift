@@ -28,6 +28,7 @@ struct ClassListView: View {
                 }
             } else {
                 ContentUnavailableView("所属しているクラスがありません。", systemImage: "book.closed")
+                    .foregroundStyle(.secondary.opacity(0.7))
             }
         }
         .navigationTitle("クラス一覧")
