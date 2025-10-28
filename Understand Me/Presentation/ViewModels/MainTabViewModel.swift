@@ -11,9 +11,36 @@ import Combine
 class MainTabViewModel: ObservableObject {
     @Published var userData: UserData? = nil
     private let userDataUseCase: UserDataUseCase
+    private var fcmTokenObserver: NSObjectProtocol?
     
     init(userDataUseCase: UserDataUseCase) {
         self.userDataUseCase = userDataUseCase
+        setupFCMTokenObserver()
+    }
+    
+    deinit {
+        if let observer = fcmTokenObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
+    // App DelegateでFCMトークンが更新されたときに呼ばれる通知を監視する
+    private func setupFCMTokenObserver() {
+        fcmTokenObserver = NotificationCenter.default.addObserver(
+            forName: .fcmTokenRefreshed,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self,
+                  let userID = self.userData?.id else { return }
+            
+            Task {
+                await FCMTokenManager.shared.updateFCMTokenToServer(
+                    userID: userID,
+                    userDataUseCase: self.userDataUseCase
+                )
+            }
+        }
     }
     
     
@@ -53,6 +80,12 @@ class MainTabViewModel: ObservableObject {
     func loadUserData(userID: String) async {
         do {
             self.userData = try await userDataUseCase.fetchUserData(userID: userID)
+            
+            // FCMトークンをサーバーに送信
+            await FCMTokenManager.shared.updateFCMTokenToServer(
+                userID: userID,
+                userDataUseCase: userDataUseCase
+            )
         } catch {
             // TODO: Userにエラーを知らせる
             print("MainTabViewModel.loadUseData: UserDataの取得に失敗しました。\(error.localizedDescription)")

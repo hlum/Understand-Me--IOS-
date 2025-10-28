@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7FBAD4C42E9888B3006807B8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD4C32E9888B3006807B8 /* FirebaseAuth */; };
+		7FBAD4C52E9888B3006807B8 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD4C62E9888B3006807B8 /* FirebaseMessaging */; };
 		7FBAD62B2E988DEA006807B8 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD62A2E988DEA006807B8 /* GoogleSignIn */; };
 		7FBAD62D2E988E46006807B8 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD62C2E988E46006807B8 /* GoogleSignInSwift */; };
 		7FC8C3272E95375400B4CF5D /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7FC8C3262E95375400B4CF5D /* Lottie */; };
@@ -32,6 +33,7 @@
 			files = (
 				7FC8C3272E95375400B4CF5D /* Lottie in Frameworks */,
 				7FBAD4C42E9888B3006807B8 /* FirebaseAuth in Frameworks */,
+				7FBAD4C52E9888B3006807B8 /* FirebaseMessaging in Frameworks */,
 				7FBAD62B2E988DEA006807B8 /* GoogleSignIn in Frameworks */,
 				7FBAD62D2E988E46006807B8 /* GoogleSignInSwift in Frameworks */,
 			);
@@ -78,6 +80,7 @@
 			packageProductDependencies = (
 				7FC8C3262E95375400B4CF5D /* Lottie */,
 				7FBAD4C32E9888B3006807B8 /* FirebaseAuth */,
+				7FBAD4C62E9888B3006807B8 /* FirebaseMessaging */,
 				7FBAD62A2E988DEA006807B8 /* GoogleSignIn */,
 				7FBAD62C2E988E46006807B8 /* GoogleSignInSwift */,
 			);
@@ -389,6 +392,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		7FBAD4C62E9888B3006807B8 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 		7FBAD62A2E988DEA006807B8 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
