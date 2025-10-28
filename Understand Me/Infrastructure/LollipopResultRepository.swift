@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import OSLog
 
 class LollipopResultRepository: ResultRepository {
     let lollipopUtility = LollipopAPIUtility()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
     
     
     func fetchResults(userID: String, year: Int) async throws -> [Result] {
@@ -30,7 +32,7 @@ class LollipopResultRepository: ResultRepository {
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             return []
         }
         
@@ -48,8 +50,8 @@ class LollipopResultRepository: ResultRepository {
             
         }catch {
             let rawString = String(data: jsonData, encoding: .utf8) ?? "nil"
-            print("Decodeに失敗したDataの中身：　\(rawString)")
-            print("Result のDecodeに失敗しました：　\(error.localizedDescription)")
+            logger.error("Decodeに失敗したDataの中身: \(rawString)")
+            logger.error("Result のDecodeに失敗しました: \(error.localizedDescription)")
             throw error
         }
     }

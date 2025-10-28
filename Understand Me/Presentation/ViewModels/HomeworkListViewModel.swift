@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import OSLog
 
 enum HomeworkFilterOption: Hashable, CaseIterable {
     case all
@@ -32,6 +33,7 @@ class HomeworkListViewModel: ObservableObject {
     // MARK: Dependencies
     private var homeworkUseCase: HomeworkUseCase
     private var authenticationUseCase: AuthenticationUseCase
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     // MARK: Published State
     @Published var allHomeworks: [HomeworkWithStatus] = []
@@ -72,14 +74,14 @@ class HomeworkListViewModel: ObservableObject {
     @MainActor
     func loadHomeworks() async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("HomeworkListViewModel.loadHomeworks: ログインしているユーザーがいません。")
+            logger.error("HomeworkListViewModel.loadHomeworks: ログインしているユーザーがいません。")
             return
         }
         
         do {
             self.allHomeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id).sorted(by: { $0.dueDate! < $1.dueDate! })
         } catch {
-            print("HomeworkListViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
+            logger.error("HomeworkListViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
         }
     }
     

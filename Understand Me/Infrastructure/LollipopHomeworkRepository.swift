@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import OSLog
 
 
 class LollipopHomeworkRepository: HomeworkRepository {
     private let lollipopAPIUtility = LollipopAPIUtility()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
     
     
     
@@ -58,7 +60,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             return []
         }
         
@@ -73,19 +75,19 @@ class LollipopHomeworkRepository: HomeworkRepository {
             
             return homeworks
         }catch let DecodingError.keyNotFound(key, context) {
-            print("❌ Missing key: '\(key.stringValue)' in \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
-            print("   Debug Description: \(context.debugDescription)")
-            print("   Coding Path: \(context.codingPath)")
+            logger.error("❌ Missing key: '\(key.stringValue)' in \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
+            logger.error("   Debug Description: \(context.debugDescription)")
+            logger.error("   Coding Path: \(context.codingPath)")
         } catch let DecodingError.typeMismatch(type, context) {
-            print("❌ Type mismatch for type '\(type)' at \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
-            print("   Debug Description: \(context.debugDescription)")
+            logger.error("❌ Type mismatch for type '\(type)' at \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
+            logger.error("   Debug Description: \(context.debugDescription)")
         } catch let DecodingError.valueNotFound(value, context) {
-            print("❌ Value not found for type '\(value)' at \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
-            print("   Debug Description: \(context.debugDescription)")
+            logger.error("❌ Value not found for type '\(value)' at \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
+            logger.error("   Debug Description: \(context.debugDescription)")
         } catch let DecodingError.dataCorrupted(context) {
-            print("❌ Data corrupted: \(context.debugDescription)")
+            logger.error("❌ Data corrupted: \(context.debugDescription)")
         } catch {
-            print("⚠️ Unknown decoding error: \(error)")
+            logger.warning("⚠️ Unknown decoding error: \(error)")
         }
         return []
     }
@@ -106,7 +108,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw LollipopError.InvalidResponseStatus
         }
     }
@@ -124,7 +126,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw LollipopError.InvalidResponseStatus
         }
 

@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import OSLog
 
 
 // Graph に表示する月ごとの平均点数
@@ -60,6 +61,7 @@ class HomeworkDetailViewModel: ObservableObject {
     private let classUseCase: ClassUseCase
     private let projectUseCase: ProjectUseCase
     private let authenticationUseCase: AuthenticationUseCase
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     init(
         homeworkUseCase: HomeworkUseCase,
@@ -88,17 +90,17 @@ class HomeworkDetailViewModel: ObservableObject {
     func uploadProject() async {
         guard let _ = URL(string: homeworkLinkTxt) else {
             // TODO: USER にAlertで知らせる
-            print("HomeworkDetailViewModel.uploadProject: URLの形式が不正です。")
+            logger.error("HomeworkDetailViewModel.uploadProject: URLの形式が不正です。")
             return
         }
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
+            logger.error("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
             return
         }
         
         guard let homework = homework else {
-            print("HomeworkDetailViewModel.uploadProject: 宿題の情報がありません。")
+            logger.error("HomeworkDetailViewModel.uploadProject: 宿題の情報がありません。")
             return
         }
         
@@ -110,7 +112,7 @@ class HomeworkDetailViewModel: ObservableObject {
             )
         } catch {
             // TODO: Alert the user and impl retry methods
-            print("HomeworkDetailViewModel.uploadProject: プロジェクトのアップロードに失敗しました。\(error.localizedDescription)")
+            logger.error("HomeworkDetailViewModel.uploadProject: プロジェクトのアップロードに失敗しました。\(error.localizedDescription)")
         }
     }
     
@@ -119,7 +121,7 @@ class HomeworkDetailViewModel: ObservableObject {
     func retryQuestionGeneration(homeworkID: String) async  {
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("HomeworkDetailViewModel.retryQuestionGeneration: ログインしているユーザーがいません。")
+            logger.error("HomeworkDetailViewModel.retryQuestionGeneration: ログインしているユーザーがいません。")
             return
         }
         
@@ -127,7 +129,7 @@ class HomeworkDetailViewModel: ObservableObject {
             try await homeworkUseCase.retryQuestionGeneration(homeworkID: homeworkID, studentID: authDataResult.id)
         } catch {
             // TODO: Alert the user
-            print("HomeworkDetailViewModel.retryQuestionGeneration: リトライ失敗.\(error.localizedDescription)")
+            logger.error("HomeworkDetailViewModel.retryQuestionGeneration: リトライ失敗.\(error.localizedDescription)")
         }
     }
     
@@ -135,7 +137,7 @@ class HomeworkDetailViewModel: ObservableObject {
     
     func cancelHomeworkSubmission(homeworkID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
+            logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: ログインしているユーザーがいません。")
             return
         }
         
@@ -143,7 +145,7 @@ class HomeworkDetailViewModel: ObservableObject {
             try await homeworkUseCase.cancelHomeworkSubmission(homeworkID: homeworkID, studentID: authDataResult.id)
         } catch {
             // TODO: Alert the user
-            print("HomeworkDetailViewModel.cancelHomeworkSubmission: 取り消し失敗.\(error.localizedDescription)")
+            logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: 取り消し失敗.\(error.localizedDescription)")
         }
     }
     
@@ -155,13 +157,13 @@ class HomeworkDetailViewModel: ObservableObject {
         do {
             
             guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-                print("HomeworkDetailViewModel.loadHomework: ログインしているユーザーがいません。")
+                logger.error("HomeworkDetailViewModel.loadHomework: ログインしているユーザーがいません。")
                 return
             }
             
             homework = try await homeworkUseCase.fetchHomework(id: id, studentID: authDataResult.id)
         } catch {
-            print("HomeworkDetailViewModel.loadHomework: 宿題の取得に失敗しました。\(error.localizedDescription)")
+            logger.error("HomeworkDetailViewModel.loadHomework: 宿題の取得に失敗しました。\(error.localizedDescription)")
         }
     }
     
@@ -172,7 +174,7 @@ class HomeworkDetailViewModel: ObservableObject {
         do {
             self.classDetail = try await classUseCase.fetchClass(id: classID)
         } catch {
-            print("HomeworkDetailViewModel.loadClassDetail: クラス情報の取得に失敗しました。\(error.localizedDescription)")
+            logger.error("HomeworkDetailViewModel.loadClassDetail: クラス情報の取得に失敗しました。\(error.localizedDescription)")
         }
     }
     

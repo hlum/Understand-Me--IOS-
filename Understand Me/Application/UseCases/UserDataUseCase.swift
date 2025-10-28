@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import OSLog
 
 class UserDataUseCase {
     private let userDataRepository: UserDataRepository
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "UseCase")
     
     init(userDataRepository: UserDataRepository) {
         self.userDataRepository = userDataRepository
@@ -21,7 +23,7 @@ class UserDataUseCase {
         let userFromDB = try? await userDataRepository.fetchUserData(userID: userData.id)
         
         if userFromDB != nil {
-            print("UserDataはすでに保存されています。")
+            logger.info("UserDataはすでに保存されています。")
             return
         }
         
