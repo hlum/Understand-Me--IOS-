@@ -165,13 +165,21 @@ struct HomeView: View {
                         }
                     }
                     
-                    ScrollView(showsIndicators: false ) {
-                        VStack {
-                            ForEach(viewModel.homeworks) { homework in
-                                HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                    Group {
+                        if !viewModel.homeworks.isEmpty {
+                            
+                            ScrollView(showsIndicators: false ) {
+                                VStack {
+                                    ForEach(viewModel.homeworks) { homework in
+                                        HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                                    }
+                                }
+                                .padding(.vertical)
                             }
+                        } else {
+                            ContentUnavailableView("提出期限が近い課題はありません。", systemImage: "book.closed")
+                                .foregroundStyle(.secondary.opacity(0.7))
                         }
-                        .padding(.vertical)
                     }
                     .frame(height: 300)
                 }
@@ -190,17 +198,26 @@ struct HomeView: View {
                             Image(systemName: "arrow.forward")
                                 .bold()
                                 .foregroundStyle(.accent.opacity(0.3))
+                            
+                            Spacer()
                         }
                     }
                     .foregroundStyle(.primary)
                     
-                    LazyVGrid(columns: adaptiveColumn, spacing: 16) {
-                        ForEach(viewModel.classes) { classItem in
-                            classCell(
-                                classID: classItem.id,
-                                className: classItem.name,
-                                teacherName: classItem.teacherId
-                            )
+                    Group {
+                        if !viewModel.classes.isEmpty {
+                            LazyVGrid(columns: adaptiveColumn, spacing: 16) {
+                                ForEach(viewModel.classes) { classItem in
+                                    classCell(
+                                        classID: classItem.id,
+                                        className: classItem.name,
+                                        teacherName: classItem.teacherId
+                                    )
+                                }
+                            }
+                        } else {
+                            ContentUnavailableView("所属するクラスがありません。", systemImage: "book")
+                                .foregroundStyle(.secondary.opacity(0.7))
                         }
                     }
                     .padding(.horizontal)
