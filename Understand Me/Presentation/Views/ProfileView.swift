@@ -176,6 +176,12 @@ struct ProfileView: View {
                 .foregroundStyle(.gray.opacity(0.2))
         )
         .frame(height: 260)
+        .overlay {
+            if viewModel.averageResultsPerMonth.isEmpty {
+                ContentUnavailableView("平均スコアのデータはありません。", systemImage: "info.circle")
+                    .foregroundStyle(.secondary.opacity(0.7))
+            }
+        }
         .overlay(alignment: .top) {
             HStack {
                 Button {
@@ -220,6 +226,7 @@ struct ProfileView: View {
                 }
             }
         }
+  
         
         
         HStack {

@@ -51,6 +51,7 @@ struct HomeworkListView: View {
             }
             } else {
                 ContentUnavailableView("該当する課題はありません。", systemImage: "book.closed")
+                    .foregroundStyle(.secondary.opacity(0.7))
             }
         }
         .navigationTitle("全ての課題")

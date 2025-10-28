@@ -15,13 +15,20 @@ struct ClassListView: View {
     )
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            ForEach(viewModel.classes) { classItem in
-                NavigationLink {
-                    ClassHomeworkView(classID: classItem.id)
-                } label: {
-                    ClassItemView(classID: "id", className: classItem.name, teacherName: classItem.teacherId)
+        Group {
+            if !viewModel.classes.isEmpty {
+                ScrollView(showsIndicators: false) {
+                    ForEach(viewModel.classes) { classItem in
+                        NavigationLink {
+                            ClassHomeworkView(classID: classItem.id)
+                        } label: {
+                            ClassItemView(classID: "id", className: classItem.name, teacherName: classItem.teacherId)
+                        }
+                    }
                 }
+            } else {
+                ContentUnavailableView("所属しているクラスがありません。", systemImage: "book.closed")
+                    .foregroundStyle(.secondary.opacity(0.7))
             }
         }
         .navigationTitle("クラス一覧")
