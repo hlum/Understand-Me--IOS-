@@ -100,7 +100,7 @@ class LollipopUserDataRepository: UserDataRepository {
         ]
         let bodyData = try JSONSerialization.data(withJSONObject: bodyDict)
         
-        let request = try lollipopAPIUtility.makeRequest(url: url, method: "POST", body: bodyData)
+        let request = try lollipopAPIUtility.makeRequest(url: url, method: "UPDATE", body: bodyData)
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
