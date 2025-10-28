@@ -17,7 +17,7 @@ class FCMTokenManager {
     
     private init() {}
     
-    /// Get the current FCM token
+    /// 新しいFCMトークンを非同期に取得する
     func getFCMToken() async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
             Messaging.messaging().token { token, error in
@@ -32,14 +32,14 @@ class FCMTokenManager {
         }
     }
     
-    /// Update FCM token to the server
+    /// FCMトークンをサーバーに更新する
     func updateFCMTokenToServer(userID: String, userDataUseCase: UserDataUseCase) async {
         do {
             let token = try await getFCMToken()
             try await userDataUseCase.updateFCMToken(userID: userID, fcmToken: token)
-            NSLog("FCMトークンが正常に更新されました: %@", token)
+            print("FCMトークンが正常に更新されました: \(token)")
         } catch {
-            NSLog("FCMトークンの更新に失敗しました: %@", error.localizedDescription)
+            print("FCMトークンの更新に失敗しました: \(error.localizedDescription)")
         }
     }
 }

@@ -15,10 +15,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
         
-        // Set up Firebase Messaging delegate
+        // Firebase Cloud Messagingのデリゲートを設定
         Messaging.messaging().delegate = self
         
-        // Request notification permissions
+        // 通知の許可をリクエスト
         UNUserNotificationCenter.current().delegate = self
         
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
@@ -26,19 +26,21 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             options: authOptions,
             completionHandler: { granted, error in
                 if let error = error {
-                    NSLog("通知許可の取得に失敗しました: %@", error.localizedDescription)
+                    print("通知許可の取得に失敗しました: %@", error.localizedDescription)
                 } else if granted {
-                    NSLog("通知許可が付与されました")
+                    print("通知許可が付与されました")
                 }
             }
         )
         
+        // Apple Push Notificationサービスに登録
         application.registerForRemoteNotifications()
         
         return true
     }
     
-    func application(_ application: UIApplication, 
+    // Apple Push Notificationサービスへの登録が成功した場合に呼ばれる
+    func application(_ application: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
     }
@@ -46,15 +48,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 // MARK: - MessagingDelegate
 extension AppDelegate: MessagingDelegate {
+    // FCMトークンが更新されたときに呼ばれる
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else {
-            NSLog("FCMトークンがnilです")
+            print("FCMトークンがnilです")
             return
         }
         
-        NSLog("FCMトークンを受信しました: %@", fcmToken)
+        print("FCMトークンを受信しました: %@", fcmToken)
         
-        // Post notification when token is refreshed
+        // FCM トークンが更新されたことを通知(アプリ内通知)
         NotificationCenter.default.post(
             name: .fcmTokenRefreshed,
             object: nil,

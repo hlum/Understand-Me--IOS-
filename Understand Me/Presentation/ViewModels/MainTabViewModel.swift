@@ -24,6 +24,7 @@ class MainTabViewModel: ObservableObject {
         }
     }
     
+    // App DelegateでFCMトークンが更新されたときに呼ばれる通知を監視する
     private func setupFCMTokenObserver() {
         fcmTokenObserver = NotificationCenter.default.addObserver(
             forName: .fcmTokenRefreshed,
@@ -80,7 +81,7 @@ class MainTabViewModel: ObservableObject {
         do {
             self.userData = try await userDataUseCase.fetchUserData(userID: userID)
             
-            // Update FCM token after user data is loaded
+            // FCMトークンをサーバーに送信
             await FCMTokenManager.shared.updateFCMTokenToServer(
                 userID: userID,
                 userDataUseCase: userDataUseCase
