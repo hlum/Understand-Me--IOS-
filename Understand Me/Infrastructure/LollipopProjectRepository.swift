@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import OSLog
 
 class LollipopProjectRepository: ProjectRepository {
     private let lollipopAPIUtility = LollipopAPIUtility()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
     
     
     
@@ -27,7 +29,7 @@ class LollipopProjectRepository: ProjectRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw LollipopError.InvalidResponseStatus
         }
     }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 enum LollipopError: LocalizedError {
     case InvalidURL
@@ -30,6 +31,7 @@ enum LollipopError: LocalizedError {
 class LollipopUserDataRepository: UserDataRepository {
     
     private let lollipopAPIUtility: LollipopAPIUtility = LollipopAPIUtility()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
     
     func saveUserData(userData: UserData) async throws {
         let url = try lollipopAPIUtility.makeURL("user/register.php")
@@ -40,7 +42,7 @@ class LollipopUserDataRepository: UserDataRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw LollipopError.InvalidResponseStatus
         }
     }
@@ -66,7 +68,7 @@ class LollipopUserDataRepository: UserDataRepository {
             if response.message.lowercased().contains("ユーザーが存在しません") {
                 throw LollipopError.UserNotFound
             }
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw LollipopError.InvalidResponseStatus
         }
 
@@ -82,7 +84,7 @@ class LollipopUserDataRepository: UserDataRepository {
             }
             throw LollipopError.UserNotFound
         } catch {
-            print("UserDataのDecodeに失敗。失敗: \(error.localizedDescription)")
+            logger.error("UserDataのDecodeに失敗。失敗: \(error.localizedDescription)")
             throw error
         }
     }
@@ -104,7 +106,7 @@ class LollipopUserDataRepository: UserDataRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw LollipopError.InvalidResponseStatus
         }
     }

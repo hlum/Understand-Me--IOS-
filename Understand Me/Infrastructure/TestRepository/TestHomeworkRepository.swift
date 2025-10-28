@@ -6,10 +6,13 @@
 //
 
 import Foundation
+import OSLog
 
 class TestHomeworkRepository: HomeworkRepository {
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
+    
     func cancelHomeworkSubmission(homeworkID: String, studentID: String) async throws {
-        print("Cancel")
+        logger.info("Cancel")
         return
     }
     

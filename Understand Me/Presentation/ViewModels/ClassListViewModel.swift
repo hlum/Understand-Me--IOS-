@@ -7,12 +7,14 @@
 
 import Foundation
 import Combine
+import OSLog
 
 class ClassListViewModel: ObservableObject {
     @Published var classes: [Class] = []
     
     private let classUseCase: ClassUseCase
     private let authenticationUseCase: AuthenticationUseCase
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     
     
@@ -26,13 +28,13 @@ class ClassListViewModel: ObservableObject {
     @MainActor
     func loadClasses() async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("ClassListViewModel.loadClasses: ログイン中のユーザのデータ取得に失敗したので、クラスの取得ができません。")
+            logger.error("ClassListViewModel.loadClasses: ログイン中のユーザのデータ取得に失敗したので、クラスの取得ができません。")
             return
         }
         do {
             classes = try await classUseCase.fetchClassList(studentID: authDataResult.id)
         } catch {
-            print("ClassListViewModel.loadClasses: クラスの取得に失敗しました。詳細：\(error.localizedDescription)")
+            logger.error("ClassListViewModel.loadClasses: クラスの取得に失敗しました。詳細：\(error.localizedDescription)")
         }
     }
 }

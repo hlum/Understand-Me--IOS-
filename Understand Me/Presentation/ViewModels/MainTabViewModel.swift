@@ -7,11 +7,13 @@
 
 import Foundation
 import Combine
+import OSLog
 
 class MainTabViewModel: ObservableObject {
     @Published var userData: UserData? = nil
     private let userDataUseCase: UserDataUseCase
     private var fcmTokenObserver: NSObjectProtocol?
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     init(userDataUseCase: UserDataUseCase) {
         self.userDataUseCase = userDataUseCase
@@ -48,12 +50,12 @@ class MainTabViewModel: ObservableObject {
     func saveUserDataIfNotExist(authDataResult: AuthDataResultModel) async {
         do {
             guard let email = authDataResult.email else {
-                print("Emailが取得できません")
+                logger.error("Emailが取得できません")
                 return
             }
             
             guard let info = extractStudentInfo(from: email) else {
-                print("メール形式が正しくありません。")
+                logger.error("メール形式が正しくありません。")
                 return
             }
             
@@ -70,7 +72,7 @@ class MainTabViewModel: ObservableObject {
             
             try await userDataUseCase.saveUserDataIfNotExist(userData: userData)
         } catch {
-            print("UserDataの保存に失敗しました。\(error.localizedDescription)")
+            logger.error("UserDataの保存に失敗しました。\(error.localizedDescription)")
         }
     }
     
@@ -88,7 +90,7 @@ class MainTabViewModel: ObservableObject {
             )
         } catch {
             // TODO: Userにエラーを知らせる
-            print("MainTabViewModel.loadUseData: UserDataの取得に失敗しました。\(error.localizedDescription)")
+            logger.error("MainTabViewModel.loadUseData: UserDataの取得に失敗しました。\(error.localizedDescription)")
         }
     }
     

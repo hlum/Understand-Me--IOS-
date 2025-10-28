@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseMessaging
+import OSLog
 
 extension Notification.Name {
     static let fcmTokenRefreshed = Notification.Name("FCMTokenRefreshed")
@@ -14,6 +15,7 @@ extension Notification.Name {
 
 class FCMTokenManager {
     static let shared = FCMTokenManager()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Helper")
     
     private init() {}
     
@@ -37,9 +39,9 @@ class FCMTokenManager {
         do {
             let token = try await getFCMToken()
             try await userDataUseCase.updateFCMToken(userID: userID, fcmToken: token)
-            print("FCMトークンが正常に更新されました: \(token)")
+            logger.info("FCMトークンが正常に更新されました: \(token)")
         } catch {
-            print("FCMトークンの更新に失敗しました: \(error.localizedDescription)")
+            logger.error("FCMトークンの更新に失敗しました: \(error.localizedDescription)")
         }
     }
 }

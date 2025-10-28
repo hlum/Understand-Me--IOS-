@@ -7,12 +7,14 @@
 
 import SwiftUI
 import Combine
+import OSLog
 
 class HomeViewModel: ObservableObject {
     private let userDataUseCase: UserDataUseCase
     private let authenticationUseCase: AuthenticationUseCase
     private let homeworkUseCase: HomeworkUseCase
     private let classUseCase: ClassUseCase
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     @Published var userData: UserData? = nil
     @Published var homeworks: [HomeworkWithStatus] = []
@@ -36,7 +38,7 @@ class HomeViewModel: ObservableObject {
     @MainActor
     func loadUserData() async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("AuthDataResultを取得できません。")
+            logger.error("AuthDataResultを取得できません。")
             return
         }
         
@@ -44,7 +46,7 @@ class HomeViewModel: ObservableObject {
             self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
         } catch {
             // TODO: UserにAlertで知らせる
-            print("HomeViewModel.loadUserData(): UserDataの取得に失敗しました。")
+            logger.error("HomeViewModel.loadUserData(): UserDataの取得に失敗しました。")
         }
     }
     
@@ -53,7 +55,7 @@ class HomeViewModel: ObservableObject {
     @MainActor
     func loadHomeworks() async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("AuthDataResultを取得できません。")
+            logger.error("AuthDataResultを取得できません。")
             return
         }
         do {
@@ -92,7 +94,7 @@ class HomeViewModel: ObservableObject {
             self.homeworks = homeworks
             
         } catch {
-            print("HomeViewModel.loadHomeworks(): 宿題の取得に失敗しました。")
+            logger.error("HomeViewModel.loadHomeworks(): 宿題の取得に失敗しました。")
         }
     }
     
@@ -101,13 +103,13 @@ class HomeViewModel: ObservableObject {
     @MainActor
     func loadClasses() async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("AuthDataResultを取得できません。")
+            logger.error("AuthDataResultを取得できません。")
             return
         }
         do {
             self.classes = try await classUseCase.fetchClassList(studentID: authDataResult.id)
         } catch {
-            print("HomeViewModel.loadClasses(): クラスの取得に失敗しました。")
+            logger.error("HomeViewModel.loadClasses(): クラスの取得に失敗しました。")
         }
         
     }

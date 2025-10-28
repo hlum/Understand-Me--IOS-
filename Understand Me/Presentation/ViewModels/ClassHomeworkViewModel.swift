@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import OSLog
 
 class ClassHomeworkViewModel: ObservableObject {
     @Published var homeworks: [HomeworkWithStatus] = []
@@ -18,6 +19,7 @@ class ClassHomeworkViewModel: ObservableObject {
     private var authenticationUseCase: AuthenticationUseCase
     private var classUseCase: ClassUseCase
     private var classID: String
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     
     init(
@@ -37,7 +39,7 @@ class ClassHomeworkViewModel: ObservableObject {
         do {
             self.classInfo = try await classUseCase.fetchClass(id: classID)
         } catch {
-            print("ClassHomeworkViewModel.loadClassInfos: クラス情報の取得に失敗しました。\(error.localizedDescription)")
+            logger.error("ClassHomeworkViewModel.loadClassInfos: クラス情報の取得に失敗しました。\(error.localizedDescription)")
         }
     }
     
@@ -46,14 +48,14 @@ class ClassHomeworkViewModel: ObservableObject {
     @MainActor
     func loadHomeworks(classID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("ClassHomeworkViewModel.loadHomeworks: ログインしているユーザーがいません。")
+            logger.error("ClassHomeworkViewModel.loadHomeworks: ログインしているユーザーがいません。")
             return
         }
         
         do {
             self.homeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id, classID: classID)
         } catch {
-            print("ClassHomeworkViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
+            logger.error("ClassHomeworkViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
         }
     }
     

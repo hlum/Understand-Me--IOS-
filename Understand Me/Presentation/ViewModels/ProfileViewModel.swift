@@ -7,6 +7,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import OSLog
 
 class ProfileViewModel: ObservableObject {
     @Published var userData: UserData?
@@ -24,6 +25,7 @@ class ProfileViewModel: ObservableObject {
     private let authenticationUseCase: AuthenticationUseCase
     private let userDataUseCase: UserDataUseCase
     private let resultUseCase: ResultUseCase
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     init(
         authenticationUseCase: AuthenticationUseCase,
@@ -41,7 +43,7 @@ class ProfileViewModel: ObservableObject {
     @MainActor
     func loadUserData() async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("AuthDataResultを取得できません。")
+            logger.error("AuthDataResultを取得できません。")
             return
         }
         
@@ -49,7 +51,7 @@ class ProfileViewModel: ObservableObject {
             self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
         } catch {
             // TODO: UserにAlertで知らせる
-            print("ProfileViewModel.loadUserData: UserDataの取得に失敗しました。")
+            logger.error("ProfileViewModel.loadUserData: UserDataの取得に失敗しました。")
         }
     }
     
@@ -59,7 +61,7 @@ class ProfileViewModel: ObservableObject {
     func loadResults() async {
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("AuthDataResultを取得できません。")
+            logger.error("AuthDataResultを取得できません。")
             return
         }
         
@@ -67,7 +69,7 @@ class ProfileViewModel: ObservableObject {
             self.results = try await resultUseCase.fetchResults(userID: authDataResult.id, year: currentYearForGraph)
         } catch {
             // TODO: UserにAlertで知らせる
-            print("ProfileViewModel.loadResults: Resultの取得に失敗しました。")
+            logger.error("ProfileViewModel.loadResults: Resultの取得に失敗しました。")
         }
     }
     

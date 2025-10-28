@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import OSLog
 
 
 class LollipopAnswerRepository: AnswerRepository {
     
     private let lollipopUtility = LollipopAPIUtility()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
     
     
     
@@ -32,7 +34,7 @@ class LollipopAnswerRepository: AnswerRepository {
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw LollipopError.InvalidResponseStatus
         }
     }
@@ -57,7 +59,7 @@ class LollipopAnswerRepository: AnswerRepository {
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw LollipopError.InvalidResponseStatus
         }
         
@@ -71,7 +73,7 @@ class LollipopAnswerRepository: AnswerRepository {
             let answers = try JSONDecoder().decode([Answer].self, from: jsonData)
             return answers
         } catch {
-            print("AnswerのDecodeに失敗。失敗: \(error.localizedDescription)")
+            logger.error("AnswerのDecodeに失敗。失敗: \(error.localizedDescription)")
             throw error
         }
         

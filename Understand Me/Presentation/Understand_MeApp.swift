@@ -9,8 +9,11 @@ import SwiftUI
 import Firebase
 import FirebaseMessaging
 import UserNotifications
+import OSLog
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
+    
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
@@ -24,11 +27,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(
             options: authOptions,
-            completionHandler: { granted, error in
+            completionHandler: { [weak self] granted, error in
                 if let error = error {
-                    print("通知許可の取得に失敗しました: %@", error.localizedDescription)
+                    self?.logger.error("通知許可の取得に失敗しました: \(error.localizedDescription)")
                 } else if granted {
-                    print("通知許可が付与されました")
+                    self?.logger.info("通知許可が付与されました")
                 }
             }
         )
@@ -51,11 +54,11 @@ extension AppDelegate: MessagingDelegate {
     // FCMトークンが更新されたときに呼ばれる
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else {
-            print("FCMトークンがnilです")
+            logger.error("FCMトークンがnilです")
             return
         }
         
-        print("FCMトークンを受信しました: %@", fcmToken)
+        logger.info("FCMトークンを受信しました: \(fcmToken)")
         
         // FCM トークンが更新されたことを通知(アプリ内通知)
         NotificationCenter.default.post(

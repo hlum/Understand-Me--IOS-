@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import OSLog
 
 class QuestionsViewModel: ObservableObject {
     @Published var questionsWithChoices: [QuestionWithChoices] = []
@@ -15,6 +16,8 @@ class QuestionsViewModel: ObservableObject {
     private var authenticationUseCase: AuthenticationUseCase
     private var questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase
     private var answerUseCase: AnswerUseCase
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
+    
     init(
         authenticationUseCase: AuthenticationUseCase,
         questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase,
@@ -28,7 +31,7 @@ class QuestionsViewModel: ObservableObject {
     @MainActor
     func loadALlQuestionsWithChoices(homeworkID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("QuestionsViewModel.loadAllQuestionsWithChoices: ログイン中のUserがありません。")
+            logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: ログイン中のUserがありません。")
             return
         }
         
@@ -40,7 +43,7 @@ class QuestionsViewModel: ObservableObject {
             )
             
         } catch {
-            print("QuestionsViewModel.loadAllQuestionsWithChoices: \(error.localizedDescription)")
+            logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: \(error.localizedDescription)")
             // TODO: Show error to the user
         }
     }
@@ -49,7 +52,7 @@ class QuestionsViewModel: ObservableObject {
     
     func postAnswer(questionID: String, homeworkID: String, selectedChoiceID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("QuestionsViewModel.postAnswer: ログイン中のUserがありません。")
+            logger.error("QuestionsViewModel.postAnswer: ログイン中のUserがありません。")
             return
         }
         
@@ -63,7 +66,7 @@ class QuestionsViewModel: ObservableObject {
             let totalQuestions = questionsWithChoices.count
             try await answerUseCase.addAnswer(answer: answer, homeworkID: homeworkID, totalQuestions: totalQuestions)
         } catch {
-            print("QuestionsViewModel.postAnswer: \(error.localizedDescription)")
+            logger.error("QuestionsViewModel.postAnswer: \(error.localizedDescription)")
             // TODO: Show error to the user
         }
     }
@@ -72,7 +75,7 @@ class QuestionsViewModel: ObservableObject {
     
     func loadAnswersForReview(homeworkID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            print("QuestionsViewModel.postAnswer: ログイン中のUserがありません。")
+            logger.error("QuestionsViewModel.loadAnswersForReview: ログイン中のUserがありません。")
             return
         }
         do {
@@ -82,7 +85,7 @@ class QuestionsViewModel: ObservableObject {
             }
         } catch {
             // TODO: Show error to the user
-            print("QuestionsViewModel.loadAnswersForReview: \(error.localizedDescription)")
+            logger.error("QuestionsViewModel.loadAnswersForReview: \(error.localizedDescription)")
         }
     }
 }

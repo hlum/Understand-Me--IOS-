@@ -7,10 +7,12 @@
 
 import Foundation
 import Combine
+import OSLog
 
 class LogInViewModel: ObservableObject {
     // Dependencies
     private let authenticationUseCase: AuthenticationUseCase
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     @Published var errorMessage: String = ""
     @Published var showErrorAlert: Bool = false
@@ -25,7 +27,7 @@ class LogInViewModel: ObservableObject {
             return try await authenticationUseCase.signIn()
         } catch {
             showErrorAlert(message: "ログイン失敗しました。もう一度お試しください。")
-            print("Login失敗。詳細: \(error.localizedDescription)")
+            logger.error("Login失敗。詳細: \(error.localizedDescription)")
             return nil
         }
     }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 
 enum ClassRepositoryError: LocalizedError {
@@ -25,6 +26,7 @@ enum ClassRepositoryError: LocalizedError {
 class LollipopClassRepository: ClassRepository {
     
     private let lollipopAPIUtility: LollipopAPIUtility = LollipopAPIUtility()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
 
     
     
@@ -45,7 +47,7 @@ class LollipopClassRepository: ClassRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             return []
         }
         
@@ -58,7 +60,7 @@ class LollipopClassRepository: ClassRepository {
             let classes = try JSONDecoder().decode([Class].self, from: jsonData)
             return classes
         } catch {
-            print("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
+            logger.error("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
             throw error
         }
     }
@@ -83,7 +85,7 @@ class LollipopClassRepository: ClassRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
 
         guard response.status == "success" else {
-            print("ResponseのStatusがsuccessではありません。エラー詳細:" + response.message)
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
             throw ClassRepositoryError.NoDataFoundInResponse
         }
         
@@ -97,11 +99,11 @@ class LollipopClassRepository: ClassRepository {
             if let firstClass = classData.first {
                 return firstClass
             }
-            print("LollipopClassRepository.fetch() Classが見つかりません。")
+            logger.error("LollipopClassRepository.fetch() Classが見つかりません。")
             throw ClassRepositoryError.NoDataFoundInResponse
             
         } catch {
-            print("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
+            logger.error("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
             throw error
         }
     }
