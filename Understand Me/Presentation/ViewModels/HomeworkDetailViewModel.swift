@@ -55,24 +55,28 @@ class HomeworkDetailViewModel: ObservableObject {
     @Published var homework: HomeworkWithStatus?
     @Published var classDetail: Class?
     @Published var homeworkLinkTxt: String = ""
-    @Published var resultsPerMonth: [AverageResultPerMonth] = []
+    @Published var result: Result? = nil
     
     private let homeworkUseCase: HomeworkUseCase
     private let classUseCase: ClassUseCase
     private let projectUseCase: ProjectUseCase
     private let authenticationUseCase: AuthenticationUseCase
+    private let resultUseCase: ResultUseCase
+    
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     init(
         homeworkUseCase: HomeworkUseCase,
         classUseCase: ClassUseCase,
         projectUseCase: ProjectUseCase,
-        authenticationUseCase: AuthenticationUseCase
+        authenticationUseCase: AuthenticationUseCase,
+        resultUseCase: ResultUseCase
     ) {
         self.homeworkUseCase = homeworkUseCase
         self.classUseCase = classUseCase
         self.projectUseCase = projectUseCase
         self.authenticationUseCase = authenticationUseCase
+        self.resultUseCase = resultUseCase
     }
     
     
@@ -177,6 +181,23 @@ class HomeworkDetailViewModel: ObservableObject {
             logger.error("HomeworkDetailViewModel.loadClassDetail: クラス情報の取得に失敗しました。\(error.localizedDescription)")
         }
     }
+    
+    
+    @MainActor
+    func loadResult(homeworkID: String) async {
+        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            logger.error("QuestionsViewModel.loadAnswersForReview: ログイン中のUserがありません。")
+            return
+        }
+
+        do {
+            self.result = try await resultUseCase.fetchResult(userID: authDataResult.id, homeworkID: homeworkID)
+        } catch {
+            // TODO: Show error to the user
+            logger.error("QuestionsViewModel.loadResult: \(error.localizedDescription)")
+        }
+    }
+
     
 }
 
