@@ -17,9 +17,10 @@ struct HomeworkDetailView: View {
         homeworkUseCase: HomeworkUseCase = .init(homeworkRepository: LollipopHomeworkRepository()),
         classUseCase: ClassUseCase = .init(classRepository: LollipopClassRepository()),
         projectUseCase: ProjectUseCase = .init(projectRepository: LollipopProjectRepository()),
-        authenticationUseCase: AuthenticationUseCase = .init(authenticationRepository: FirebaseAuthenticationRepository())
+        authenticationUseCase: AuthenticationUseCase = .init(authenticationRepository: FirebaseAuthenticationRepository()),
+        resultUseCase: ResultUseCase = .init(resultRepo: LollipopResultRepository())
     ) {
-        self._viewModel = .init(wrappedValue: .init(homeworkUseCase: homeworkUseCase, classUseCase: classUseCase, projectUseCase: projectUseCase, authenticationUseCase: authenticationUseCase))
+        self._viewModel = .init(wrappedValue: .init(homeworkUseCase: homeworkUseCase, classUseCase: classUseCase, projectUseCase: projectUseCase, authenticationUseCase: authenticationUseCase, resultUseCase: resultUseCase))
         
         self.id = id
     }
@@ -55,6 +56,7 @@ struct HomeworkDetailView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .refreshable {
                     await viewModel.loadInfoOfHomework(homeworkID: id)
+                    await viewModel.loadResult(homeworkID: id)
                 }
             } else {
                 ProgressView()
@@ -64,6 +66,7 @@ struct HomeworkDetailView: View {
         }
         .task(id: id) {
             await viewModel.loadInfoOfHomework(homeworkID: id)
+            await viewModel.loadResult(homeworkID: id)
         }
     }
     
@@ -147,12 +150,36 @@ struct HomeworkDetailView: View {
         }
     }
     
-    
-    private func homeworkTitleDescription(homework: HomeworkWithStatus, classInfo: Class) -> some View {
+    @ViewBuilder
+    private func homeworkTitleDescription(
+        homework: HomeworkWithStatus,
+        classInfo: Class
+    ) -> some View {
         VStack(alignment: .leading) {
-            Text(homework.title)
-                .font(.title.bold())
-                .padding(.bottom, 7)
+            HStack {
+                Text(homework.title)
+                    .font(.title.bold())
+                    .padding(.bottom, 7)
+                
+                Spacer()
+                
+                if let score = viewModel.result?.score {
+                    Text("\(score)点")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.primary)
+                        .padding()
+                        .background(
+                            Circle()
+                                .stroke(lineWidth: 4)
+                                .foregroundStyle(LinearGradient(
+                                    gradient: Gradient(colors: [.accent, .secAccent]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ))
+                        )
+                        .padding(.trailing, 20)
+                }
+            }
             
             HStack {
                 Image(systemName: "graduationcap")
@@ -245,7 +272,6 @@ struct HomeworkDetailView: View {
             homeworkUseCase: HomeworkUseCase(homeworkRepository: TestHomeworkRepository()),
             classUseCase: ClassUseCase(classRepository: TestClassRepository()),
             projectUseCase: ProjectUseCase(projectRepository: TestProjectRepository()),
-            authenticationUseCase: AuthenticationUseCase(authenticationRepository: TestAuthenticationRepository())
-        )
+            authenticationUseCase: AuthenticationUseCase(authenticationRepository: TestAuthenticationRepository()), resultUseCase: ResultUseCase(resultRepo: TestResultRepository()))
     }
 }
