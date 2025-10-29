@@ -10,9 +10,16 @@ import SwiftUI
 @main
 struct Understand_MeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject var router = AppRouter()
+    
+    
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .environmentObject(router)
+                .onAppear {
+                    delegate.router = router
+                }
         }
     }
 }

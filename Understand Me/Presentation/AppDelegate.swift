@@ -14,6 +14,10 @@ import OSLog
 class AppDelegate: NSObject, UIApplicationDelegate {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
+    var router: AppRouter?
+    
+    
+    
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
@@ -42,12 +46,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
     
+    
+    
     // Apple Push Notificationサービスへの登録が成功した場合に呼ばれる
     func application(_ application: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
     }
 }
+
+
 
 // MARK: - MessagingDelegate
 extension AppDelegate: MessagingDelegate {
@@ -69,6 +77,8 @@ extension AppDelegate: MessagingDelegate {
     }
 }
 
+
+
 // MARK: - UNUserNotificationCenterDelegate
 extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter,
@@ -77,10 +87,20 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         completionHandler([[.banner, .sound]])
     }
     
+    
+    
+    // 通知をタップしてアプリを開いたときに呼ばれる関数
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        print(response.notification.request.content.userInfo["homeworkId"])
+        
+      // 通知の中のHomeworkIdを取得する
+        if let homeworkIDFromNotification = response.notification.request.content.userInfo["homeworkId"] as? String {
+            DispatchQueue.main.async {
+                self.router?.selectedHomeworkID = homeworkIDFromNotification
+            }
+        }
+        
         completionHandler()
     }
 }
