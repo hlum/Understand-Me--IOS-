@@ -20,6 +20,11 @@ class ResultUseCase {
     }
     
     
+    func fetchResult(userID: String, homeworkID: String) async throws -> Result {
+        try await resultRepo.fetchResult(userID: userID, homeworkID: homeworkID)
+    }
+    
+    
     func calculateAverageResultsPerMonth(results: [Result], year: Int) -> [AverageResultPerMonth] {
         let calendar = Calendar.current
         var averageResultsPerMonth: [AverageResultPerMonth] = []
