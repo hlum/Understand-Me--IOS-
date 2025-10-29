@@ -152,7 +152,7 @@ struct HomeView: View {
                 // MARK: - Upcoming Homework
                 VStack(alignment: .leading, spacing: 12) {
                     Button {
-                        
+                        selectedTab = 2
                     } label: {
                         HStack {
                             Text("提出期限が近い課題")
@@ -190,7 +190,7 @@ struct HomeView: View {
                 // MARK: - My Classes
                 VStack(alignment: .leading, spacing: 12) {
                     Button {
-                        
+                        selectedTab = 1
                     } label: {
                         HStack {
                             Text("マイクラス")
