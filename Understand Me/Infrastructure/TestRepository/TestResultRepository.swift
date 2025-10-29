@@ -9,6 +9,10 @@ import Foundation
 
 
 class TestResultRepository: ResultRepository {
+    func fetchResult(userID: String, homeworkID: String) async throws -> Result {
+        return .getDummy()
+    }
+    
     func fetchResults(userID: String, year: Int) async throws -> [Result] {
         return [.getDummy(), .getDummy(), .getDummy()]
     }
