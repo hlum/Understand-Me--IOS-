@@ -73,6 +73,7 @@ struct MainTabView: View {
                 Image(systemName: "graduationcap")
                 Text("クラス")
             }
+            .tag(1)
             
             NavigationStack{
                 HomeworkListView()
@@ -82,6 +83,7 @@ struct MainTabView: View {
                 Image(systemName: "list.bullet.rectangle.portrait")
                 Text("課題")
             }
+            .tag(2)
             
             
             
@@ -94,6 +96,7 @@ struct MainTabView: View {
                 Image(systemName: "person")
                 Text("プロフィール")
             }
+            .tag(3)
         }
         .navigationBarBackButtonHidden(true)
 
