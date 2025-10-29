@@ -152,6 +152,7 @@ struct QuestionsView: View {
             Spacer()
         }
         .navigationTitle(mode == .answering ? "質問一覧" : "回答履歴")
+        .navigationBarBackButtonHidden(true)
         .task {
             await viewModel.loadALlQuestionsWithChoices(homeworkID: homeworkID)
         }
