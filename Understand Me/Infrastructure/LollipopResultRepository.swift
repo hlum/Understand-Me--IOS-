@@ -55,4 +55,45 @@ class LollipopResultRepository: ResultRepository {
             throw error
         }
     }
+    
+    
+    
+    func fetchResult(userID: String, homeworkID: String) async throws -> Result {
+        let url = try lollipopUtility.makeURL("result/get_result_userID_homeworkID.php")
+        
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.queryItems = [
+            URLQueryItem(name: "user_id", value: userID),
+            URLQueryItem(name: "homework_id", value: homeworkID)
+        ]
+        
+        guard let finalURL = components?.url else {
+            throw LollipopError.InvalidURL
+        }
+        
+        let request = try lollipopUtility.makeRequest(url: finalURL, method: "GET")
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        
+        guard let jsonString = response.dataString,
+              let jsonData = jsonString.data(using: .utf8) else {
+            throw URLError(.badServerResponse)
+        }
+
+        do {
+            
+            let decoder = JSONDecoder()
+            let result = try decoder.decode(Result.self, from: jsonData)
+            
+            return result
+            
+        }catch {
+            let rawString = String(data: jsonData, encoding: .utf8) ?? "nil"
+            logger.error("Decodeに失敗したDataの中身: \(rawString)")
+            logger.error("Result のDecodeに失敗しました: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
