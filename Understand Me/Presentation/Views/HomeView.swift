@@ -63,8 +63,8 @@ class HomeViewModel: ObservableObject {
             
             // 1. Filter (.completed じゃないものだけ)
             homeworks = homeworks.filter { $0.submissionState != .completed }
-        
-
+            
+            
             // 2. Sort: dueDate(昇順),
             //    submissionStateの順に並び替え(.notAssigned, .failed, .questionGenerated, .generatingQuestions)
             homeworks.sort { lhs, rhs in
@@ -126,18 +126,21 @@ struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
     
     
-    init(selectedTab: Binding<Int>) {
+    init(
+        selectedTab: Binding<Int>,
+        authenticationRepo: AuthenticationRepository = FirebaseAuthenticationRepository(),
+        userDataRepo: UserDataRepository = LollipopUserDataRepository(),
+        homeworkRepo: HomeworkRepository = LollipopHomeworkRepository(),
+        classRepo: ClassRepository = LollipopClassRepository()
+    ) {
         self._selectedTab = selectedTab
         
         self._viewModel = .init(
             wrappedValue: .init(
-                authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
-                userDataUseCase: UserDataUseCase(
-                    userDataRepository: LollipopUserDataRepository()
-                ),
-                homeworkUseCase: HomeworkUseCase(
-                    homeworkRepository: LollipopHomeworkRepository()
-                ), classUseCase: ClassUseCase(classRepository: LollipopClassRepository())
+                authenticationUseCase: AuthenticationUseCase(authenticationRepository: authenticationRepo),
+                userDataUseCase: UserDataUseCase(userDataRepository: userDataRepo),
+                homeworkUseCase: HomeworkUseCase(homeworkRepository: homeworkRepo),
+                classUseCase: ClassUseCase(classRepository: classRepo)
             )
         )
     }
@@ -297,6 +300,12 @@ struct HomeView: View {
 
 #Preview {
     NavigationStack {
-        HomeView(selectedTab: .constant(1))
+        HomeView(
+            selectedTab: .constant(1),
+            authenticationRepo: TestAuthenticationRepository(),
+            userDataRepo: TestUserRepository(),
+            homeworkRepo: TestHomeworkRepository(),
+            classRepo: TestClassRepository()
+        )
     }
 }
