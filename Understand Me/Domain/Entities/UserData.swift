@@ -11,9 +11,9 @@ struct UserData: Codable {
     let id: String
     let email: String
     let fcmToken: String?
-    let studentCode: String
-    let majorCode: String
-    let admissionYear: Int
+    let studentCode: String?
+    let majorCode: String?
+    let admissionYear: Int?
     let photoURL: String?
     
     
@@ -21,10 +21,10 @@ struct UserData: Codable {
         if studentCode == "99zz"{
             return "Guest"
         }
-        return studentCode
+        return studentCode ?? "Unknown"
     }
     
-    init(id: String, email: String, fcmToken: String?, studentCode: String, majorCode: String, admissionYear: Int, photoURL: String?) {
+    init(id: String, email: String, fcmToken: String?, studentCode: String?, majorCode: String?, admissionYear: Int?, photoURL: String?) {
         self.id = id
         self.email = email
         self.fcmToken = fcmToken

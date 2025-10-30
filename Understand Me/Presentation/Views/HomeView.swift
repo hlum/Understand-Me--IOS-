@@ -27,7 +27,7 @@ struct HomeView: View {
                 authenticationUseCase: AuthenticationUseCase(authenticationRepository: authenticationRepo),
                 userDataUseCase: UserDataUseCase(userDataRepository: userDataRepo),
                 homeworkUseCase: HomeworkUseCase(homeworkRepository: homeworkRepo),
-                classUseCase: ClassUseCase(classRepository: classRepo)
+                classWIthTeacherNameUseCase: ClassWithTeacherNameUseCase(classRepository: classRepo, userRepository: userDataRepo)
             )
         )
     }
@@ -65,7 +65,7 @@ struct HomeView: View {
                             classCell(
                                 classID: classItem.id,
                                 className: classItem.name,
-                                teacherName: classItem.teacherId
+                                teacherName: classItem.teacherName
                             )
                         }
                     }
