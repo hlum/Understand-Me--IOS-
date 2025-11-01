@@ -15,7 +15,7 @@ struct MainTabView: View {
     
     @StateObject private var viewModel = MainTabViewModel(
         userDataUseCase: UserDataUseCase(
-            userDataRepository: LollipopUserDataRepository()
+            userDataRepository: LollipopUserDataRepository(), fcmTokenRepository: LollipopFCMTokenRepository()
         )
     )
     
