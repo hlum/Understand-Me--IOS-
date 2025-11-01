@@ -31,7 +31,7 @@ struct ProfileView: View {
     
     init(
         authenticationUseCase: AuthenticationUseCase = AuthenticationUseCase(authenticationRepository:FirebaseAuthenticationRepository()),
-        userDataUseCase: UserDataUseCase = UserDataUseCase(userDataRepository: LollipopUserDataRepository()),
+        userDataUseCase: UserDataUseCase = UserDataUseCase(userDataRepository: LollipopUserDataRepository(), fcmTokenRepository: LollipopFCMTokenRepository()),
         resultUseCase: ResultUseCase = ResultUseCase(resultRepo: LollipopResultRepository()),
         onSignOut: @escaping () -> ()
     ) {
@@ -314,10 +314,22 @@ struct ProfileView: View {
 #Preview {
     NavigationStack {
         ProfileView(
-            authenticationUseCase: AuthenticationUseCase(authenticationRepository: TestAuthenticationRepository()),
-            userDataUseCase: UserDataUseCase(userDataRepository: TestUserRepository()),
-            resultUseCase: ResultUseCase(resultRepo: TestResultRepository())
-            ,onSignOut: {}
+            
+            authenticationUseCase:
+                AuthenticationUseCase(authenticationRepository: TestAuthenticationRepository()),
+            
+            userDataUseCase:
+                UserDataUseCase(
+                userDataRepository: TestUserRepository(),
+                fcmTokenRepository: TestFCMTokenRepository()
+            ),
+            
+            resultUseCase:
+                ResultUseCase(resultRepo: TestResultRepository())
+            ,
+            
+            onSignOut: {
+            }
         )
     }
 }

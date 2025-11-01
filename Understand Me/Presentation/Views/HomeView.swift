@@ -18,14 +18,15 @@ struct HomeView: View {
         authenticationRepo: AuthenticationRepository = FirebaseAuthenticationRepository(),
         userDataRepo: UserDataRepository = LollipopUserDataRepository(),
         homeworkRepo: HomeworkRepository = LollipopHomeworkRepository(),
-        classRepo: ClassRepository = LollipopClassRepository()
+        classRepo: ClassRepository = LollipopClassRepository(),
+        fcmTokenRepo: FCMTokenRepository = LollipopFCMTokenRepository()
     ) {
         self._selectedTab = selectedTab
         
         self._viewModel = .init(
             wrappedValue: .init(
                 authenticationUseCase: AuthenticationUseCase(authenticationRepository: authenticationRepo),
-                userDataUseCase: UserDataUseCase(userDataRepository: userDataRepo),
+                userDataUseCase: UserDataUseCase(userDataRepository: userDataRepo, fcmTokenRepository: fcmTokenRepo),
                 homeworkUseCase: HomeworkUseCase(homeworkRepository: homeworkRepo),
                 classWIthTeacherNameUseCase: ClassWithTeacherNameUseCase(classRepository: classRepo, userRepository: userDataRepo)
             )
@@ -187,7 +188,8 @@ struct HomeView: View {
             authenticationRepo: TestAuthenticationRepository(),
             userDataRepo: TestUserRepository(),
             homeworkRepo: TestHomeworkRepository(),
-            classRepo: TestClassRepository()
+            classRepo: TestClassRepository(),
+            fcmTokenRepo: TestFCMTokenRepository()
         )
     }
 }

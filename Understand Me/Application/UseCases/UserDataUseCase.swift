@@ -10,10 +10,17 @@ import OSLog
 
 class UserDataUseCase {
     private let userDataRepository: UserDataRepository
+    private let fcmTokenRepository: FCMTokenRepository
+    private let deviceManager = DeviceManager.shared
+    
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "UseCase")
     
-    init(userDataRepository: UserDataRepository) {
+    init(
+        userDataRepository: UserDataRepository,
+        fcmTokenRepository: FCMTokenRepository
+    ) {
         self.userDataRepository = userDataRepository
+        self.fcmTokenRepository = fcmTokenRepository
     }
     
     
@@ -39,6 +46,9 @@ class UserDataUseCase {
     
     
     func updateFCMToken(userID: String, fcmToken: String) async throws {
-        try await userDataRepository.updateFCMToken(userID: userID, fcmToken: fcmToken)
+        let deviceID = deviceManager.getDeviceID()
+        let deviceType = deviceManager.getDeviceType()
+        
+        try await fcmTokenRepository.saveOrUpdateToken(userID: userID, deviceID: deviceID, deviceType: deviceType, fcmToken: fcmToken)
     }
 }
