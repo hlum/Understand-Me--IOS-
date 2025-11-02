@@ -51,4 +51,10 @@ class UserDataUseCase {
         
         try await fcmTokenRepository.saveOrUpdateToken(userID: userID, deviceID: deviceID, deviceType: deviceType, fcmToken: fcmToken)
     }
+    
+    func deleteFCMToken(userID: String) async throws {
+        let deviceID = deviceManager.getDeviceID()
+        
+        try await fcmTokenRepository.deleteFcmToken(userID: userID, deviceID: deviceID)
+    }
 }

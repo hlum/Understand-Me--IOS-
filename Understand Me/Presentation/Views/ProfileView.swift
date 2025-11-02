@@ -289,8 +289,10 @@ struct ProfileView: View {
     @ViewBuilder
     private var logoutBtn: some View {
         Button {
-            viewModel.signOut()
-            onSignOut()
+            Task {
+                await viewModel.signOut()
+                onSignOut()
+            }
         } label: {
             HStack {
                 Image(systemName: "rectangle.portrait.and.arrow.right")

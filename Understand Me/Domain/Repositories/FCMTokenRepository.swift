@@ -9,4 +9,5 @@ import Foundation
 
 protocol FCMTokenRepository {
     func saveOrUpdateToken(userID: String, deviceID: String, deviceType: String, fcmToken: String) async throws
+    func deleteFcmToken(userID: String, deviceID: String) async throws
 }
