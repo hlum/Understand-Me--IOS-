@@ -101,10 +101,18 @@ class ProfileViewModel: ObservableObject {
     
     
     func signOut() {
-        do {
-            try authenticationUseCase.signOut()
-        } catch {
-            showErrorAlert(message: errorMessage.description)
+        Task {
+            do {
+                // FCMトークンを削除
+                if let authDataResult = await authenticationUseCase.fetchCurrentUser() {
+                    try await userDataUseCase.deleteFCMToken(userID: authDataResult.id)
+                }
+                
+                // ログアウト
+                try authenticationUseCase.signOut()
+            } catch {
+                await showErrorAlert(message: error.localizedDescription)
+            }
         }
     }
     

@@ -13,5 +13,9 @@ class TestFCMTokenRepository: FCMTokenRepository {
     func saveOrUpdateToken(userID: String, deviceID: String, deviceType: String, fcmToken: String) async throws {
         return
     }
+    
+    func deleteFcmToken(userID: String, deviceID: String) async throws {
+        return
+    }
 
 }
