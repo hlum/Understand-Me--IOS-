@@ -289,7 +289,8 @@ struct ProfileView: View {
     @ViewBuilder
     private var logoutBtn: some View {
         Button {
-            viewModel.signOut {
+            Task {
+                await viewModel.signOut()
                 onSignOut()
             }
         } label: {
