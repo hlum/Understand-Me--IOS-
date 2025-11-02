@@ -100,7 +100,7 @@ class ProfileViewModel: ObservableObject {
     }
     
     
-    func signOut() {
+    func signOut(completion: @escaping () -> Void) {
         Task {
             do {
                 // FCMトークンを削除
@@ -110,6 +110,11 @@ class ProfileViewModel: ObservableObject {
                 
                 // ログアウト
                 try authenticationUseCase.signOut()
+                
+                // ログアウト完了後にコールバックを呼ぶ
+                await MainActor.run {
+                    completion()
+                }
             } catch {
                 await showErrorAlert(message: error.localizedDescription)
             }
