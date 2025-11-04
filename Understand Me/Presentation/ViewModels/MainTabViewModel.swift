@@ -59,10 +59,13 @@ class MainTabViewModel: ObservableObject {
                 return
             }
             
+            // nameはAuthDataResultModelから取得、なければemailを使用
+            let name = authDataResult.name ?? email
             
             let userData = UserData(
                 id: authDataResult.id,
                 email: email,
+                name: name,
                 fcmToken: nil,
                 studentCode: info.studentCode,
                 majorCode: info.className,
