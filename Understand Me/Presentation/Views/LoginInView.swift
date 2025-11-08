@@ -56,7 +56,12 @@ struct LoginInView: View {
             
             
             Button {
-                
+                Task {
+                    let authDataResult = await viewModel.signInWithApple()
+                    if let authDataResult {
+                        onLoginCompleted(authDataResult)
+                    }
+                }
             } label: {
                 SignInWithAppleButtonViewRepresentable(type: .default, style: .black)
                     .frame(height: 55)

@@ -9,10 +9,46 @@ import Foundation
 import FirebaseAuth
 
 class FirebaseAuthenticationRepository: AuthenticationRepository {
+    private let appleSignInCoordinator: AppleSignInCoordinator
+    
+    
+    init(appleSignInCoordinator: AppleSignInCoordinator = AppleSignInCoordinator()) {
+        self.appleSignInCoordinator = appleSignInCoordinator
+    }
+    
+    
     func signInWithGoogle(token: Token) async throws -> AuthDataResultModel {
         let credential = GoogleAuthProvider.credential(withIDToken: token.idToken, accessToken: token.accessToken)
         return try await signInWithCredential(credential: credential)
     }
+    
+    
+    func signInWithApple() async throws -> AuthDataResultModel {
+        
+        try await withCheckedThrowingContinuation { continuation in
+            appleSignInCoordinator.startSignInWithAppleFlow { result in
+                
+                switch result {
+                          
+                    case .success(let appleSignInResult):
+                        let credential = OAuthProvider.appleCredential(
+                            withIDToken: appleSignInResult.idToken,
+                            rawNonce: appleSignInResult.rawNonce,
+                            fullName: appleSignInResult.fullName
+                        )
+                        
+                        Task {
+                            let authData = try await self.signInWithCredential(credential: credential)
+                            continuation.resume(returning: authData)
+                        }
+                        
+                    case .failure(let error):
+                        continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
     
     func fetchCurrentUser() -> AuthDataResultModel? {
         guard let currentUser = Auth.auth().currentUser else {

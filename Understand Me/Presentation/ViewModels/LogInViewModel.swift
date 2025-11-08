@@ -24,11 +24,23 @@ class LogInViewModel: ObservableObject {
     
     func signInWithGoogle() async -> AuthDataResultModel? {
         do {
-            return try await authenticationUseCase.signIn()
+            return try await authenticationUseCase.signInWithGoogle()
         } catch {
             showErrorAlert(message: "ログイン失敗しました。もう一度お試しください。")
             logger.error("Login失敗。詳細: \(error.localizedDescription)")
             return nil
+        }
+    }
+    
+    
+    func signInWithApple() async -> AuthDataResultModel? {
+        do {
+            return try await authenticationUseCase.signInWithApple()
+        } catch  {
+            showErrorAlert(message: "ログイン失敗しました。もう一度お試しください。")
+            logger.error("Login失敗。詳細: \(error.localizedDescription)")
+            return nil
+
         }
     }
     
