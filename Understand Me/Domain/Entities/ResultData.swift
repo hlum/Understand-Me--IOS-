@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Result: Decodable {
+struct ResultData: Decodable {
     let id: String
     let userID: String
     let homeworkID: String
@@ -68,8 +68,8 @@ struct Result: Decodable {
     
     
     
-    static func getDummy() -> Result {
-        return Result(
+    static func getDummy() -> ResultData {
+        return ResultData(
             id: UUID().uuidString,
             userID: UUID().uuidString,
             homeworkID: UUID().uuidString,
