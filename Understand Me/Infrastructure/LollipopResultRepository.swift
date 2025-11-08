@@ -13,7 +13,7 @@ class LollipopResultRepository: ResultRepository {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
     
     
-    func fetchResults(userID: String, year: Int) async throws -> [Result] {
+    func fetchResults(userID: String, year: Int) async throws -> [ResultData] {
         let url = try lollipopUtility.makeURL("result/get_result.php")
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.queryItems = [
@@ -44,7 +44,7 @@ class LollipopResultRepository: ResultRepository {
         do {
             
             let decoder = JSONDecoder()
-            let results = try decoder.decode([Result].self, from: jsonData)
+            let results = try decoder.decode([ResultData].self, from: jsonData)
             
             return results
             
@@ -58,7 +58,7 @@ class LollipopResultRepository: ResultRepository {
     
     
     
-    func fetchResult(userID: String, homeworkID: String) async throws -> Result {
+    func fetchResult(userID: String, homeworkID: String) async throws -> ResultData {
         let url = try lollipopUtility.makeURL("result/get_result_userID_homeworkID.php")
         
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
@@ -85,7 +85,7 @@ class LollipopResultRepository: ResultRepository {
         do {
             
             let decoder = JSONDecoder()
-            let result = try decoder.decode(Result.self, from: jsonData)
+            let result = try decoder.decode(ResultData.self, from: jsonData)
             
             return result
             

@@ -11,7 +11,7 @@ import OSLog
 
 class ProfileViewModel: ObservableObject {
     @Published var userData: UserData?
-    @Published var results: [Result] = []
+    @Published var results: [ResultData] = []
     @Published var averageResultsPerMonth: [AverageResultPerMonth] = []
     @Published var averageScoreOfAllResults: Int = 0
 
@@ -104,7 +104,7 @@ class ProfileViewModel: ObservableObject {
         do {
             // FCMトークンを削除
             if let authDataResult = await authenticationUseCase.fetchCurrentUser() {
-                try await userDataUseCase.deleteFCMToken(userID: authDataResult.id)
+                try? await userDataUseCase.deleteFCMToken(userID: authDataResult.id)
             }
             
             // ログアウト

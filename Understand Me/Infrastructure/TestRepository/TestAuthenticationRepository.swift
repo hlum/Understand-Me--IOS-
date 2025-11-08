@@ -8,6 +8,10 @@
 import Foundation
 
 class TestAuthenticationRepository: AuthenticationRepository {
+    func signInWithApple() async throws -> AuthDataResultModel {
+        return .dummy()
+    }
+    
     var currentUser: AuthDataResultModel? = AuthDataResultModel.dummy()
     
     func signInWithGoogle(token: Token) async throws -> AuthDataResultModel {

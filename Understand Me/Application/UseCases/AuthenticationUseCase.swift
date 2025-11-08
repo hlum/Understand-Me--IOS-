@@ -14,10 +14,15 @@ class AuthenticationUseCase {
         self.authenticationRepository = authenticationRepository
     }
     
-    func signIn() async throws -> AuthDataResultModel {
+    func signInWithGoogle() async throws -> AuthDataResultModel {
         let helper = SignInGoogleHelper()
         let tokens = try await helper.signIn()
         return try await authenticationRepository.signInWithGoogle(token: tokens)
+    }
+    
+    
+    func signInWithApple() async throws -> AuthDataResultModel {
+        try await authenticationRepository.signInWithApple()
     }
     
     func fetchCurrentUser() async -> AuthDataResultModel? {

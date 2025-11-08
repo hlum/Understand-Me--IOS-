@@ -15,17 +15,17 @@ class ResultUseCase {
     }
     
     
-    func fetchResults(userID: String, year: Int) async throws -> [Result] {
+    func fetchResults(userID: String, year: Int) async throws -> [ResultData] {
         try await resultRepo.fetchResults(userID: userID, year: year)
     }
     
     
-    func fetchResult(userID: String, homeworkID: String) async throws -> Result {
+    func fetchResult(userID: String, homeworkID: String) async throws -> ResultData {
         try await resultRepo.fetchResult(userID: userID, homeworkID: homeworkID)
     }
     
     
-    func calculateAverageResultsPerMonth(results: [Result], year: Int) -> [AverageResultPerMonth] {
+    func calculateAverageResultsPerMonth(results: [ResultData], year: Int) -> [AverageResultPerMonth] {
         let calendar = Calendar.current
         var averageResultsPerMonth: [AverageResultPerMonth] = []
         

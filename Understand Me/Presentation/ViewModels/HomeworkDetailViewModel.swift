@@ -22,7 +22,7 @@ struct AverageResultPerMonth: Identifiable {
     }
     
     
-    init(resultsOfOneMonth: [Result]) {
+    init(resultsOfOneMonth: [ResultData]) {
         self.month = resultsOfOneMonth.first?.evaluatedAt ?? Date()
         let totalScore = resultsOfOneMonth.reduce(0.0) { partialResult, result in
             partialResult + Double(result.score)
@@ -55,7 +55,7 @@ class HomeworkDetailViewModel: ObservableObject {
     @Published var homework: HomeworkWithStatus?
     @Published var classDetail: Class?
     @Published var homeworkLinkTxt: String = ""
-    @Published var result: Result? = nil
+    @Published var result: ResultData? = nil
     
     private let homeworkUseCase: HomeworkUseCase
     private let classUseCase: ClassUseCase

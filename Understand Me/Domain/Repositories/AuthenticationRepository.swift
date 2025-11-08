@@ -10,6 +10,7 @@ import FirebaseAuth
 
 protocol AuthenticationRepository {
     func signInWithGoogle(token: Token) async throws -> AuthDataResultModel
+    func signInWithApple() async throws -> AuthDataResultModel
     func fetchCurrentUser() -> AuthDataResultModel?
     func signOut() throws
 }
