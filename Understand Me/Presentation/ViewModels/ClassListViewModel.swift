@@ -14,7 +14,6 @@ class ClassListViewModel: ObservableObject {
     @Published var classCode: String = ""
     @Published var classCodeErrorMessage: String = ""
     @Published var showAddOptionalClassSheet: Bool = false
-
     private let classUseCase: ClassUseCase
     private let authenticationUseCase: AuthenticationUseCase
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
