@@ -56,6 +56,8 @@ class HomeworkDetailViewModel: ObservableObject {
     @Published var classDetail: Class?
     @Published var homeworkLinkTxt: String = ""
     @Published var result: ResultData? = nil
+    @Published var errorMessage: String = ""
+    @Published var showErrorAlert: Bool = false
     
     private let homeworkUseCase: HomeworkUseCase
     private let classUseCase: ClassUseCase
@@ -93,17 +95,19 @@ class HomeworkDetailViewModel: ObservableObject {
     
     func uploadProject() async {
         guard let _ = URL(string: homeworkLinkTxt) else {
-            // TODO: USER にAlertで知らせる
+            await showAlert(message: "URLの形式が不正です。正しいURLを入力してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: URLの形式が不正です。")
             return
         }
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            await showAlert(message: "ログイン情報を取得できませんでした。")
             logger.error("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
             return
         }
         
         guard let homework = homework else {
+            await showAlert(message: "宿題の情報が見つかりません。")
             logger.error("HomeworkDetailViewModel.uploadProject: 宿題の情報がありません。")
             return
         }
@@ -114,9 +118,12 @@ class HomeworkDetailViewModel: ObservableObject {
                 homeworkID: homework.id,
                 githubURLString: homeworkLinkTxt
             )
+        } catch let error as LollipopError {
+            await showAlert(message: error.errorDescription ?? "プロジェクトのアップロードに失敗しました。")
+            logger.error("HomeworkDetailViewModel.uploadProject: \(error.debugDescription)")
         } catch {
-            // TODO: Alert the user and impl retry methods
-            logger.error("HomeworkDetailViewModel.uploadProject: プロジェクトのアップロードに失敗しました。\(error.localizedDescription)")
+            await showAlert(message: "プロジェクトのアップロードに失敗しました。")
+            logger.error("HomeworkDetailViewModel.uploadProject: \(error.localizedDescription)")
         }
     }
     
@@ -125,15 +132,19 @@ class HomeworkDetailViewModel: ObservableObject {
     func retryQuestionGeneration(homeworkID: String) async  {
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            await showAlert(message: "ログイン情報を取得できませんでした。")
             logger.error("HomeworkDetailViewModel.retryQuestionGeneration: ログインしているユーザーがいません。")
             return
         }
         
         do {
             try await homeworkUseCase.retryQuestionGeneration(homeworkID: homeworkID, studentID: authDataResult.id)
+        } catch let error as LollipopError {
+            await showAlert(message: error.errorDescription ?? "問題生成の再試行に失敗しました。")
+            logger.error("HomeworkDetailViewModel.retryQuestionGeneration: \(error.debugDescription)")
         } catch {
-            // TODO: Alert the user
-            logger.error("HomeworkDetailViewModel.retryQuestionGeneration: リトライ失敗.\(error.localizedDescription)")
+            await showAlert(message: "問題生成の再試行に失敗しました。")
+            logger.error("HomeworkDetailViewModel.retryQuestionGeneration: \(error.localizedDescription)")
         }
     }
     
@@ -141,15 +152,19 @@ class HomeworkDetailViewModel: ObservableObject {
     
     func cancelHomeworkSubmission(homeworkID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            await showAlert(message: "ログイン情報を取得できませんでした。")
             logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: ログインしているユーザーがいません。")
             return
         }
         
         do {
             try await homeworkUseCase.cancelHomeworkSubmission(homeworkID: homeworkID, studentID: authDataResult.id)
+        } catch let error as LollipopError {
+            await showAlert(message: error.errorDescription ?? "宿題提出の取り消しに失敗しました。")
+            logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: \(error.debugDescription)")
         } catch {
-            // TODO: Alert the user
-            logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: 取り消し失敗.\(error.localizedDescription)")
+            await showAlert(message: "宿題提出の取り消しに失敗しました。")
+            logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: \(error.localizedDescription)")
         }
     }
     
@@ -161,13 +176,18 @@ class HomeworkDetailViewModel: ObservableObject {
         do {
             
             guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+                showAlert(message: "ログイン情報を取得できませんでした。")
                 logger.error("HomeworkDetailViewModel.loadHomework: ログインしているユーザーがいません。")
                 return
             }
             
             homework = try await homeworkUseCase.fetchHomework(id: id, studentID: authDataResult.id)
+        } catch let error as LollipopError {
+            showAlert(message: error.errorDescription ?? "宿題の取得に失敗しました。")
+            logger.error("HomeworkDetailViewModel.loadHomework: \(error.debugDescription)")
         } catch {
-            logger.error("HomeworkDetailViewModel.loadHomework: 宿題の取得に失敗しました。\(error.localizedDescription)")
+            showAlert(message: "宿題の取得に失敗しました。")
+            logger.error("HomeworkDetailViewModel.loadHomework: \(error.localizedDescription)")
         }
     }
     
@@ -177,8 +197,12 @@ class HomeworkDetailViewModel: ObservableObject {
     private func loadClassDetail(classID: String) async {
         do {
             self.classDetail = try await classUseCase.fetchClass(id: classID)
+        } catch let error as LollipopError {
+            showAlert(message: error.errorDescription ?? "クラス情報の取得に失敗しました。")
+            logger.error("HomeworkDetailViewModel.loadClassDetail: \(error.debugDescription)")
         } catch {
-            logger.error("HomeworkDetailViewModel.loadClassDetail: クラス情報の取得に失敗しました。\(error.localizedDescription)")
+            showAlert(message: "クラス情報の取得に失敗しました。")
+            logger.error("HomeworkDetailViewModel.loadClassDetail: \(error.localizedDescription)")
         }
     }
     
@@ -186,18 +210,27 @@ class HomeworkDetailViewModel: ObservableObject {
     @MainActor
     func loadResult(homeworkID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
+            showAlert(message: "ログイン情報を取得できませんでした。")
             logger.error("QuestionsViewModel.loadAnswersForReview: ログイン中のUserがありません。")
             return
         }
 
         do {
             self.result = try await resultUseCase.fetchResult(userID: authDataResult.id, homeworkID: homeworkID)
+        } catch let error as LollipopError {
+            showAlert(message: error.errorDescription ?? "結果の取得に失敗しました。")
+            logger.error("QuestionsViewModel.loadResult: \(error.debugDescription)")
         } catch {
-            // TODO: Show error to the user
+            showAlert(message: "結果の取得に失敗しました。")
             logger.error("QuestionsViewModel.loadResult: \(error.localizedDescription)")
         }
     }
 
+    @MainActor
+    private func showAlert(message: String) {
+        errorMessage = message
+        showErrorAlert = true
+    }
     
 }
 

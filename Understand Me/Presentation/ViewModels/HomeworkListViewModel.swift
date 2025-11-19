@@ -40,6 +40,8 @@ class HomeworkListViewModel: ObservableObject {
     @Published var filteredHomeworks: [HomeworkWithStatus] = []
     @Published var searchText = ""
     @Published var selectedFilter: HomeworkFilterOption = .all
+    @Published var errorMessage: String = ""
+    @Published var showErrorAlert: Bool = false
     
     private var cancellables: Set<AnyCancellable> = []
     
@@ -80,8 +82,12 @@ class HomeworkListViewModel: ObservableObject {
         
         do {
             self.allHomeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id).sorted(by: { $0.dueDate! < $1.dueDate! })
+        } catch let error as LollipopError {
+            showAlert(message: error.errorDescription ?? "宿題一覧の取得に失敗しました。")
+            logger.error("HomeworkListViewModel.loadHomeworks: \(error.debugDescription)")
         } catch {
-            logger.error("HomeworkListViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
+            showAlert(message: "宿題一覧の取得に失敗しました。")
+            logger.error("HomeworkListViewModel.loadHomeworks: \(error.localizedDescription)")
         }
     }
     
@@ -142,5 +148,10 @@ extension HomeworkListViewModel {
         }
     }
     
+    @MainActor
+    private func showAlert(message: String) {
+        errorMessage = message
+        showErrorAlert = true
+    }
     
 }

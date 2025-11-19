@@ -64,10 +64,7 @@ class LollipopClassRepository: ClassRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
         
         guard let jsonString = response.dataString,
               let jsonData = jsonString.data(using: .utf8) else {
@@ -76,9 +73,14 @@ class LollipopClassRepository: ClassRepository {
 
         do {
             let classes = try JSONDecoder().decode([Class].self, from: jsonData)
-            return classes.first
+            if let firstClass = classes.first {
+                logger.info("クラス情報の取得に成功: classCode=\(classCode)")
+                return firstClass
+            }
+            logger.info("クラスが見つかりませんでした: classCode=\(classCode)")
+            return nil
         } catch {
-            logger.error("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
+            logger.error("クラスのDecodeに失敗: \(error.localizedDescription)")
             throw error
         }
     }
