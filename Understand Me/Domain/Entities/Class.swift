@@ -14,12 +14,14 @@ struct Class: Identifiable, Codable {
     let name: String // 授業名
     let admissionYear: Int // 入学年 2024->24, 2023->23
     let majorCode: String // 専攻コード 例： cm, ac..
+    let classCode: String? // 選択科目のときに使うコード
     
     enum CodingKeys: String, CodingKey {
         case id, name
         case teacherId = "teacher_id"
         case admissionYear = "admission_year"
         case majorCode = "major_code"
+        case classCode = "class_code"
     }
     
     static func getDummy() -> Self {
@@ -28,7 +30,8 @@ struct Class: Identifiable, Codable {
             teacherId: UUID().uuidString,
             name: "IOSプログラミング 1",
             admissionYear: 24,
-            majorCode: "cm"
+            majorCode: "cm",
+            classCode: nil
         )
     }
 }

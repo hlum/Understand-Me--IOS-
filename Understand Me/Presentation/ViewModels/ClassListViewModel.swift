@@ -43,6 +43,10 @@ class ClassListViewModel: ObservableObject {
             try await classUseCase.addOptionalClass(classCode: classCode, userID: authData.id)
             showAddOptionalClassSheet = false
             await loadClasses()
+        } catch(ClassUseCaseErrors.InvalidClassCode) {
+            showClassCodeError(message: "学科コードが無効です。")
+        } catch(ClassUseCaseErrors.AlreadyEnrolled) {
+            showClassCodeError(message: "すでにこの科目に登録されています。")
         } catch {
             showClassCodeError(message: "予期せぬエラ発生しました、もう一度やり直してください！")
         }
