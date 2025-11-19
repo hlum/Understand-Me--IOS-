@@ -29,6 +29,7 @@ class LollipopProjectRepository: ProjectRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
+        logger.info("プロジェクトのアップロードに成功: homeworkID=\(homeworkID), userID=\(userID)")
     }
     
     

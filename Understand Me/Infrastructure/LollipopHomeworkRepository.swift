@@ -61,8 +61,11 @@ class LollipopHomeworkRepository: HomeworkRepository {
         
         do {
             try lollipopAPIUtility.checkResponseForErrors(response)
+        } catch let error as LollipopError {
+            logger.error("宿題一覧の取得に失敗: \(error.debugDescription)")
+            return []
         } catch {
-            logger.error("エラー: \(error.localizedDescription)")
+            logger.error("宿題一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
             return []
         }
         
@@ -110,6 +113,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
+        logger.info("問題生成の再試行に成功: homeworkID=\(homeworkID)")
     }
     
     
@@ -125,6 +129,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
+        logger.info("宿題提出のキャンセルに成功: homeworkID=\(homeworkID)")
 
     }
     

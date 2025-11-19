@@ -33,6 +33,7 @@ class LollipopFCMTokenRepository: FCMTokenRepository {
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
         try lollipopUtility.checkResponseForErrors(response)
+        logger.info("FCMトークンの保存/更新に成功: userID=\(userID), deviceID=\(deviceID)")
     }
     
     func deleteFcmToken(userID: String, deviceID: String) async throws {
@@ -47,6 +48,7 @@ class LollipopFCMTokenRepository: FCMTokenRepository {
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
         try lollipopUtility.checkResponseForErrors(response)
+        logger.info("FCMトークンの削除に成功: userID=\(userID), deviceID=\(deviceID)")
     }
     
 }

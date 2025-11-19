@@ -43,6 +43,7 @@ class LollipopClassRepository: ClassRepository {
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
+        logger.info("選択科目の追加に成功: classCode=\(classCode), userID=\(userID)")
     }
 
     
@@ -65,8 +66,11 @@ class LollipopClassRepository: ClassRepository {
         
         do {
             try lollipopAPIUtility.checkResponseForErrors(response)
+        } catch let error as LollipopError {
+            logger.error("クラス一覧の取得に失敗: \(error.debugDescription)")
+            return []
         } catch {
-            logger.error("エラー: \(error.localizedDescription)")
+            logger.error("クラス一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
             return []
         }
         
@@ -77,9 +81,10 @@ class LollipopClassRepository: ClassRepository {
 
         do {
             let classes = try JSONDecoder().decode([Class].self, from: jsonData)
+            logger.info("クラス一覧の取得成功: \(classes.count)件")
             return classes
         } catch {
-            logger.error("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
+            logger.error("クラスのデータのDecodeに失敗: \(error.localizedDescription)")
             throw error
         }
     }
@@ -113,13 +118,16 @@ class LollipopClassRepository: ClassRepository {
         do {
             let classData = try JSONDecoder().decode([Class].self, from: jsonData)
             if let firstClass = classData.first {
+                logger.info("クラス情報の取得に成功: classID=\(id)")
                 return firstClass
             }
-            logger.error("LollipopClassRepository.fetch() Classが見つかりません。")
+            logger.error("クラスが配列に含まれていません: classID=\(id)")
             throw ClassRepositoryError.NoDataFoundInResponse
             
+        } catch let error as ClassRepositoryError {
+            throw error
         } catch {
-            logger.error("ClassのDecodeに失敗。失敗: \(error.localizedDescription)")
+            logger.error("クラスのDecodeに失敗: \(error.localizedDescription)")
             throw error
         }
     }

@@ -35,8 +35,11 @@ class LollipopQuestionsWithChoicesRepository: QuestionsWithChoicesRepository {
         
         do {
             try lollipopAPIUtility.checkResponseForErrors(response)
+        } catch let error as LollipopError {
+            logger.error("問題一覧の取得に失敗: \(error.debugDescription)")
+            return []
         } catch {
-            logger.error("エラー: \(error.localizedDescription)")
+            logger.error("問題一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
             return []
         }
         

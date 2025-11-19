@@ -33,8 +33,11 @@ class LollipopResultRepository: ResultRepository {
         
         do {
             try lollipopUtility.checkResponseForErrors(response)
+        } catch let error as LollipopError {
+            logger.error("結果一覧の取得に失敗: \(error.debugDescription)")
+            return []
         } catch {
-            logger.error("エラー: \(error.localizedDescription)")
+            logger.error("結果一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
             return []
         }
         
