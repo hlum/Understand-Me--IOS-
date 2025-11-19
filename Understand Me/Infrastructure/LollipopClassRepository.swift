@@ -42,10 +42,7 @@ class LollipopClassRepository: ClassRepository {
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
     }
 
     
@@ -66,8 +63,10 @@ class LollipopClassRepository: ClassRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
+        do {
+            try lollipopAPIUtility.checkResponseForErrors(response)
+        } catch {
+            logger.error("エラー: \(error.localizedDescription)")
             return []
         }
         
@@ -104,10 +103,7 @@ class LollipopClassRepository: ClassRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
 
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw ClassRepositoryError.NoDataFoundInResponse
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
         
         guard let jsonString = response.dataString,
               let jsonData = jsonString.data(using: .utf8) else {

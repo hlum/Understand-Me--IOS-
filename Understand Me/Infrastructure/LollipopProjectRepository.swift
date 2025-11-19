@@ -28,10 +28,7 @@ class LollipopProjectRepository: ProjectRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
     }
     
     

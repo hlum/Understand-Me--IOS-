@@ -31,8 +31,10 @@ class LollipopResultRepository: ResultRepository {
         
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
+        do {
+            try lollipopUtility.checkResponseForErrors(response)
+        } catch {
+            logger.error("エラー: \(error.localizedDescription)")
             return []
         }
         

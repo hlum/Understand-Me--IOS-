@@ -36,4 +36,24 @@ class LollipopAPIUtility {
         try JSONDecoder().decode(APIResponse.self, from: data)
     }
     
+    /// APIレスポンスのエラーチェックを行い、エラーがある場合は適切な例外を投げる
+    func checkResponseForErrors(_ response: APIResponse) throws {
+        guard response.status == "success" else {
+            switch response.error_type {
+            case "validation_error":
+                throw LollipopError.validation(response.message)
+            case "auth_error":
+                throw LollipopError.auth
+            case "forbidden":
+                throw LollipopError.forbidden
+            case "not_found":
+                throw LollipopError.notFound
+            case "server_error":
+                throw LollipopError.server
+            default:
+                throw LollipopError.invalidResponse
+            }
+        }
+    }
+    
 }

@@ -59,8 +59,10 @@ class LollipopHomeworkRepository: HomeworkRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
+        do {
+            try lollipopAPIUtility.checkResponseForErrors(response)
+        } catch {
+            logger.error("エラー: \(error.localizedDescription)")
             return []
         }
         
@@ -107,10 +109,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
     }
     
     
@@ -125,10 +124,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
 
     }
     

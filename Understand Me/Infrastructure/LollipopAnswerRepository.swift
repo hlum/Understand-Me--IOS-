@@ -33,10 +33,7 @@ class LollipopAnswerRepository: AnswerRepository {
         
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopUtility.checkResponseForErrors(response)
     }
     
     
@@ -58,11 +55,7 @@ class LollipopAnswerRepository: AnswerRepository {
         
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
-        
+        try lollipopUtility.checkResponseForErrors(response)
         
         guard let jsonString = response.dataString,
               let jsonData = jsonString.data(using: .utf8) else {

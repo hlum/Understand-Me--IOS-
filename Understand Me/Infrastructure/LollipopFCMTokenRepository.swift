@@ -32,10 +32,7 @@ class LollipopFCMTokenRepository: FCMTokenRepository {
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopUtility.checkResponseForErrors(response)
     }
     
     func deleteFcmToken(userID: String, deviceID: String) async throws {
@@ -49,10 +46,7 @@ class LollipopFCMTokenRepository: FCMTokenRepository {
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try lollipopUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopUtility.checkResponseForErrors(response)
     }
     
 }

@@ -9,19 +9,34 @@ import Foundation
 import OSLog
 
 enum LollipopError: LocalizedError {
+    case validation(String)
+    case auth
+    case forbidden
+    case notFound
+    case server
+    case invalidResponse
     case InvalidURL
     case NoDataFoundInResponse
-    case InvalidResponseStatus
     case UserNotFound
     
     var errorDescription: String? {
         switch self {
+        case .validation(let message):
+            return "バリデーションエラー: \(message)"
+        case .auth:
+            return "認証エラー: ログインが必要です。"
+        case .forbidden:
+            return "アクセス権限がありません。"
+        case .notFound:
+            return "リソースが見つかりませんでした。"
+        case .server:
+            return "サーバーエラーが発生しました。"
+        case .invalidResponse:
+            return "不正なレスポンスです。"
         case .InvalidURL:
             return "URL が無効です。"
         case .NoDataFoundInResponse:
             return "データが返っていません。"
-        case .InvalidResponseStatus:
-            return "ResponseのStatusがsuccessではありません。"
         case .UserNotFound:
             return "指定されたIDのユーザーが見つかりませんでした。"
         }
@@ -41,10 +56,7 @@ class LollipopUserDataRepository: UserDataRepository {
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
     }
     
     
@@ -63,14 +75,7 @@ class LollipopUserDataRepository: UserDataRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            
-            if response.message.lowercased().contains("ユーザーが存在しません") {
-                throw LollipopError.UserNotFound
-            }
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
 
         guard let jsonString = response.dataString,
               let jsonData = jsonString.data(using: .utf8) else {
@@ -105,10 +110,7 @@ class LollipopUserDataRepository: UserDataRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
     }
 
 }
