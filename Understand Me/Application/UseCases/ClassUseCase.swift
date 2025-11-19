@@ -15,6 +15,11 @@ class ClassUseCase {
     }
     
     
+    func addOptionalClass(classCode: String, userID: String) async throws {
+        // TODO: Class 存在するかをチェックしてユーザーに知らせる
+        try await classRepository.addOptionalClass(classCode: classCode, userID: userID)
+    }
+    
     
     func fetchClass(id: String) async throws -> Class {
         try await classRepository.fetch(id: id)

@@ -30,6 +30,26 @@ class LollipopClassRepository: ClassRepository {
 
     
     
+    func addOptionalClass(classCode: String, userID: String) async throws {
+        let url = try lollipopAPIUtility.makeURL("class/enroll.php")
+        let body = try JSONEncoder().encode([
+            "student_id": userID,
+            "class_code": classCode
+        ])
+        
+        let request = try lollipopAPIUtility.makeRequest(url: url, method: "POST", body: body)
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        
+        guard response.status == "success" else {
+            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
+            throw LollipopError.InvalidResponseStatus
+        }
+    }
+
+    
+    
     func fetchAll(studentID: String) async throws -> [Class] {
         let url = try lollipopAPIUtility.makeURL("class/get_class.php")
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
