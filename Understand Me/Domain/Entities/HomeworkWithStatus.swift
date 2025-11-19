@@ -10,7 +10,7 @@ import Foundation
 struct HomeworkWithStatus: Identifiable, Decodable {
     var id: String
     let title: String
-    let description: String
+    let description: String?
     let dueDateString: String
     let classID: String
     let githubURL: String?

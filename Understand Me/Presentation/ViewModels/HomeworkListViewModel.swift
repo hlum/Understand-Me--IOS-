@@ -135,7 +135,7 @@ extension HomeworkListViewModel {
         
         return homeworks.filter {
             let normalizedTitle = normalize($0.title)
-            let normalizedDescription = normalize($0.description)
+            let normalizedDescription = normalize($0.description ?? "")
             
             return normalizedTitle.contains(normalizedSearchText) ||
             normalizedDescription.contains(normalizedSearchText)

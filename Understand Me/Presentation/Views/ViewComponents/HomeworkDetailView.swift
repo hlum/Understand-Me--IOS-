@@ -192,7 +192,8 @@ struct HomeworkDetailView: View {
             }
             .padding(.bottom, 12)
             
-            Text(homework.description)
+            Text(homework.description ?? "説明はありません。")
+                
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
