@@ -59,8 +59,13 @@ class LollipopHomeworkRepository: HomeworkRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
+        do {
+            try lollipopAPIUtility.checkResponseForErrors(response)
+        } catch let error as LollipopError {
+            logger.error("宿題一覧の取得に失敗: \(error.debugDescription)")
+            return []
+        } catch {
+            logger.error("宿題一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
             return []
         }
         
@@ -107,10 +112,8 @@ class LollipopHomeworkRepository: HomeworkRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
+        logger.info("問題生成の再試行に成功: homeworkID=\(homeworkID)")
     }
     
     
@@ -125,10 +128,8 @@ class LollipopHomeworkRepository: HomeworkRepository {
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
-            throw LollipopError.InvalidResponseStatus
-        }
+        try lollipopAPIUtility.checkResponseForErrors(response)
+        logger.info("宿題提出のキャンセルに成功: homeworkID=\(homeworkID)")
 
     }
     

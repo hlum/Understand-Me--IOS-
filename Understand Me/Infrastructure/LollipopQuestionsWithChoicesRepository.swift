@@ -33,8 +33,13 @@ class LollipopQuestionsWithChoicesRepository: QuestionsWithChoicesRepository {
         
         let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        guard response.status == "success" else {
-            logger.error("ResponseのStatusがsuccessではありません。エラー詳細: \(response.message)")
+        do {
+            try lollipopAPIUtility.checkResponseForErrors(response)
+        } catch let error as LollipopError {
+            logger.error("問題一覧の取得に失敗: \(error.debugDescription)")
+            return []
+        } catch {
+            logger.error("問題一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
             return []
         }
         

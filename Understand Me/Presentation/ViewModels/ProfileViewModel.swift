@@ -49,9 +49,12 @@ class ProfileViewModel: ObservableObject {
         
         do {
             self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
+        } catch let error as LollipopError {
+            showErrorAlert(message: error.errorDescription ?? "ユーザーデータの取得に失敗しました。")
+            logger.error("ProfileViewModel.loadUserData: \(error.debugDescription)")
         } catch {
-            // TODO: UserにAlertで知らせる
-            logger.error("ProfileViewModel.loadUserData: UserDataの取得に失敗しました。")
+            showErrorAlert(message: "ユーザーデータの取得に失敗しました。")
+            logger.error("ProfileViewModel.loadUserData: \(error.localizedDescription)")
         }
     }
     
@@ -67,9 +70,12 @@ class ProfileViewModel: ObservableObject {
         
         do {
             self.results = try await resultUseCase.fetchResults(userID: authDataResult.id, year: currentYearForGraph)
+        } catch let error as LollipopError {
+            showErrorAlert(message: error.errorDescription ?? "結果の取得に失敗しました。")
+            logger.error("ProfileViewModel.loadResults: \(error.debugDescription)")
         } catch {
-            // TODO: UserにAlertで知らせる
-            logger.error("ProfileViewModel.loadResults: Resultの取得に失敗しました。")
+            showErrorAlert(message: "結果の取得に失敗しました。")
+            logger.error("ProfileViewModel.loadResults: \(error.localizedDescription)")
         }
     }
     
@@ -104,7 +110,13 @@ class ProfileViewModel: ObservableObject {
         do {
             // FCMトークンを削除
             if let authDataResult = await authenticationUseCase.fetchCurrentUser() {
-                try? await userDataUseCase.deleteFCMToken(userID: authDataResult.id)
+                do {
+                    try await userDataUseCase.deleteFCMToken(userID: authDataResult.id)
+                } catch let error as LollipopError {
+                    logger.warning("FCMトークンの削除に失敗（ログアウトは続行）: \(error.debugDescription)")
+                } catch {
+                    logger.warning("FCMトークンの削除に失敗（ログアウトは続行）: \(error.localizedDescription)")
+                }
             }
             
             // ログアウト

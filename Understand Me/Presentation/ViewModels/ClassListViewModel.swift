@@ -14,6 +14,8 @@ class ClassListViewModel: ObservableObject {
     @Published var classCode: String = ""
     @Published var classCodeErrorMessage: String = ""
     @Published var showAddOptionalClassSheet: Bool = false
+    @Published var errorMessage: String = ""
+    @Published var showErrorAlert: Bool = false
     private let classUseCase: ClassUseCase
     private let authenticationUseCase: AuthenticationUseCase
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
@@ -43,8 +45,16 @@ class ClassListViewModel: ObservableObject {
             try await classUseCase.addOptionalClass(classCode: classCode, userID: authData.id)
             showAddOptionalClassSheet = false
             await loadClasses()
+        } catch(ClassUseCaseErrors.InvalidClassCode) {
+            showClassCodeError(message: "学科コードが無効です。")
+        } catch(ClassUseCaseErrors.AlreadyEnrolled) {
+            showClassCodeError(message: "すでにこの科目に登録されています。")
+        } catch let error as LollipopError {
+            showClassCodeError(message: error.errorDescription ?? "予期せぬエラーが発生しました。")
+            logger.error("ClassListViewModel.addOptionalClass: \(error.debugDescription)")
         } catch {
-            showClassCodeError(message: "予期せぬエラ発生しました、もう一度やり直してください！")
+            showClassCodeError(message: "予期せぬエラーが発生しました、もう一度やり直してください。")
+            logger.error("ClassListViewModel.addOptionalClass: \(error.localizedDescription)")
         }
     }
     
@@ -58,8 +68,12 @@ class ClassListViewModel: ObservableObject {
         }
         do {
             classes = try await classUseCase.fetchClassList(studentID: authDataResult.id)
+        } catch let error as LollipopError {
+            showAlert(message: error.errorDescription ?? "クラス一覧の取得に失敗しました。")
+            logger.error("ClassListViewModel.loadClasses: \(error.debugDescription)")
         } catch {
-            logger.error("ClassListViewModel.loadClasses: クラスの取得に失敗しました。詳細：\(error.localizedDescription)")
+            showAlert(message: "クラス一覧の取得に失敗しました。")
+            logger.error("ClassListViewModel.loadClasses: \(error.localizedDescription)")
         }
     }
     
@@ -67,5 +81,11 @@ class ClassListViewModel: ObservableObject {
     @MainActor
     func showClassCodeError(message: String) {
         classCodeErrorMessage = message
+    }
+    
+    @MainActor
+    private func showAlert(message: String) {
+        errorMessage = message
+        showErrorAlert = true
     }
 }
