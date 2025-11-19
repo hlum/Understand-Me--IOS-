@@ -8,6 +8,10 @@
 import Foundation
 
 class TestClassRepository: ClassRepository {
+    func addOptionalClass(classCode: String, userID: String) async throws {
+        return
+    }
+    
     func fetch(id: String) async throws -> Class {
         return Class.getDummy()
     }
