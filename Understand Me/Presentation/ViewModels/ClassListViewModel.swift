@@ -11,6 +11,8 @@ import OSLog
 
 class ClassListViewModel: ObservableObject {
     @Published var classes: [Class] = []
+    @Published var classCode: String = ""
+    @Published var classCodeErrorMessage: String = ""
     
     private let classUseCase: ClassUseCase
     private let authenticationUseCase: AuthenticationUseCase
