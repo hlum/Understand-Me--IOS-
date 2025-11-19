@@ -13,8 +13,7 @@ struct ClassListView: View {
         classUseCase: ClassUseCase(classRepository: LollipopClassRepository()),
         authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository())
     )
-    
-    @State private var showAddOptionalClassSheet: Bool = false
+    @State var addOptionalClassLoading: Bool = false
     
     var body: some View {
         Group {
@@ -37,7 +36,7 @@ struct ClassListView: View {
         .toolbar(content: {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    showAddOptionalClassSheet = true
+                    viewModel.showAddOptionalClassSheet = true
                 } label: {
                     Image(systemName: "plus")
                         .bold()
@@ -46,7 +45,7 @@ struct ClassListView: View {
             }
         })
         .foregroundStyle(.primary)
-        .sheet(isPresented: $showAddOptionalClassSheet) {
+        .sheet(isPresented: $viewModel.showAddOptionalClassSheet) {
             addOptionalClassSheetView
                 .presentationDetents([.height(300)])
         }
@@ -70,7 +69,7 @@ struct ClassListView: View {
                 .padding()
                 .frame(maxWidth: .infinity)
                 .frame(height: 55)
-                .background(.background)
+                .background(.gray.opacity(0.3))
                 .cornerRadius(10)
             
             Text(viewModel.classCodeErrorMessage)
@@ -81,17 +80,21 @@ struct ClassListView: View {
             
             
             Button {
-                
+                Task {
+                    addOptionalClassLoading = true
+                    await viewModel.addOptionalClass()
+                    addOptionalClassLoading = false
+                }
             } label: {
-                Text("参加する")
+                Text(addOptionalClassLoading ? "エントリー中。。" : "参加する")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .frame(height: 55)
-                    .background(viewModel.classCode.isEmpty ? .gray.opacity(0.3) : .accent)
-                    .foregroundColor(viewModel.classCode.isEmpty ? .gray : .white)
+                    .background(viewModel.classCode.isEmpty || addOptionalClassLoading ? .gray.opacity(0.3) : .accent)
+                    .foregroundColor(viewModel.classCode.isEmpty || addOptionalClassLoading ? .gray : .white)
                     .cornerRadius(10)
             }
-            .disabled(viewModel.classCode.isEmpty)
+            .disabled(viewModel.classCode.isEmpty || addOptionalClassLoading)
         }
         .padding()
     }
