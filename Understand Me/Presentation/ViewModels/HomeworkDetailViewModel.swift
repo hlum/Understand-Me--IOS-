@@ -206,7 +206,7 @@ class HomeworkDetailViewModel: ObservableObject {
         }
     }
     
-    
+    // TODO: Result should be nullable
     @MainActor
     func loadResult(homeworkID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
