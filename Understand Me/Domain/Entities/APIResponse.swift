@@ -9,7 +9,7 @@ import Foundation
 
 struct APIResponse: Codable {
     let status: String
-    let error_type: String?
+    let error_type: ErrorType?
     let message: String
     let dataString: String?
     
@@ -19,4 +19,15 @@ struct APIResponse: Codable {
         case message
         case dataString = "data"
     }
+}
+
+enum ErrorType: String, Codable {
+    case validation_error
+    case auth_error
+    case forbidden_error
+    case not_found_error
+    case server_error
+    case unsupported_file_type
+    case unsupported_repo_url
+    
 }

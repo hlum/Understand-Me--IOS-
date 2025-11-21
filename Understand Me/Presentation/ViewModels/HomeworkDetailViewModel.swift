@@ -101,7 +101,7 @@ class HomeworkDetailViewModel: ObservableObject {
         }
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            await showAlert(message: "ログイン情報を取得できませんでした。")
+            await showAlert(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
             return
         }
@@ -118,11 +118,12 @@ class HomeworkDetailViewModel: ObservableObject {
                 homeworkID: homework.id,
                 githubURLString: homeworkLinkTxt
             )
-        } catch let error as LollipopError {
-            await showAlert(message: error.errorDescription ?? "プロジェクトのアップロードに失敗しました。")
-            logger.error("HomeworkDetailViewModel.uploadProject: \(error.debugDescription)")
+        } catch let error as UseCaseErrors {
+            await showAlert(message: error.localizedDescription)
+            logger.error("HomeworkDetailViewModel.uploadProject: \(error.localizedDescription)")
         } catch {
-            await showAlert(message: "プロジェクトのアップロードに失敗しました。")
+            // unexpected errors
+            await showAlert(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: \(error.localizedDescription)")
         }
     }

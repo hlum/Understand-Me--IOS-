@@ -233,10 +233,12 @@ struct HomeworkDetailView: View {
             .keyboardType(.URL)
             .foregroundColor(.primary)
             
-            Text("無効なURLです。")
-                .font(.caption)
-                .foregroundStyle(.red)
-                .frame(height: 10)
+            if viewModel.showErrorAlert {
+                Text(viewModel.errorMessage)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .frame(height: 10)
+            }
             
             Button {
                 Task {
