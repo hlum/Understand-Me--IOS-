@@ -21,7 +21,7 @@ class TestHomeworkRepository: HomeworkRepository {
     }
     
     func fetchHomework(id: String, studentID: String) async throws -> HomeworkWithStatus {
-        return .getDummy(submissionState: .failed)
+        return .getDummy(submissionState: .notAssigned)
     }
     
     func fetchHomeworks(studentID: String) async throws -> [HomeworkWithStatus] {

@@ -175,7 +175,7 @@ struct HomeView: View {
             .frame(maxWidth: 200, minHeight: 100, alignment: .leading)
             .background(.background)
             .cornerRadius(20)
-            .shadow(color: .primary.opacity(0.2), radius: 2)
+            .shadow(color: .primary.opacity(0.7), radius: 2)
         })
     }
 }

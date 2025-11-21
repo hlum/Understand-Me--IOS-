@@ -58,6 +58,8 @@ class HomeworkDetailViewModel: ObservableObject {
     @Published var result: ResultData? = nil
     @Published var errorMessage: String = ""
     @Published var showErrorAlert: Bool = false
+    @Published var showInputError: Bool = false
+    @Published var inputErrorMessage: String = ""
     
     private let homeworkUseCase: HomeworkUseCase
     private let classUseCase: ClassUseCase
@@ -94,6 +96,9 @@ class HomeworkDetailViewModel: ObservableObject {
     
     
     func uploadProject() async {
+        inputErrorMessage = ""
+        showInputError = false
+        
         guard let _ = URL(string: homeworkLinkTxt) else {
             await showAlert(message: "URLの形式が不正です。正しいURLを入力してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: URLの形式が不正です。")
@@ -101,13 +106,13 @@ class HomeworkDetailViewModel: ObservableObject {
         }
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            await showAlert(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
+            await showInputError(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
             return
         }
         
         guard let homework = homework else {
-            await showAlert(message: "宿題の情報が見つかりません。")
+            await showInputError(message: "宿題の情報が見つかりません。")
             logger.error("HomeworkDetailViewModel.uploadProject: 宿題の情報がありません。")
             return
         }
@@ -119,11 +124,11 @@ class HomeworkDetailViewModel: ObservableObject {
                 githubURLString: homeworkLinkTxt
             )
         } catch let error as UseCaseErrors {
-            await showAlert(message: error.localizedDescription)
+            await showInputError(message: error.localizedDescription)
             logger.error("HomeworkDetailViewModel.uploadProject: \(error.localizedDescription)")
         } catch {
             // unexpected errors
-            await showAlert(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
+            await showInputError(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: \(error.localizedDescription)")
         }
     }
@@ -231,6 +236,12 @@ class HomeworkDetailViewModel: ObservableObject {
     private func showAlert(message: String) {
         errorMessage = message
         showErrorAlert = true
+    }
+    
+    @MainActor
+    private func showInputError(message: String) {
+        inputErrorMessage = message
+        showInputError = true
     }
     
 }
