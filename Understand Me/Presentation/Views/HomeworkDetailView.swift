@@ -214,30 +214,57 @@ struct HomeworkDetailView: View {
     
     
     private func githubTxtFieldAndBtn(homeworkID: String) -> some View {
-        VStack(alignment: .leading) {
-            Text("GitHubリポジトリ　URL")
+        VStack(alignment: .leading, spacing: 16) {
+
+            // Title
+            Text("提出リンク (GitHub または Google Drive)")
                 .font(.headline)
-            
-            TextField(
-                "例: https: //github.com/your-username/your-repository",
-                text: $viewModel.homeworkLinkTxt
-            )
-            .padding()
-            .frame(height: 55)
-            .background(
-                RoundedRectangle(cornerRadius: 50).stroke()
-            )
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled(true)
-            .textContentType(.URL)
-            .keyboardType(.URL)
-            .foregroundColor(.primary)
-            
-            Text("無効なURLです。")
-                .font(.caption)
-                .foregroundStyle(.red)
-                .frame(height: 10)
-            
+
+            // TextField
+            VStack(spacing: 4) {
+                TextField(
+                    "例: https:// github.com/your-username/your-repository",
+                    text: $viewModel.homeworkLinkTxt
+                )
+                .padding(.horizontal, 20)
+                .frame(height: 55)
+                .background(
+                    RoundedRectangle(cornerRadius: 200)
+                        .fill(Color(.secondarySystemBackground))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 200)
+                        .stroke(Color.accent.opacity(0.4), lineWidth: 1.5)
+                )
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled(true)
+                .textContentType(.URL)
+                .keyboardType(.URL)
+                .animation(.easeInOut(duration: 0.15), value: viewModel.homeworkLinkTxt)
+            }
+
+            // Info message
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "info.circle")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Text("Google Driveで提出する場合は、ファイルを圧縮し、\n「リンクを知っている全員がアクセス可能」に設定してください。")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.top, -4)
+
+            // Error message
+            if viewModel.showInputError {
+                Text(viewModel.inputErrorMessage)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .transition(.opacity)
+                    .padding(.top, -8)
+            }
+
+            // Submit button
             Button {
                 Task {
                     await viewModel.uploadProject()
@@ -246,16 +273,22 @@ struct HomeworkDetailView: View {
             } label: {
                 Text("提出する")
                     .font(.headline)
-                    .padding()
                     .frame(maxWidth: .infinity)
                     .frame(height: 55)
-                    .background(.accent)
+                    .background(
+                        viewModel.homeworkLinkTxt.isEmpty
+                        ? Color.gray.opacity(0.4)
+                        : Color.accentColor
+                    )
+                    .foregroundColor(.white)
                     .cornerRadius(70)
+                    .animation(.easeInOut, value: viewModel.homeworkLinkTxt.isEmpty)
             }
-            .foregroundStyle(.white)
-            
+            .disabled(viewModel.homeworkLinkTxt.isEmpty)
+
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.vertical, 12)
     }
     
     private func formattedDate(_ date: Date) -> String {
