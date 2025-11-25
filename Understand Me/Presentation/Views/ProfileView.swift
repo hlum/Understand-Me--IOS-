@@ -214,8 +214,6 @@ struct ProfileView: View {
                             viewModel.currentYearForGraph += 1
                         }
                             await viewModel.loadAverageResultsPerMonth()
-                        
-                        
                     }
                 } label: {
                     Image(systemName: "chevron.right")
@@ -243,45 +241,60 @@ struct ProfileView: View {
     @ViewBuilder
     private var statusInfo: some View {
         HStack {
-            VStack(spacing: 10) {
-                Image(systemName: "checkmark.circle")
-                    .font(.title2)
-                    .foregroundStyle(.secAccent)
-                
-                Text("\(viewModel.results.count)")
-                    .font(.headline)
-                
-                Text("完了した課題")
-                    .fontWeight(.thin)
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 30)
-                    .stroke(lineWidth: 2)
-                    .foregroundStyle(.gray.opacity(0.2))
-            )
-            .padding(.horizontal)
             
-            VStack(spacing: 10) {
-                Image(systemName: "star.hexagon")
-                    .font(.title2)
-                    .foregroundStyle(.accent)
+            NavigationLink {
+                DetailAverageScoreView()
+            } label: {
+                HStack {
+                    VStack(spacing: 10) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.title2)
+                            .foregroundStyle(.secAccent)
+                        
+                        Text("\(viewModel.results.count)")
+                            .font(.headline)
+                        
+                        Text("完了した課題")
+                            .fontWeight(.thin)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal)
+                    
+                    RoundedRectangle(cornerRadius: 0)
+                        .frame(width: 1)
+                        .padding(.vertical)
+                        .foregroundStyle(.gray.opacity(0.5))
+                    
+                    VStack(spacing: 10) {
+                        Image(systemName: "star.hexagon")
+                            .font(.title2)
+                            .foregroundStyle(.accent)
+                        
+                        Text("\(viewModel.averageScoreOfAllResults)点")
+                            .font(.headline)
+                        
+                        Text("平均スコア")
+                            .fontWeight(.thin)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal)
+                    
+                    
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 30)
+                        .stroke(lineWidth: 2)
+                        .foregroundStyle(.gray.opacity(0.2))
+                )
                 
-                Text("\(viewModel.averageScoreOfAllResults)点")
-                    .font(.headline)
                 
-                Text("平均スコア")
-                    .fontWeight(.thin)
+                
+
             }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 30)
-                    .stroke(lineWidth: 2)
-                    .foregroundStyle(.gray.opacity(0.2))
-            )
-            .padding(.horizontal)
+            .foregroundStyle(.foreground)
+
         }
     }
     
