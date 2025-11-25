@@ -7,19 +7,40 @@
 
 import SwiftUI
 
+
 struct DetailAverageScoreView: View {
+    @StateObject private var viewModel: DetailAverageScoreViewModel
+    
+    
+    init(
+        averageScoreRepository: AverageScoreRepository = LollipopAverageScoreRepository(),
+        authenticationRepository: AuthenticationRepository = FirebaseAuthenticationRepository()
+    ) {
+        _viewModel = .init(
+            wrappedValue: DetailAverageScoreViewModel(
+                averageScoreUseCase: AverageScoreUseCase(repository: averageScoreRepository),
+                authenticationUseCase: AuthenticationUseCase(authenticationRepository: authenticationRepository)
+            )
+        )
+    }
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                averageScoreForClassItem(className: "IOS開発科", averageScore: 80, finishedHomeworkCount: 8, maxHomeworkCount: 20)
-                averageScoreForClassItem(className: "Android開発科", averageScore: 85, finishedHomeworkCount: 12, maxHomeworkCount: 40)
-                averageScoreForClassItem(className: "Web開発科", averageScore: 92, finishedHomeworkCount: 10, maxHomeworkCount: 25)
+            ForEach(viewModel.averageScoresPerClass) { averageScorePerClass in
+                averageScoreForClassItem(className: averageScorePerClass.className, averageScore: averageScorePerClass.averageScore, finishedHomeworkCount: averageScorePerClass.finishedHomeworkCount, maxHomeworkCount: averageScorePerClass.totalHomeworkCount)
             }
-            .padding(.vertical)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("平均スコア")
+        .navigationTitle("各科目の平均スコア")
         .navigationBarTitleDisplayMode(.inline)
+        .alert (isPresented: $viewModel.showAlert){
+            Alert(title: Text("エラー"),message: Text(viewModel.alertMessage))
+        }
+        .task {
+            await viewModel.loadAverageScoresPerClass()
+        }
+        .refreshable {
+            await viewModel.loadAverageScoresPerClass()
+        }
     }
     
     @ViewBuilder
