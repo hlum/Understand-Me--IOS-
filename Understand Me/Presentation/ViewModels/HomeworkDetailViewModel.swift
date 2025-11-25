@@ -125,7 +125,6 @@ class HomeworkDetailViewModel: ObservableObject {
             )
         } catch let error as UseCaseErrors {
             await showInputError(message: error.localizedDescription)
-            logger.error("HomeworkDetailViewModel.uploadProject: \(error.localizedDescription)")
         } catch {
             // unexpected errors
             await showInputError(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
