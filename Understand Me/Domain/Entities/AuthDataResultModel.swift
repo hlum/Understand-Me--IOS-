@@ -17,9 +17,10 @@ struct AuthDataResultModel: Hashable {
     init(user: User) {
         self.id = user.uid
         self.email = user.email
-        self.photoURL = user.photoURL
+        self.photoURL = user.providerData.first(where: {$0.providerID == "google.com"})?.photoURL
         self.name = user.displayName
     }
+    
     
     init (id: String, email: String?, photoURL: URL?, name: String? = nil) {
         self.id = id
@@ -27,6 +28,7 @@ struct AuthDataResultModel: Hashable {
         self.photoURL = photoURL
         self.name = name
     }
+    
     
     static func dummy() -> AuthDataResultModel {
         return AuthDataResultModel(
