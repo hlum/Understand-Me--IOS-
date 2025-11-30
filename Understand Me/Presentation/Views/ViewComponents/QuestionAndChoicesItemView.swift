@@ -8,6 +8,7 @@
 import SwiftUI
 
 import SwiftUI
+import Combine
 
 // MARK: - Mode Enum
 enum QuestionViewMode {
@@ -19,79 +20,116 @@ struct QuestionAndChoicesItemView: View {
     var questionAndChoices: QuestionWithChoices
     var mode: QuestionViewMode = .answering
     var isLastQuestion: Bool = false
-    var onClickNext: ((_ selectedChoiceID: String) -> Void)? = nil
+    var onClickNext: ((_ selectedChoiceID: String?) -> Void)? = nil
     var selectedChoiceIDFromServer: String? = nil // for review mode
     
+    @State private var remainingTime: Int = 20
     @State private var selectedChoiceID: String? = nil
     @State private var submitted = false
+    @State private var timerCancellable: Cancellable? = nil
+    @State private var progressFromArcTimer: Double = 0.0
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            
-            // MARK: Question
-            Text(questionAndChoices.questionText)
-                .font(.title3.bold())
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.leading)
-            
-            // MARK: Choices
-            VStack(spacing: 12) {
-                ForEach(questionAndChoices.choices) { choice in
-                    ChoiceButton(
-                        choice: choice,
-                        isSelected: isChoiceSelected(choice),
-                        submitted: isSubmitted
-                    )
-                    .onTapGesture {
-                        if mode == .answering && !submitted {
-                            withAnimation(.spring()) {
-                                selectedChoiceID = choice.id
+        VStack {
+            VStack(alignment: .leading, spacing: 20) {
+                if mode == .answering {
+                    Text("残り時間: \(remainingTime)秒")
+                        .foregroundStyle(.red)
+                }
+                
+                if mode == .review && selectedChoiceIDFromServer == nil {
+                    Text("未回答")
+                        .foregroundStyle(.red)
+                }
+                
+                // MARK: Question
+                Text(questionAndChoices.questionText)
+                    .font(.title3.bold())
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.leading)
+                
+                // MARK: Choices
+                VStack(spacing: 12) {
+                    ForEach(questionAndChoices.choices) { choice in
+                        ChoiceButton(
+                            choice: choice,
+                            isSelected: isChoiceSelected(choice),
+                            submitted: isSubmitted
+                        )
+                        .onTapGesture {
+                            if mode == .answering && !submitted {
+                                withAnimation(.spring()) {
+                                    selectedChoiceID = choice.id
+                                }
                             }
                         }
                     }
+                }
+                
+                // MARK: Next Button
+                if mode == .answering {
+                    Button {
+                        withAnimation(.easeInOut) {
+                            if !submitted {
+                                submitted = true
+                            } else {
+                                submitted = false
+                                if let id = selectedChoiceID {
+                                    onClickNext?(id)
+                                    restartTimer()
+                                }
+                            }
+                        }
+                    } label: {
+                        Text(buttonLabel)
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 55)
+                            .background(buttonColor)
+                            .cornerRadius(14)
+                    }
+                    .disabled(selectedChoiceID == nil && !submitted)
+                    .opacity(selectedChoiceID == nil && !submitted ? 0.6 : 1)
+                    
                 }
             }
-            
-            // MARK: Next Button
-            if mode == .answering {
-                Button {
-                    withAnimation(.easeInOut) {
-                        if !submitted {
-                            submitted = true
-                        } else {
-                            submitted = false
-                            if let id = selectedChoiceID {
-                                onClickNext?(id)
-                            }
-                        }
-                    }
-                } label: {
-                    Text(buttonLabel)
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 55)
-                        .background(buttonColor)
-                        .cornerRadius(14)
+            .padding(20)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
+            )
+            .padding()
+            .onAppear {
+                if mode == .review {
+                    submitted = true
+                    selectedChoiceID = selectedChoiceIDFromServer
+                } else if mode == .answering {
+                    startTimer()
                 }
-                .disabled(selectedChoiceID == nil && !submitted)
-                .opacity(selectedChoiceID == nil && !submitted ? 0.6 : 1)
                 
             }
-        }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
-        )
-        .padding()
-        .onAppear {
-            if mode == .review {
-                submitted = true
-                selectedChoiceID = selectedChoiceIDFromServer
+            
+            Spacer()
+            
+            if mode == .answering {
+                ArcTimerButton(
+                    progress: $progressFromArcTimer,
+                    duration: 10,
+                    lineWidth: 10,
+                    size: 70,
+                    accentColor: .accent,
+                    warningColor: .red,
+                    onComplete: {
+                        onClickNext?(nil)
+                        restartTimer()
+                    }
+                )
+                .padding(.bottom, 100)
             }
         }
+        .frame(maxHeight: .infinity)
     }
     
     // MARK: Helpers
@@ -121,6 +159,32 @@ struct QuestionAndChoicesItemView: View {
         } else {
             return isLastQuestion ? .green : .orange
         }
+    }
+    
+    private func startTimer() {
+        stopTimer()
+        
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                if remainingTime == 0 {
+                    restartTimer()
+                }
+                remainingTime -= 1
+            }
+    }
+    
+    
+    private func restartTimer() {
+        stopTimer()
+        remainingTime = 20
+        progressFromArcTimer = 0.0
+        startTimer()
+    }
+    
+    private func stopTimer() {
+        timerCancellable?.cancel()
+        timerCancellable = nil
     }
 }
 

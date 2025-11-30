@@ -22,7 +22,7 @@ class LollipopAnswerRepository: AnswerRepository {
             "question_id": answer.questionID,
             "homework_id": homeworkID,
             "user_id": answer.userID,
-            "selected_choice_id": answer.selectedChoiceID,
+            "selected_choice_id": answer.selectedChoiceID ?? nil,
             "total_questions": "\(totalQuestions)"
         ])
         

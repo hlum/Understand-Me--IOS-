@@ -11,6 +11,8 @@ import Combine
 
 /// A reusable button that visually fills an arc into a complete circle over a specified duration.
 struct ArcTimerButton: View {
+    @Binding var progress: Double
+
     // MARK: - Configuration
     let duration: TimeInterval
     var lineWidth: CGFloat = 12
@@ -23,7 +25,6 @@ struct ArcTimerButton: View {
     var onTick: ((Int) -> Void)? = nil
     
     // MARK: - State
-    @State private var progress: Double = 0.0
     @State private var isRunning = false
     @State private var timerCancellable: Cancellable? = nil
     @State private var breathScale: CGFloat = 1.4
@@ -86,6 +87,11 @@ struct ArcTimerButton: View {
         .onDisappear(perform: cleanup)
         .onChange(of: remainingSeconds) { _, newValue in
             onTick?(newValue)
+        }
+        .onChange(of: progress) { _, newValue in
+            if newValue == 0 {
+                startTimer()
+            }
         }
         .onAppear {
             startTimer()
@@ -152,12 +158,12 @@ struct ArcTimerButton: View {
 
 // MARK: - Preview
 #Preview {
+    @Previewable @State var progress: Double = 0.0
     VStack(spacing: 40) {
         ArcTimerButton(
-            duration: 5,
+            progress: $progress, duration: 5,
             lineWidth: 14
-        ) {
-            print("Completed!")
+        ) {            print("Completed!")
         }
         
 //        ArcTimerButton(
