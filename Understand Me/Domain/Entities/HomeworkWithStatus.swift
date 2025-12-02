@@ -11,7 +11,7 @@ struct HomeworkWithStatus: Identifiable, Decodable {
     var id: String
     let title: String
     let description: String?
-    let dueDateString: String
+    let dueDateString: String?
     let classID: String
     let githubURL: String?
     let submissionState: HomeworkState
@@ -27,6 +27,7 @@ struct HomeworkWithStatus: Identifiable, Decodable {
     }
     
     var dueDate: Date? {
+        guard let dueDateString else { return nil }
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.date(from: dueDateString)

@@ -81,7 +81,17 @@ class HomeworkListViewModel: ObservableObject {
         }
         
         do {
-            self.allHomeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id).sorted(by: { $0.dueDate! < $1.dueDate! })
+            self.allHomeworks = try await homeworkUseCase
+                .fetchHomeworks(studentID: authDataResult.id)
+                .sorted {
+                    switch ($0.dueDate, $1.dueDate) {
+                    case let (d1?, d2?):  return d1 < d2     // 両方 non-nil → 直接比較
+                    case (nil, nil):      return false       // 両方 nil → 順番変えない
+                    case (nil, _):        return false       // 左が nil → 後ろへ
+                    case (_, nil):        return true        // 右が nil → 左を前へ
+                    }
+                }
+
         } catch let error as LollipopError {
             showAlert(message: error.errorDescription ?? "宿題一覧の取得に失敗しました。")
             logger.error("HomeworkListViewModel.loadHomeworks: \(error.debugDescription)")
