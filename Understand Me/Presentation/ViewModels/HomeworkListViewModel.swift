@@ -81,16 +81,9 @@ class HomeworkListViewModel: ObservableObject {
         }
         
         do {
+            
             self.allHomeworks = try await homeworkUseCase
                 .fetchHomeworks(studentID: authDataResult.id)
-                .sorted {
-                    switch ($0.dueDate, $1.dueDate) {
-                    case let (d1?, d2?):  return d1 < d2     // 両方 non-nil → 直接比較
-                    case (nil, nil):      return false       // 両方 nil → 順番変えない
-                    case (nil, _):        return false       // 左が nil → 後ろへ
-                    case (_, nil):        return true        // 右が nil → 左を前へ
-                    }
-                }
 
         } catch let error as LollipopError {
             showAlert(message: error.errorDescription ?? "宿題一覧の取得に失敗しました。")
@@ -111,10 +104,8 @@ extension HomeworkListViewModel {
     @MainActor
     func filterAndSearch() {
         var result = allHomeworks
+        result = filterHomeworks()
         
-        if selectedFilter != .all {
-            result = filterHomeworks()
-        }
         
         filteredHomeworks = searchHomeworks(homeworks: result)
     }
@@ -126,9 +117,24 @@ extension HomeworkListViewModel {
         
         switch selectedFilter {
         case .all:
-            filteredHomeworks = allHomeworks
+            filteredHomeworks = allHomeworks.sorted { $0.createdAt > $1.createdAt }
         case .state(let homeworkState):
-            filteredHomeworks = allHomeworks.filter { $0.submissionState == homeworkState }
+                if homeworkState == .notAssigned {
+                    filteredHomeworks = allHomeworks
+                        .filter { $0.submissionState == homeworkState }
+                        .sorted {
+                            switch ($0.dueDate, $1.dueDate) {
+                                case let (d1?, d2?):  return d1 < d2     // 両方 non-nil → 直接比較
+                                case (nil, nil):      return false       // 両方 nil → 順番変えない
+                                case (nil, _):        return false       // 左が nil → 後ろへ
+                                case (_, nil):        return true        // 右が nil → 左を前へ
+                            }
+                        }
+                } else {
+                    filteredHomeworks = allHomeworks
+                        .filter { $0.submissionState == homeworkState }
+                }
+                
         }
         
         return filteredHomeworks
