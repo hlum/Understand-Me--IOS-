@@ -122,6 +122,7 @@ struct QuestionAndChoicesItemView: View {
                     accentColor: .accent,
                     warningColor: .red,
                     onComplete: {
+                        selectedChoiceID = nil
                         onClickNext?(nil)
                         restartTimer()
                     }
