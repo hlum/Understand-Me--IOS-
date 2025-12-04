@@ -70,11 +70,12 @@ struct ArcTimerButton: View {
                         Text(label)
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primary)
+                    } else {
+                        
+                        Text("\(remainingSeconds)")
+                            .font(.system(size: isWarning ? 28 : 22, weight: .medium))
+                            .foregroundColor(isWarning ? warningColor : .primary.opacity(0.8))
                     }
-                    
-                    Text("\(remainingSeconds)")
-                        .font(.system(size: isWarning ? 28 : 22, weight: .medium))
-                        .foregroundColor(isWarning ? warningColor : .primary.opacity(0.8))
                 }
             }
             .frame(width: size, height: size)

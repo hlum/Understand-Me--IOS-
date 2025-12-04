@@ -118,7 +118,7 @@ struct QuestionAndChoicesItemView: View {
                     progress: $progressFromArcTimer,
                     duration: 10,
                     lineWidth: 10,
-                    size: 70,
+                    size: 70, label: "PUSH",
                     accentColor: .accent,
                     warningColor: .red,
                     onComplete: {
