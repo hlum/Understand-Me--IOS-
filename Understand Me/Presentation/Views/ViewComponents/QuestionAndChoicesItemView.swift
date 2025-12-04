@@ -169,6 +169,8 @@ struct QuestionAndChoicesItemView: View {
             .autoconnect()
             .sink { _ in
                 if remainingTime == 0 {
+                    selectedChoiceID = nil
+                    onClickNext?(nil)
                     restartTimer()
                 }
                 remainingTime -= 1
