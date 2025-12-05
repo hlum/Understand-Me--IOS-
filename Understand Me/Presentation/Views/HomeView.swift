@@ -28,7 +28,7 @@ struct HomeView: View {
                 authenticationUseCase: AuthenticationUseCase(authenticationRepository: authenticationRepo),
                 userDataUseCase: UserDataUseCase(userDataRepository: userDataRepo, fcmTokenRepository: fcmTokenRepo),
                 homeworkUseCase: HomeworkUseCase(homeworkRepository: homeworkRepo),
-                classWIthTeacherNameUseCase: ClassWithTeacherNameUseCase(classRepository: classRepo, userRepository: userDataRepo)
+                classUseCase: ClassUseCase(classRepository: classRepo)
             )
         )
     }
@@ -169,13 +169,14 @@ struct HomeView: View {
                 Text(teacherName)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .lineLimit(1)
             .padding()
-            .frame(maxWidth: 200, minHeight: 100, alignment: .leading)
+            .frame(minWidth: 200, maxWidth: 200, minHeight: 100, alignment: .leading)
             .background(.background)
             .cornerRadius(20)
-            .shadow(color: .primary.opacity(0.7), radius: 2)
+            .shadow(color: .primary.opacity(0.2), radius: 2)
         })
     }
 }

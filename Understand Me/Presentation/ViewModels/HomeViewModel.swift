@@ -9,78 +9,30 @@
 import Combine
 import OSLog
 
-// Viewで使うStruct
-struct ClassWithTeacherName: Identifiable {
-    let id: String // ClassID
-    let name: String
-    let teacherName: String
-}
-
-
-
-final class ClassWithTeacherNameUseCase {
-    private let classRepository: ClassRepository
-    private let userRepository: UserDataRepository
-    
-    
-    init(classRepository: ClassRepository, userRepository: UserDataRepository) {
-        self.classRepository = classRepository
-        self.userRepository = userRepository
-    }
-    
-    func fetchClassesWithTeacherName(studentID: String) async throws -> [ClassWithTeacherName] {
-        let classes = try await classRepository.fetchAll(studentID: studentID)
-        
-        // teacherNameを非同期で取得する
-        let classesWithTeacherName: [ClassWithTeacherName] = try await withThrowingTaskGroup(of: ClassWithTeacherName.self) { group in
-            for classItem in classes {
-                group.addTask {
-                    let teacher = try await self.userRepository.fetchUserData(userID: classItem.teacherId)
-                    return ClassWithTeacherName(
-                        id: classItem.id,
-                        name: classItem.name,
-                        teacherName: teacher.email // TODO: ここを名前に変更する
-                    )
-                }
-            }
-            
-            
-            var results: [ClassWithTeacherName] = []
-            for try await item in group {
-                results.append(item)
-            }
-            
-            return results
-        }
-        
-        
-        return classesWithTeacherName
-    }
-}
 
 
 class HomeViewModel: ObservableObject {
     private let userDataUseCase: UserDataUseCase
     private let authenticationUseCase: AuthenticationUseCase
     private let homeworkUseCase: HomeworkUseCase
-    private let classWIthTeacherNameUseCase: ClassWithTeacherNameUseCase
+    private let classUseCase: ClassUseCase
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     @Published var userData: UserData? = nil
     @Published var homeworks: [HomeworkWithStatus] = []
-    @Published var classes: [ClassWithTeacherName] = []
+    @Published var classes: [Class] = []
     
     
     init(
         authenticationUseCase: AuthenticationUseCase,
         userDataUseCase: UserDataUseCase,
         homeworkUseCase: HomeworkUseCase,
-        classWIthTeacherNameUseCase: ClassWithTeacherNameUseCase
+        classUseCase: ClassUseCase
     ) {
         self.userDataUseCase = userDataUseCase
         self.authenticationUseCase = authenticationUseCase
         self.homeworkUseCase = homeworkUseCase
-        self.classWIthTeacherNameUseCase = classWIthTeacherNameUseCase
+        self.classUseCase = classUseCase
     }
     
     
@@ -157,7 +109,7 @@ class HomeViewModel: ObservableObject {
             return
         }
         do {
-            self.classes = try await classWIthTeacherNameUseCase.fetchClassesWithTeacherName(studentID: authDataResult.id)
+            self.classes = try await classUseCase.fetchClassList(studentID: authDataResult.id)
         } catch {
             logger.error("HomeViewModel.loadClasses(): クラスの取得に失敗しました。")
         }
