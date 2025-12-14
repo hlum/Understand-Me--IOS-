@@ -34,14 +34,14 @@ class LollipopAPIUtility {
     
     
     
-    func decodeAPIResponse(from data: Data) throws -> APIResponse {
-        try JSONDecoder().decode(APIResponse.self, from: data)
+    func decodeAPIResponse<T: Codable>(from data: Data) throws -> APIResponse<T> {
+        try JSONDecoder().decode(APIResponse<T>.self, from: data)
     }
     
     /// APIレスポンスのエラーチェックを行い、エラーがある場合は適切な例外を投げる
     /// - Parameter response: デコードされたAPIレスポンス
     /// - Throws: エラータイプに応じたLollipopError
-    func checkResponseForErrors(_ response: APIResponse) throws {
+    func checkResponseForErrors<T>(_ response: APIResponse<T>) throws {
         guard response.status == "success" else {
             logger.error("❌ API エラー発生 - status: \(response.status), error_type: \(response.error_type?.rawValue ?? "null"), message: \(response.message)")
             

@@ -31,7 +31,7 @@ class LollipopAnswerRepository: AnswerRepository {
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopUtility.decodeAPIResponse(from: data)
         
         try lollipopUtility.checkResponseForErrors(response)
         logger.info("解答の投稿に成功: questionID=\(answer.questionID), homeworkID=\(homeworkID)")
@@ -54,23 +54,15 @@ class LollipopAnswerRepository: AnswerRepository {
         let request = try lollipopUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<Answer> = try lollipopUtility.decodeAPIResponse(from: data)
         
         try lollipopUtility.checkResponseForErrors(response)
         
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
+        guard let answers = response.dataString else {
             throw LollipopError.NoDataFoundInResponse
         }
         
-        do {
-            let answers = try JSONDecoder().decode([Answer].self, from: jsonData)
-            logger.info("解答一覧の取得に成功: homeworkID=\(homeworkID), 件数=\(answers.count)")
-            return answers
-        } catch {
-            logger.error("解答のDecodeに失敗: \(error.localizedDescription)")
-            throw error
-        }
+        return answers
         
     }
 

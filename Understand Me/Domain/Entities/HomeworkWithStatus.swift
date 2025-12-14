@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct HomeworkWithStatus: Identifiable, Decodable {
+struct HomeworkWithStatus: Identifiable, Codable {
     var id: String
     let title: String
     let description: String?

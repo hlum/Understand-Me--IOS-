@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct APIResponse: Codable {
+struct APIResponse<T: Codable>: Codable {
     let status: String
     let error_type: ErrorType?
     let message: String
-    let dataString: String?
+    let dataString: [T]?
     
     enum CodingKeys: String, CodingKey {
         case status
@@ -31,3 +31,6 @@ enum ErrorType: String, Codable {
     case unsupported_repo_url
     
 }
+
+
+struct EmptyResponse: Codable {}

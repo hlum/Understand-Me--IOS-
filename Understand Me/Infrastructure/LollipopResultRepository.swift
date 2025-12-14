@@ -29,36 +29,13 @@ class LollipopResultRepository: ResultRepository {
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<ResultData> = try lollipopUtility.decodeAPIResponse(from: data)
         
-        do {
-            try lollipopUtility.checkResponseForErrors(response)
-        } catch let error as LollipopError {
-            logger.error("結果一覧の取得に失敗: \(error.debugDescription)")
-            return []
-        } catch {
-            logger.error("結果一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
-            return []
-        }
-        
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
+        guard let result = response.dataString else {
             throw URLError(.badServerResponse)
         }
 
-        do {
-            
-            let decoder = JSONDecoder()
-            let results = try decoder.decode([ResultData].self, from: jsonData)
-            
-            return results
-            
-        }catch {
-            let rawString = String(data: jsonData, encoding: .utf8) ?? "nil"
-            logger.error("Decodeに失敗したDataの中身: \(rawString)")
-            logger.error("Result のDecodeに失敗しました: \(error.localizedDescription)")
-            throw error
-        }
+       return result
     }
     
     
@@ -80,25 +57,13 @@ class LollipopResultRepository: ResultRepository {
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<ResultData> = try lollipopUtility.decodeAPIResponse(from: data)
         
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
+        guard let results = response.dataString,
+              let result = results.first else {
             throw URLError(.badServerResponse)
         }
 
-        do {
-            
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(ResultData.self, from: jsonData)
-            
-            return result
-            
-        }catch {
-            let rawString = String(data: jsonData, encoding: .utf8) ?? "nil"
-            logger.error("Decodeに失敗したDataの中身: \(rawString)")
-            logger.error("Result のDecodeに失敗しました: \(error.localizedDescription)")
-            throw error
-        }
+       return result
     }
 }

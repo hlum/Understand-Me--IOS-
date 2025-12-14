@@ -40,7 +40,7 @@ class LollipopClassRepository: ClassRepository {
         let request = try lollipopAPIUtility.makeRequest(url: url, method: "POST", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
         logger.info("選択科目の追加に成功: classCode=\(classCode), userID=\(userID)")
@@ -62,27 +62,11 @@ class LollipopClassRepository: ClassRepository {
         let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<Class> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
         
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
-            throw ClassRepositoryError.NoDataFoundInResponse
-        }
-
-        do {
-            let classes = try JSONDecoder().decode([Class].self, from: jsonData)
-            if let firstClass = classes.first {
-                logger.info("クラス情報の取得に成功: classCode=\(classCode)")
-                return firstClass
-            }
-            logger.info("クラスが見つかりませんでした: classCode=\(classCode)")
-            return nil
-        } catch {
-            logger.error("クラスのDecodeに失敗: \(error.localizedDescription)")
-            throw error
-        }
+        return response.dataString?.first
     }
     
     
@@ -100,31 +84,15 @@ class LollipopClassRepository: ClassRepository {
         let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<Class> = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        try lollipopAPIUtility.checkResponseForErrors(response)
+
         
-        do {
-            try lollipopAPIUtility.checkResponseForErrors(response)
-        } catch let error as LollipopError {
-            logger.error("クラス一覧の取得に失敗: \(error.debugDescription)")
-            return []
-        } catch {
-            logger.error("クラス一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
-            return []
-        }
-        
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
+        guard let result = response.dataString else {
             throw ClassRepositoryError.NoDataFoundInResponse
         }
 
-        do {
-            let classes = try JSONDecoder().decode([Class].self, from: jsonData)
-            logger.info("クラス一覧の取得成功: \(classes.count)件")
-            return classes
-        } catch {
-            logger.error("クラスのデータのDecodeに失敗: \(error.localizedDescription)")
-            throw error
-        }
+        return result
     }
     
     
@@ -144,29 +112,15 @@ class LollipopClassRepository: ClassRepository {
         let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<Class> = try lollipopAPIUtility.decodeAPIResponse(from: data)
 
         try lollipopAPIUtility.checkResponseForErrors(response)
         
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
+        guard let results = response.dataString,
+              let result = results.first else {
             throw ClassRepositoryError.NoDataFoundInResponse
         }
 
-        do {
-            let classData = try JSONDecoder().decode([Class].self, from: jsonData)
-            if let firstClass = classData.first {
-                logger.info("クラス情報の取得に成功: classID=\(id)")
-                return firstClass
-            }
-            logger.error("クラスが配列に含まれていません: classID=\(id)")
-            throw ClassRepositoryError.NoDataFoundInResponse
-            
-        } catch let error as ClassRepositoryError {
-            throw error
-        } catch {
-            logger.error("クラスのDecodeに失敗: \(error.localizedDescription)")
-            throw error
-        }
+        return result
     }
 }

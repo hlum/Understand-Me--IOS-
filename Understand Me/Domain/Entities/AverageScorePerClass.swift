@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AverageScorePerClass: Identifiable, Decodable {
+struct AverageScorePerClass: Identifiable, Codable {
     let id: String = UUID().uuidString
     let className: String
     let averageScore: Int
