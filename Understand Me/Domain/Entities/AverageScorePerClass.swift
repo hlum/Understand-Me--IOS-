@@ -21,5 +21,10 @@ struct AverageScorePerClass: Identifiable, Codable {
         case finishedHomeworkCount = "finished_homework_count"
         case totalHomeworkCount = "total_homework_count"
     }
+
+
+    static func getDummy() -> AverageScorePerClass {
+        return AverageScorePerClass(className: "国語", averageScore: 80, finishedHomeworkCount: 5, totalHomeworkCount:5)
+    }
     
 }

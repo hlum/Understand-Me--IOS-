@@ -69,7 +69,7 @@ class ProfileViewModel: ObservableObject {
         }
         
         do {
-            self.results = try await resultUseCase.fetchResults(userID: authDataResult.id, year: currentYearForGraph)
+            self.results = try await resultUseCase.fetchResults(userID: authDataResult.id)
         } catch let error as LollipopError {
             showErrorAlert(message: error.errorDescription ?? "結果の取得に失敗しました。")
             logger.error("ProfileViewModel.loadResults: \(error.debugDescription)")

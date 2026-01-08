@@ -37,7 +37,7 @@ struct QuestionWithChoices: Codable, Identifiable {
             projectID: UUID().uuidString,
             homeworkID: UUID().uuidString,
             userID: UUID().uuidString,
-            questionText: "TESTの質問文です。" + UUID().uuidString,
+            questionText: "TESTの質問文です。" + UUID().uuidString + UUID().uuidString + UUID().uuidString,
             createdAt: Date().description,
             choices: [.getDummy(), .getDummy(), .getDummy(), .getDummy()]
         )

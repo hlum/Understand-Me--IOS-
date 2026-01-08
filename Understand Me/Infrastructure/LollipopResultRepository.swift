@@ -13,12 +13,11 @@ class LollipopResultRepository: ResultRepository {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Domain")
     
     
-    func fetchResults(userID: String, year: Int) async throws -> [ResultData] {
+    func fetchResults(userID: String) async throws -> [ResultData] {
         let url = try lollipopUtility.makeURL("result/get_result.php")
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.queryItems = [
             URLQueryItem(name: "user_id", value: userID),
-            URLQueryItem(name: "year", value: String(year))
         ]
         
         guard let finalURL = components?.url else {

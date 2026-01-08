@@ -47,6 +47,9 @@ struct QuestionAndChoicesItemView: View {
                     .font(.title3.bold())
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true) // Add this
+
                 
                 // MARK: Choices
                 VStack(spacing: 12) {
@@ -127,10 +130,10 @@ struct QuestionAndChoicesItemView: View {
                         restartTimer()
                     }
                 )
-                .padding(.bottom, 100)
+                .padding(.bottom)
             }
         }
-        .frame(maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: Helpers

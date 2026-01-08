@@ -8,6 +8,6 @@
 import Foundation
 
 protocol ResultRepository {
-    func fetchResults(userID: String, year: Int) async throws -> [ResultData]
+    func fetchResults(userID: String) async throws -> [ResultData]
     func fetchResult(userID: String, homeworkID: String) async throws -> ResultData
 }

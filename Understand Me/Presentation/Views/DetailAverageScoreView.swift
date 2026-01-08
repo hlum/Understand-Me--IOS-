@@ -140,6 +140,9 @@ struct DetailAverageScoreView: View {
 
 #Preview {
     NavigationStack {
-        DetailAverageScoreView()
+        DetailAverageScoreView(
+            averageScoreRepository: TestAverageRepository(),
+            authenticationRepository: TestAuthenticationRepository()
+        )
     }
 }
