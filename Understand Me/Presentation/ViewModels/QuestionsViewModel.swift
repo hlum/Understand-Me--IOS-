@@ -13,6 +13,7 @@ class QuestionsViewModel: ObservableObject {
     @Published var questionsWithChoices: [QuestionWithChoices] = []
     @Published var currentIndex = 0
     @Published var questionIDAndSelectedChoiceID: [String: String] = [:] // questionID: selectedChoiceID
+    @Published var isLoading: Bool = false
     private var authenticationUseCase: AuthenticationUseCase
     private var questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase
     private var answerUseCase: AnswerUseCase
@@ -30,6 +31,9 @@ class QuestionsViewModel: ObservableObject {
     
     @MainActor
     func loadALlQuestionsWithChoices(homeworkID: String) async {
+        isLoading = true
+        defer { isLoading = false }
+        
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: ログイン中のUserがありません。")
             return

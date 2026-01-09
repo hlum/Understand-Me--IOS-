@@ -24,9 +24,16 @@ struct DetailAverageScoreView: View {
         )
     }
     var body: some View {
-        ScrollView {
-            ForEach(viewModel.averageScoresPerClass) { averageScorePerClass in
-                averageScoreForClassItem(className: averageScorePerClass.className, averageScore: averageScorePerClass.averageScore, finishedHomeworkCount: averageScorePerClass.finishedHomeworkCount, maxHomeworkCount: averageScorePerClass.totalHomeworkCount)
+        Group {
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+            } else {
+                ScrollView {
+                    ForEach(viewModel.averageScoresPerClass) { averageScorePerClass in
+                        averageScoreForClassItem(className: averageScorePerClass.className, averageScore: averageScorePerClass.averageScore, finishedHomeworkCount: averageScorePerClass.finishedHomeworkCount, maxHomeworkCount: averageScorePerClass.totalHomeworkCount)
+                    }
+                }
             }
         }
         .background(Color(.systemGroupedBackground))

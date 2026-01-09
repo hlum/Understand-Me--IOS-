@@ -21,6 +21,7 @@ class HomeViewModel: ObservableObject {
     @Published var userData: UserData? = nil
     @Published var homeworks: [HomeworkWithStatus] = []
     @Published var classes: [Class] = []
+    @Published var isLoading: Bool = false
     
     
     init(
@@ -39,6 +40,9 @@ class HomeViewModel: ObservableObject {
     
     @MainActor
     func loadUserData() async {
+        isLoading = true
+        defer { isLoading = false }
+        
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("AuthDataResultを取得できません。")
             return

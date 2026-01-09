@@ -12,6 +12,7 @@ class DetailAverageScoreViewModel: ObservableObject {
     
     @Published var showAlert: Bool = false
     @Published var alertMessage: String = ""
+    @Published var isLoading: Bool = false
     
     private let averageScoreUseCase: AverageScoreUseCase
     private let authenticationUseCase: AuthenticationUseCase
@@ -24,6 +25,9 @@ class DetailAverageScoreViewModel: ObservableObject {
     
     @MainActor
     func loadAverageScoresPerClass() async {
+        isLoading = true
+        defer { isLoading = false }
+        
         guard let authData = await authenticationUseCase.fetchCurrentUser() else  {
             showAlert(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
             return

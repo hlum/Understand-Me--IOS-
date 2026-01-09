@@ -35,87 +35,94 @@ struct HomeView: View {
     
     var body: some View {
         
-        VStack {
-            
-            header
-            
-      
-            
-            // MARK: - My Classes
-            VStack(alignment: .leading, spacing: 12) {
-                Button {
-                    selectedTab = 1
-                } label: {
-                    HStack {
-                        Text("マイクラス")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
+        Group {
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+            } else {
+                VStack {
+                    
+                    header
+                    
+              
+                    
+                    // MARK: - My Classes
+                    VStack(alignment: .leading, spacing: 12) {
+                        Button {
+                            selectedTab = 1
+                        } label: {
+                            HStack {
+                                Text("マイクラス")
+                                    .font(.title2.bold())
+                                    .padding(.horizontal)
+                                
+                                Image(systemName: "arrow.forward")
+                                    .bold()
+                                    .foregroundStyle(.accent.opacity(0.3))
+                                
+                                Spacer()
+                            }
+                        }
+                        .foregroundStyle(.primary)
                         
-                        Image(systemName: "arrow.forward")
-                            .bold()
-                            .foregroundStyle(.accent.opacity(0.3))
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack {
+                                ForEach(viewModel.classes) { classItem in
+                                    classCell(
+                                        classID: classItem.id,
+                                        className: classItem.name,
+                                        teacherName: classItem.teacherName
+                                    )
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+                    .frame(maxHeight: 150)
+
+                    
+                    Spacer()
+                    
+                    
+                    // MARK: - Upcoming Homework
+                    VStack(alignment: .leading, spacing: 12) {
+                        Button {
+                            selectedTab = 2
+                        } label: {
+                            HStack {
+                                Text("提出期限が近い課題")
+                                    .font(.title2.bold())
+                                    .padding(.horizontal)
+                                
+                                Image(systemName: "arrow.forward")
+                                    .bold()
+                                    .foregroundStyle(.accent.opacity(0.3))
+                                
+                                Spacer()
+                            }
+                        }
                         
-                        Spacer()
+                        Group {
+                            if !viewModel.homeworks.isEmpty {
+                                
+                                ScrollView(showsIndicators: false ) {
+                                    VStack {
+                                        ForEach(viewModel.homeworks) { homework in
+                                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                                        }
+                                    }
+                                    .padding(.vertical)
+                                }
+                            } else {
+                                ContentUnavailableView("提出期限が近い課題はありません。", systemImage: "book.closed")
+                                    .foregroundStyle(.secondary.opacity(0.7))
+                            }
+                        }
                     }
                 }
                 .foregroundStyle(.primary)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack {
-                        ForEach(viewModel.classes) { classItem in
-                            classCell(
-                                classID: classItem.id,
-                                className: classItem.name,
-                                teacherName: classItem.teacherName
-                            )
-                        }
-                    }
-                    .padding()
-                }
-            }
-            .frame(maxHeight: 150)
-
-            
-            Spacer()
-            
-            
-            // MARK: - Upcoming Homework
-            VStack(alignment: .leading, spacing: 12) {
-                Button {
-                    selectedTab = 2
-                } label: {
-                    HStack {
-                        Text("提出期限が近い課題")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                        
-                        Image(systemName: "arrow.forward")
-                            .bold()
-                            .foregroundStyle(.accent.opacity(0.3))
-                        
-                        Spacer()
-                    }
-                }
-                
-                Group {
-                    if !viewModel.homeworks.isEmpty {
-                        
-                        ScrollView(showsIndicators: false ) {
-                            VStack {
-                                ForEach(viewModel.homeworks) { homework in
-                                    HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
-                                }
-                            }
-                            .padding(.vertical)
-                        }
-                    } else {
-                        ContentUnavailableView("提出期限が近い課題はありません。", systemImage: "book.closed")
-                            .foregroundStyle(.secondary.opacity(0.7))
-                    }
-                }
             }
         }
-        .foregroundStyle(.primary)
         .task {
             await viewModel.loadUserData()
             await viewModel.loadHomeworks()

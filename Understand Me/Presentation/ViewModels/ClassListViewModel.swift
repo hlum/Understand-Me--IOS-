@@ -16,6 +16,7 @@ class ClassListViewModel: ObservableObject {
     @Published var showAddOptionalClassSheet: Bool = false
     @Published var errorMessage: String = ""
     @Published var showErrorAlert: Bool = false
+    @Published var isLoading: Bool = false
     private let classUseCase: ClassUseCase
     private let authenticationUseCase: AuthenticationUseCase
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
@@ -62,6 +63,9 @@ class ClassListViewModel: ObservableObject {
     
     @MainActor
     func loadClasses() async {
+        isLoading = true
+        defer { isLoading = false }
+        
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("ClassListViewModel.loadClasses: ログイン中のユーザのデータ取得に失敗したので、クラスの取得ができません。")
             return

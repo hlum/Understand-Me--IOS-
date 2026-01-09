@@ -38,7 +38,7 @@ struct QuestionsView: View {
     
     var body: some View {
         VStack {
-            if viewModel.questionsWithChoices.isEmpty {
+            if viewModel.isLoading || viewModel.questionsWithChoices.isEmpty {
                 ProgressView()
                     .progressViewStyle(.circular)
             } else {

@@ -17,7 +17,10 @@ struct ClassListView: View {
     
     var body: some View {
         Group {
-            if !viewModel.classes.isEmpty {
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+            } else if !viewModel.classes.isEmpty {
                 ScrollView(showsIndicators: false) {
                     ForEach(viewModel.classes) { classItem in
                         NavigationLink {

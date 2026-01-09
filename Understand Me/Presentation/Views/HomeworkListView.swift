@@ -23,35 +23,42 @@ struct HomeworkListView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
-                        FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
-                            viewModel.selectedFilter = option
-                            viewModel.filterAndSearch()
+        Group {
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+            } else {
+                VStack(spacing: 0) {
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
+                                FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
+                                    viewModel.selectedFilter = option
+                                    viewModel.filterAndSearch()
+                                }
+                            }
                         }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(10)
+                    .cornerRadius(10)
+                    
+                    
+                    if !viewModel.filteredHomeworks.isEmpty{
+                        ScrollView {
+                            VStack(spacing: 12) {
+                                ForEach(viewModel.filteredHomeworks) { homework in
+                                    HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate, state: homework.submissionState)
+                                }
+                            }
+                            .padding()
+                    }
+                    } else {
+                        ContentUnavailableView("該当する課題はありません。", systemImage: "book.closed")
+                            .foregroundStyle(.secondary.opacity(0.7))
                     }
                 }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(10)
-            .cornerRadius(10)
-            
-            
-            if !viewModel.filteredHomeworks.isEmpty{
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(viewModel.filteredHomeworks) { homework in
-                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate, state: homework.submissionState)
-                        }
-                    }
-                    .padding()
-            }
-            } else {
-                ContentUnavailableView("該当する課題はありません。", systemImage: "book.closed")
-                    .foregroundStyle(.secondary.opacity(0.7))
             }
         }
         .navigationTitle("全ての課題")

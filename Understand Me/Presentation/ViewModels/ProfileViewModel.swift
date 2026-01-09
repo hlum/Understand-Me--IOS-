@@ -21,6 +21,7 @@ class ProfileViewModel: ObservableObject {
     
     @Published var errorMessage: String = ""
     @Published var showError: Bool = false
+    @Published var isLoading: Bool = false
     
     private let authenticationUseCase: AuthenticationUseCase
     private let userDataUseCase: UserDataUseCase
@@ -42,6 +43,9 @@ class ProfileViewModel: ObservableObject {
     
     @MainActor
     func loadUserData() async {
+        isLoading = true
+        defer { isLoading = false }
+        
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("AuthDataResultを取得できません。")
             return

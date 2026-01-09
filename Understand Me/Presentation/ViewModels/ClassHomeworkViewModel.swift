@@ -14,6 +14,7 @@ class ClassHomeworkViewModel: ObservableObject {
     @Published var classInfo: Class? = nil
     @Published var filteredHomeworks: [HomeworkWithStatus] = []
     @Published var selectedFilterOption: HomeworkFilterOption = .all
+    @Published var isLoading: Bool = false
     
     private var homeworkUseCase: HomeworkUseCase
     private var authenticationUseCase: AuthenticationUseCase
@@ -36,6 +37,9 @@ class ClassHomeworkViewModel: ObservableObject {
     
     @MainActor
     func loadClassInfos() async {
+        isLoading = true
+        defer { isLoading = false }
+        
         do {
             self.classInfo = try await classUseCase.fetchClass(id: classID)
         } catch {

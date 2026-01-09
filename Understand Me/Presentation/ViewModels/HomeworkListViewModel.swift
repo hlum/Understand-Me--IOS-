@@ -42,6 +42,7 @@ class HomeworkListViewModel: ObservableObject {
     @Published var selectedFilter: HomeworkFilterOption = .all
     @Published var errorMessage: String = ""
     @Published var showErrorAlert: Bool = false
+    @Published var isLoading: Bool = false
     
     private var cancellables: Set<AnyCancellable> = []
     
@@ -75,6 +76,9 @@ class HomeworkListViewModel: ObservableObject {
     // MARK: Data Loading
     @MainActor
     func loadHomeworks() async {
+        isLoading = true
+        defer { isLoading = false }
+        
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("HomeworkListViewModel.loadHomeworks: ログインしているユーザーがいません。")
             return

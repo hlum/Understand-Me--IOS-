@@ -46,17 +46,24 @@ struct ProfileView: View {
     }
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack {
-                profileBasicInfo
-                
-                graphInfo
-                
-                statusInfo
-                
-                logoutBtn
+        Group {
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+            } else {
+                ScrollView(showsIndicators: false) {
+                    VStack {
+                        profileBasicInfo
+                        
+                        graphInfo
+                        
+                        statusInfo
+                        
+                        logoutBtn
+                    }
+                    .padding(.horizontal)
+                }
             }
-            .padding(.horizontal)
         }
         .navigationTitle("プロフィール")
         .navigationBarTitleDisplayMode(.inline)
