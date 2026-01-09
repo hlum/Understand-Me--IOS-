@@ -15,8 +15,8 @@ class ResultUseCase {
     }
     
     
-    func fetchResults(userID: String, year: Int) async throws -> [ResultData] {
-        try await resultRepo.fetchResults(userID: userID, year: year)
+    func fetchResults(userID: String) async throws -> [ResultData] {
+        try await resultRepo.fetchResults(userID: userID)
     }
     
     

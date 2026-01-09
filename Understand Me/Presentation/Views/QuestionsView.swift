@@ -6,101 +6,35 @@
 //
 
 import SwiftUI
-import Combine
-import OSLog
-
-class QuestionsViewModel: ObservableObject {
-    @Published var questionsWithChoices: [QuestionWithChoices] = []
-    @Published var currentIndex = 0
-    @Published var questionIDAndSelectedChoiceID: [String: String] = [:] // questionID: selectedChoiceID
-    private var authenticationUseCase: AuthenticationUseCase
-    private var questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase
-    private var answerUseCase: AnswerUseCase
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
-    
-    init(
-        authenticationUseCase: AuthenticationUseCase,
-        questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase,
-        answerUseCase: AnswerUseCase
-    ) {
-        self.authenticationUseCase = authenticationUseCase
-        self.questionsWithChoicesUseCase = questionsWithChoicesUseCase
-        self.answerUseCase = answerUseCase
-    }
-    
-    @MainActor
-    func loadALlQuestionsWithChoices(homeworkID: String) async {
-        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: ログイン中のUserがありません。")
-            return
-        }
-        
-        do {
-            
-            self.questionsWithChoices = try await questionsWithChoicesUseCase.fetchAll(
-                homeworkID: homeworkID,
-                userID: authDataResult.id
-            )
-            
-        } catch {
-            logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: \(error.localizedDescription)")
-            // TODO: Show error to the user
-        }
-    }
-    
-    
-    
-    func postAnswer(questionID: String, homeworkID: String, selectedChoiceID: String) async {
-        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            logger.error("QuestionsViewModel.postAnswer: ログイン中のUserがありません。")
-            return
-        }
-        
-        let answer = Answer(
-            questionID: questionID,
-            userID: authDataResult.id,
-            selectedChoiceID: selectedChoiceID
-        )
-        
-        do {
-            let totalQuestions = questionsWithChoices.count
-            try await answerUseCase.addAnswer(answer: answer, homeworkID: homeworkID, totalQuestions: totalQuestions)
-        } catch {
-            logger.error("QuestionsViewModel.postAnswer: \(error.localizedDescription)")
-            // TODO: Show error to the user
-        }
-    }
-    
-    
-    
-    func loadAnswersForReview(homeworkID: String) async {
-        guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            logger.error("QuestionsViewModel.loadAnswersForReview: ログイン中のUserがありません。")
-            return
-        }
-        do {
-            let answers = try await answerUseCase.fetchAnswers(homeworkID: homeworkID, userID: authDataResult.id)
-            answers.forEach { answer in
-                self.questionIDAndSelectedChoiceID[answer.questionID] = answer.selectedChoiceID
-            }
-        } catch {
-            // TODO: Show error to the user
-            logger.error("QuestionsViewModel.loadAnswersForReview: \(error.localizedDescription)")
-        }
-    }
-}
 
 struct QuestionsView: View {
     @Environment(\.dismiss) var dismiss
     
-    @StateObject private var viewModel = QuestionsViewModel(
-        authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
-        questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase(questionsWithChoicesRepository: LollipopQuestionsWithChoicesRepository()),
-        answerUseCase: AnswerUseCase(answerRepository: LollipopAnswerRepository())
-    )
+    @StateObject private var viewModel: QuestionsViewModel
     
     var homeworkID: String
-    var mode: QuestionViewMode = .answering
+    var mode: QuestionViewMode
+    
+    
+    init(
+        authenticationRepository: AuthenticationRepository = FirebaseAuthenticationRepository(),
+        questionsWithChoicesRepository: QuestionsWithChoicesRepository = LollipopQuestionsWithChoicesRepository(),
+        answerRepository: AnswerRepository = LollipopAnswerRepository(),
+        homeworkID: String,
+        mode: QuestionViewMode = .answering
+    ) {
+        self._viewModel = .init(
+            wrappedValue: .init(
+                authenticationUseCase: AuthenticationUseCase(authenticationRepository: authenticationRepository),
+                questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase(questionsWithChoicesRepository: questionsWithChoicesRepository),
+                answerUseCase: AnswerUseCase(answerRepository: answerRepository)
+            )
+        )
+        
+        self.homeworkID = homeworkID
+        self.mode = mode
+    }
+    
     
     var body: some View {
         VStack {
@@ -114,6 +48,8 @@ struct QuestionsView: View {
                         mode: mode,
                         isLastQuestion: viewModel.currentIndex == viewModel.questionsWithChoices.count - 1,
                         onClickNext: { selectedChoiceID in
+                            
+                            
                             Task {
                                 await viewModel.postAnswer(
                                     questionID: viewModel.questionsWithChoices[viewModel.currentIndex].id,
@@ -131,8 +67,18 @@ struct QuestionsView: View {
                                     dismiss()
                                     
                                 }
+
                             }
+                            
                         })
+                    .task {
+                        //　回答を始めたのを記録するため空の回答を送信しとく
+                        await viewModel.postAnswer(
+                            questionID: viewModel.questionsWithChoices[viewModel.currentIndex].id,
+                            homeworkID: viewModel.questionsWithChoices[viewModel.currentIndex].homeworkID,
+                            selectedChoiceID: nil
+                        )
+                    }
                 } else {
                     ScrollView(.vertical) {
                         ForEach(viewModel.questionsWithChoices) { questionWithChoices in
@@ -149,7 +95,6 @@ struct QuestionsView: View {
                 }
             }
             
-            Spacer()
         }
         .navigationTitle(mode == .answering ? "質問一覧" : "回答履歴")
         .navigationBarBackButtonHidden(mode == .answering)
@@ -161,6 +106,11 @@ struct QuestionsView: View {
 
 #Preview {
     NavigationStack {
-        QuestionsView(homeworkID: "")
+        QuestionsView(
+            authenticationRepository: TestAuthenticationRepository(),
+            questionsWithChoicesRepository: TestQuestionsWithChoicesRepository(),
+            answerRepository: TestAnswerRepository(),
+            homeworkID: "",
+            mode: .review)
     }
 }

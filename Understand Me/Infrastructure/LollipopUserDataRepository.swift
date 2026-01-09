@@ -21,7 +21,7 @@ class LollipopUserDataRepository: UserDataRepository {
         let request = try lollipopAPIUtility.makeRequest(url: url, method: "POST", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
         logger.info("ユーザーデータの保存に成功: userID=\(userData.id)")
@@ -41,30 +41,16 @@ class LollipopUserDataRepository: UserDataRepository {
         let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<UserData> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
 
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
-            throw LollipopError.NoDataFoundInResponse
+        guard let results = response.dataString,
+              let result = results.first else {
+            throw URLError(.badServerResponse)
         }
 
-        do {
-            let userDatas = try JSONDecoder().decode([UserData].self, from: jsonData)
-            if let userData = userDatas.first {
-                logger.info("ユーザーデータの取得に成功: userID=\(userID)")
-                return userData
-            }
-            logger.error("ユーザーデータが配列に含まれていません: userID=\(userID)")
-            throw LollipopError.UserNotFound
-        } catch let error as LollipopError {
-            logger.error("ユーザーデータの取得に失敗: \(error.debugDescription)")
-            throw error
-        } catch {
-            logger.error("ユーザーデータのDecodeに失敗: \(error.localizedDescription)")
-            throw error
-        }
+       return result
     }
     
     
@@ -81,7 +67,7 @@ class LollipopUserDataRepository: UserDataRepository {
         let request = try lollipopAPIUtility.makeRequest(url: url, method: "UPDATE", body: bodyData)
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
         logger.info("FCMトークンの更新に成功: userID=\(userID)")

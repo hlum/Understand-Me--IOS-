@@ -57,44 +57,14 @@ class LollipopHomeworkRepository: HomeworkRepository {
         let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<HomeworkWithStatus> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
-        do {
-            try lollipopAPIUtility.checkResponseForErrors(response)
-        } catch let error as LollipopError {
-            logger.error("宿題一覧の取得に失敗: \(error.debugDescription)")
-            return []
-        } catch {
-            logger.error("宿題一覧の取得に失敗（予期しないエラー）: \(error.localizedDescription)")
-            return []
-        }
         
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
+        guard let result = response.dataString else {
             throw URLError(.badServerResponse)
         }
 
-        do {
-            let decoder = JSONDecoder()
-            let homeworks = try decoder.decode([HomeworkWithStatus].self, from: jsonData)
-            
-            return homeworks
-        }catch let DecodingError.keyNotFound(key, context) {
-            logger.error("❌ Missing key: '\(key.stringValue)' in \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
-            logger.error("   Debug Description: \(context.debugDescription)")
-            logger.error("   Coding Path: \(context.codingPath)")
-        } catch let DecodingError.typeMismatch(type, context) {
-            logger.error("❌ Type mismatch for type '\(type)' at \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
-            logger.error("   Debug Description: \(context.debugDescription)")
-        } catch let DecodingError.valueNotFound(value, context) {
-            logger.error("❌ Value not found for type '\(value)' at \(context.codingPath.map(\.stringValue).joined(separator: " → "))")
-            logger.error("   Debug Description: \(context.debugDescription)")
-        } catch let DecodingError.dataCorrupted(context) {
-            logger.error("❌ Data corrupted: \(context.debugDescription)")
-        } catch {
-            logger.warning("⚠️ Unknown decoding error: \(error)")
-        }
-        return []
+       return result
     }
     
     
@@ -110,7 +80,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
         logger.info("問題生成の再試行に成功: homeworkID=\(homeworkID)")
@@ -126,7 +96,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
         
         let request = try lollipopAPIUtility.makeRequest(url: url, method: "DELETE", body: body)
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
         logger.info("宿題提出のキャンセルに成功: homeworkID=\(homeworkID)")

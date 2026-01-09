@@ -44,7 +44,7 @@ struct HomeworkListView: View {
                 ScrollView {
                     VStack(spacing: 12) {
                         ForEach(viewModel.filteredHomeworks) { homework in
-                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate, state: homework.submissionState)
                         }
                     }
                     .padding()

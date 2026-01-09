@@ -13,7 +13,7 @@ class TestResultRepository: ResultRepository {
         return .getDummy()
     }
     
-    func fetchResults(userID: String, year: Int) async throws -> [ResultData] {
+    func fetchResults(userID: String) async throws -> [ResultData] {
         return [.getDummy(), .getDummy(), .getDummy()]
     }
 }

@@ -23,7 +23,7 @@ struct ClassListView: View {
                         NavigationLink {
                             ClassHomeworkView(classID: classItem.id)
                         } label: {
-                            ClassItemView(classID: "id", className: classItem.name, teacherName: classItem.teacherId)
+                            ClassItemView(classID: classItem.id, className: classItem.name, teacherName: classItem.teacherName)
                         }
                     }
                 }

@@ -26,7 +26,7 @@ class LollipopProjectRepository: ProjectRepository {
 
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
         try lollipopAPIUtility.checkResponseForErrors(response)
         logger.info("プロジェクトのアップロードに成功: homeworkID=\(homeworkID), userID=\(userID)")

@@ -30,7 +30,7 @@ class LollipopFCMTokenRepository: FCMTokenRepository {
         let request = try lollipopUtility.makeRequest(url: url, method: "POST", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopUtility.decodeAPIResponse(from: data)
         
         try lollipopUtility.checkResponseForErrors(response)
         logger.info("FCMトークンの保存/更新に成功: userID=\(userID), deviceID=\(deviceID)")
@@ -45,7 +45,7 @@ class LollipopFCMTokenRepository: FCMTokenRepository {
         let request = try lollipopUtility.makeRequest(url: url, method: "DELETE", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<EmptyResponse> = try lollipopUtility.decodeAPIResponse(from: data)
         
         try lollipopUtility.checkResponseForErrors(response)
         logger.info("FCMトークンの削除に成功: userID=\(userID), deviceID=\(deviceID)")

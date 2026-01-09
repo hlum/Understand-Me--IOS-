@@ -29,24 +29,15 @@ class LollipopAverageScoreRepository: AverageScoreRepository {
         let request = try lollipopUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let response = try lollipopUtility.decodeAPIResponse(from: data)
+        let response: APIResponse<AverageScorePerClass> = try lollipopUtility.decodeAPIResponse(from: data)
         
         try lollipopUtility.checkResponseForErrors(response)
         
         
-        guard let jsonString = response.dataString,
-              let jsonData = jsonString.data(using: .utf8) else {
+        guard let result = response.dataString else {
             throw LollipopError.NoDataFoundInResponse
         }
         
-        do {
-            let averageScores = try JSONDecoder().decode([AverageScorePerClass].self, from: jsonData)
- 
-            logger.info("学科ごとの平均スコアカウント: \(averageScores)")
-            return averageScores
-        } catch {
-            logger.error("Error decoding JSON: \(error)")
-            throw error
-        }
+        return result
     }
 }

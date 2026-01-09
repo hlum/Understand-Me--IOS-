@@ -11,9 +11,9 @@ struct Answer: Identifiable, Codable {
     let id: String
     let questionID: String
     let userID: String
-    let selectedChoiceID: String
+    let selectedChoiceID: String?
     
-    init(questionID: String, userID: String, selectedChoiceID: String) {
+    init(questionID: String, userID: String, selectedChoiceID: String?) {
         self.id = UUID().uuidString
         self.questionID = questionID
         self.userID = userID
@@ -25,5 +25,14 @@ struct Answer: Identifiable, Codable {
         case questionID = "question_id"
         case userID = "user_id"
         case selectedChoiceID = "selected_choice_id"
+    }
+    
+    
+    static func getDummy() -> Self {
+        return .init(
+            questionID: "testquestionID",
+            userID: "testUserID",
+            selectedChoiceID: "testSleectechoiceid"
+        )
     }
 }

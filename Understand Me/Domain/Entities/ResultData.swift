@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ResultData: Decodable {
+struct ResultData: Codable {
     let id: String
     let userID: String
     let homeworkID: String

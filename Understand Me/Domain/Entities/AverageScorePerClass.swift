@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AverageScorePerClass: Identifiable, Decodable {
+struct AverageScorePerClass: Identifiable, Codable {
     let id: String = UUID().uuidString
     let className: String
     let averageScore: Int
@@ -20,6 +20,11 @@ struct AverageScorePerClass: Identifiable, Decodable {
         case averageScore = "average_score"
         case finishedHomeworkCount = "finished_homework_count"
         case totalHomeworkCount = "total_homework_count"
+    }
+
+
+    static func getDummy() -> AverageScorePerClass {
+        return AverageScorePerClass(className: "国語", averageScore: 80, finishedHomeworkCount: 5, totalHomeworkCount:5)
     }
     
 }

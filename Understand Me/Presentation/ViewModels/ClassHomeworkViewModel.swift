@@ -64,9 +64,23 @@ class ClassHomeworkViewModel: ObservableObject {
     func filterHomeworks() {
         switch selectedFilterOption {
         case .all:
-            filteredHomeworks = homeworks
+            filteredHomeworks = homeworks.sorted { $0.createdAt > $1.createdAt }
         case .state(let state):
-            filteredHomeworks = homeworks.filter { $0.submissionState == state }
+            if state == .notAssigned {
+                filteredHomeworks = homeworks
+                        .filter { $0.submissionState == state }
+                        .sorted {
+                            switch ($0.dueDate, $1.dueDate) {
+                                case let (d1?, d2?):  return d1 < d2     // 両方 non-nil → 直接比較
+                                case (nil, nil):      return false       // 両方 nil → 順番変えない
+                                case (nil, _):        return false       // 左が nil → 後ろへ
+                                case (_, nil):        return true        // 右が nil → 左を前へ
+                            }
+                        }
+                return
+            }
+            filteredHomeworks = homeworks
+                    .filter { $0.submissionState == state }
         }
     }
 }

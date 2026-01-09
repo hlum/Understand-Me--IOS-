@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeworkListItemView: View {
     var id: String
     var title: String
-    var dueDate: Date
+    var dueDate: Date?
     var state: HomeworkState
     
     var body: some View {
@@ -26,8 +26,13 @@ struct HomeworkListItemView: View {
                 HStack {
                     Image(systemName: "calendar")
                     
-                    Text(formattedDate(dueDate) + "まで")
-                        .font(.caption)
+                    if let dueDate {
+                        Text(formattedDate(dueDate) + "まで")
+                            .font(.caption)
+                    } else {
+                        Text("締切未設定")
+                            .font(.caption)
+                    }
                 }
                 .foregroundColor(.secondary)
                 

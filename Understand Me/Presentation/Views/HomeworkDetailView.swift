@@ -188,7 +188,11 @@ struct HomeworkDetailView: View {
             
             HStack {
                 Image(systemName: "calendar")
-                Text("締切：" + formattedDate(homework.dueDate ?? Date()))
+                if let dueDate = homework.dueDate {
+                    Text("締切：" + formattedDate(dueDate))
+                } else  {
+                    Text("締切期限未設定")
+                }
             }
             .padding(.bottom, 12)
             
