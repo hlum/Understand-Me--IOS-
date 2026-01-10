@@ -66,7 +66,9 @@ class HomeworkListViewModel: ObservableObject {
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.filterAndSearch()
+                Task { @MainActor in
+                    await self?.filterAndSearch()
+                }
             }
             .store(in: &cancellables)
     }
@@ -106,25 +108,36 @@ class HomeworkListViewModel: ObservableObject {
 extension HomeworkListViewModel {
     
     @MainActor
-    func filterAndSearch() {
-        var result = allHomeworks
-        result = filterHomeworks()
+    func filterAndSearch() async {
+        let homeworks = allHomeworks
+        let filter = selectedFilter
+        let search = searchText
         
-        
-        filteredHomeworks = searchHomeworks(homeworks: result)
+        let result = await performFilterAndSearch(homeworks: homeworks, filter: filter, searchText: search)
+        filteredHomeworks = result
     }
     
+    @concurrent
+    private func performFilterAndSearch(
+        homeworks: [HomeworkWithStatus],
+        filter: HomeworkFilterOption,
+        searchText: String
+    ) async -> [HomeworkWithStatus] {
+        var result = await filterHomeworks(homeworks: homeworks, filter: filter)
+        result = await searchHomeworks(homeworks: result, searchText: searchText)
+        return result
+    }
     
-    
-    func filterHomeworks() -> [HomeworkWithStatus] {
+    @concurrent
+    private func filterHomeworks(homeworks: [HomeworkWithStatus], filter: HomeworkFilterOption) async -> [HomeworkWithStatus] {
         var filteredHomeworks: [HomeworkWithStatus] = []
         
-        switch selectedFilter {
+        switch filter {
         case .all:
-            filteredHomeworks = allHomeworks.sorted { $0.createdAt > $1.createdAt }
+            filteredHomeworks = homeworks.sorted { $0.createdAt > $1.createdAt }
         case .state(let homeworkState):
                 if homeworkState == .notAssigned {
-                    filteredHomeworks = allHomeworks
+                    filteredHomeworks = homeworks
                         .filter { $0.submissionState == homeworkState }
                         .sorted {
                             switch ($0.dueDate, $1.dueDate) {
@@ -135,7 +148,7 @@ extension HomeworkListViewModel {
                             }
                         }
                 } else {
-                    filteredHomeworks = allHomeworks
+                    filteredHomeworks = homeworks
                         .filter { $0.submissionState == homeworkState }
                 }
                 
@@ -144,11 +157,9 @@ extension HomeworkListViewModel {
         return filteredHomeworks
     }
     
-    
-    
-    func searchHomeworks(homeworks: [HomeworkWithStatus]) -> [HomeworkWithStatus] {
+    @concurrent
+    private func searchHomeworks(homeworks: [HomeworkWithStatus], searchText: String) async -> [HomeworkWithStatus] {
         guard !searchText.isEmpty else { return homeworks }
-        
         
         // 半角、全角、スペース、! を無視する
         func normalize(_ text: String) -> String {

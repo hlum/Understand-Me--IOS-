@@ -42,9 +42,9 @@ struct ClassHomeworkView: View {
                         HStack(spacing: 10) {
                             ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
                                 FilterButton(title: option.displayName, isSelected: viewModel.selectedFilterOption == option) {
-                                    withAnimation(.easeInOut) {
-                                        viewModel.selectedFilterOption = option
-                                        viewModel.filterHomeworks()
+                                    viewModel.selectedFilterOption = option
+                                    Task {
+                                        await viewModel.filterHomeworks()
                                     }
                                 }
                             }
@@ -58,7 +58,7 @@ struct ClassHomeworkView: View {
                     
                     if !viewModel.filteredHomeworks.isEmpty {
                         ScrollView(showsIndicators: false) {
-                            VStack {
+                            LazyVStack {
                                 ForEach(viewModel.filteredHomeworks) { homework in
                                     HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
                                 }
@@ -76,7 +76,7 @@ struct ClassHomeworkView: View {
         .task {
             await viewModel.loadClassInfos()
             await viewModel.loadHomeworks(classID: classID)
-            viewModel.filterHomeworks()
+            await viewModel.filterHomeworks()
         }
     }
 }

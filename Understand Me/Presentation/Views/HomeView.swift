@@ -106,7 +106,7 @@ struct HomeView: View {
                             if !viewModel.homeworks.isEmpty {
                                 
                                 ScrollView(showsIndicators: false ) {
-                                    VStack {
+                                    LazyVStack {
                                         ForEach(viewModel.homeworks) { homework in
                                             HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
                                         }

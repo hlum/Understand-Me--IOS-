@@ -24,7 +24,44 @@ class HomeworkUseCase {
     func fetchHomeworks(studentID: String) async throws -> [HomeworkWithStatus] {
         try await homeworkRepository.fetchHomeworks(studentID: studentID)
     }
-    
+
+
+    @concurrent
+    func fetchHomeworksNearDeadline(studentID: String) async throws -> [HomeworkWithStatus] {
+        var allHomeworks = try await homeworkRepository.fetchHomeworks(studentID: studentID)
+        
+        // 1. Filter (.completed じゃないものだけ)
+        allHomeworks = allHomeworks.filter { $0.submissionState != .completed }
+        
+        
+        // 2. Sort: dueDate(昇順),
+        //    submissionStateの順に並び替え(.notAssigned, .failed, .questionGenerated, .generatingQuestions)
+        allHomeworks.sort { lhs, rhs in
+            // dueDateのUnwarp
+            let lhsDate = lhs.dueDate ?? .distantFuture
+            let rhsDate = rhs.dueDate ?? .distantFuture
+            
+            
+            if lhsDate != rhsDate {
+                return lhsDate < rhsDate
+            } else {
+                
+                // submissionStateの優先順位を定義
+                let submissionStatePriority: [HomeworkState: Int] = [
+                    .notAssigned: 0,
+                    .failed: 1,
+                    .questionGenerated: 2,
+                    .generatingQuestions: 3,
+                ]
+                
+                
+                return (submissionStatePriority[lhs.submissionState] ?? Int.max < submissionStatePriority[rhs.submissionState] ?? Int.max)
+            }
+        }
+        
+        // return only top ten
+        return Array(allHomeworks.prefix(10))
+    }
     
     
     func fetchHomeworks(studentID: String, classID: String) async throws -> [HomeworkWithStatus] {

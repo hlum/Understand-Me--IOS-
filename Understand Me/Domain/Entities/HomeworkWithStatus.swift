@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct HomeworkWithStatus: Identifiable, Codable {
+struct HomeworkWithStatus: Sendable, Identifiable, Codable {
     var id: String
     let title: String
     let description: String?
@@ -28,7 +28,7 @@ struct HomeworkWithStatus: Identifiable, Codable {
         case createdAtString = "created_at"
     }
     
-    var dueDate: Date? {
+    nonisolated var dueDate: Date? {
         guard let dueDateString else { return nil }
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"

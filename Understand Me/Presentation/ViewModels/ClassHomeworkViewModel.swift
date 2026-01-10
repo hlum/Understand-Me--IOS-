@@ -65,13 +65,21 @@ class ClassHomeworkViewModel: ObservableObject {
     
     
     @MainActor
-    func filterHomeworks() {
-        switch selectedFilterOption {
+    func filterHomeworks() async {
+        let homeworks = self.homeworks
+        let filter = selectedFilterOption
+        
+        filteredHomeworks = await performFilterHomeworks(homeworks: homeworks, filter: filter)
+    }
+    
+    @concurrent
+    private func performFilterHomeworks(homeworks: [HomeworkWithStatus], filter: HomeworkFilterOption) async -> [HomeworkWithStatus] {
+        switch filter {
         case .all:
-            filteredHomeworks = homeworks.sorted { $0.createdAt > $1.createdAt }
+            return homeworks.sorted { $0.createdAt > $1.createdAt }
         case .state(let state):
             if state == .notAssigned {
-                filteredHomeworks = homeworks
+                return homeworks
                         .filter { $0.submissionState == state }
                         .sorted {
                             switch ($0.dueDate, $1.dueDate) {
@@ -81,10 +89,8 @@ class ClassHomeworkViewModel: ObservableObject {
                                 case (_, nil):        return true        // 右が nil → 左を前へ
                             }
                         }
-                return
             }
-            filteredHomeworks = homeworks
-                    .filter { $0.submissionState == state }
+            return homeworks.filter { $0.submissionState == state }
         }
     }
 }
