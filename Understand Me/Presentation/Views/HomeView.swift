@@ -124,9 +124,11 @@ struct HomeView: View {
             }
         }
         .task {
+            viewModel.isLoading = true
             await viewModel.loadUserData()
             await viewModel.loadHomeworks()
             await viewModel.loadClasses()
+            viewModel.isLoading = false
         }
     }
     

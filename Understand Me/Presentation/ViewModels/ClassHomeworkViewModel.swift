@@ -15,6 +15,7 @@ class ClassHomeworkViewModel: ObservableObject {
     @Published var filteredHomeworks: [HomeworkWithStatus] = []
     @Published var selectedFilterOption: HomeworkFilterOption = .all
     @Published var isLoading: Bool = false
+    @Published var isFiltering: Bool = false
     
     private var homeworkUseCase: HomeworkUseCase
     private var authenticationUseCase: AuthenticationUseCase
@@ -66,6 +67,9 @@ class ClassHomeworkViewModel: ObservableObject {
     
     @MainActor
     func filterHomeworks() async {
+        isFiltering = true
+        defer { isFiltering = false }
+        
         let homeworks = self.homeworks
         let filter = selectedFilterOption
         

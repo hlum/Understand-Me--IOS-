@@ -43,6 +43,7 @@ class HomeworkListViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     @Published var showErrorAlert: Bool = false
     @Published var isLoading: Bool = false
+    @Published var isFiltering: Bool = false
     
     private var cancellables: Set<AnyCancellable> = []
     
@@ -109,6 +110,9 @@ extension HomeworkListViewModel {
     
     @MainActor
     func filterAndSearch() async {
+        isFiltering = true
+        defer { isFiltering = false }
+        
         let homeworks = allHomeworks
         let filter = selectedFilter
         let search = searchText

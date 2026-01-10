@@ -32,7 +32,7 @@ struct ClassHomeworkView: View {
     var body: some View {
         
         Group {
-            if viewModel.isLoading {
+            if viewModel.isLoading || viewModel.isFiltering {
                 ProgressView()
                     .progressViewStyle(.circular)
             } else {

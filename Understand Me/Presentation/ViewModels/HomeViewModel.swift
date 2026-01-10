@@ -40,9 +40,6 @@ class HomeViewModel: ObservableObject {
     
     @MainActor
     func loadUserData() async {
-        isLoading = true
-        defer { isLoading = false }
-        
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("AuthDataResultを取得できません。")
             return

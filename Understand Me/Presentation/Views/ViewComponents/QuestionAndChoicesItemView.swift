@@ -30,7 +30,7 @@ struct QuestionAndChoicesItemView: View {
     @State private var progressFromArcTimer: Double = 0.0
     
     var body: some View {
-        VStack {
+        ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 if mode == .answering {
                     Text("残り時間: \(remainingTime)秒")
