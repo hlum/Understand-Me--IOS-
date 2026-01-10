@@ -32,8 +32,8 @@ struct HomeworkDetailView: View {
                     if let classInfo = viewModel.classDetail {
                         homeworkTitleDescription(homework: homework, classInfo: classInfo)
                     } else {
-                        ProgressView()
-                            .progressViewStyle(.circular)
+                        homeworkTitleDescription(homework: homework, classInfo: nil)
+                            .redacted(reason: .placeholder)
                     }
                     Divider()
                     
@@ -59,8 +59,7 @@ struct HomeworkDetailView: View {
                     await viewModel.loadResult(homeworkID: id)
                 }
             } else {
-                ProgressView()
-                    .progressViewStyle(.circular)
+                HomeworkDetailSkeleton()
             }
             
         }
@@ -153,7 +152,7 @@ struct HomeworkDetailView: View {
     @ViewBuilder
     private func homeworkTitleDescription(
         homework: HomeworkWithStatus,
-        classInfo: Class
+        classInfo: Class?
     ) -> some View {
         VStack(alignment: .leading) {
             HStack {
@@ -183,7 +182,7 @@ struct HomeworkDetailView: View {
             
             HStack {
                 Image(systemName: "graduationcap")
-                Text(classInfo.name)
+                Text(classInfo?.name ?? "クラス名")
             }
             
             HStack {

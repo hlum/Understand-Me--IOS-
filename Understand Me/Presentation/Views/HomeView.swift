@@ -37,8 +37,7 @@ struct HomeView: View {
         
         Group {
             if viewModel.isLoading {
-                ProgressView()
-                    .progressViewStyle(.circular)
+                HomeViewSkeleton()
             } else {
                 VStack {
                     

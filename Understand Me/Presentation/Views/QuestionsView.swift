@@ -39,8 +39,7 @@ struct QuestionsView: View {
     var body: some View {
         VStack {
             if viewModel.isLoading || viewModel.questionsWithChoices.isEmpty {
-                ProgressView()
-                    .progressViewStyle(.circular)
+                QuestionsViewSkeleton()
             } else {
                 if mode == .answering {
                     QuestionAndChoicesItemView(

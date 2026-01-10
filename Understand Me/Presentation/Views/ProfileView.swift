@@ -48,8 +48,7 @@ struct ProfileView: View {
     var body: some View {
         Group {
             if viewModel.isLoading {
-                ProgressView()
-                    .progressViewStyle(.circular)
+                ProfileViewSkeleton()
             } else {
                 ScrollView(showsIndicators: false) {
                     VStack {

@@ -25,8 +25,25 @@ struct HomeworkListView: View {
     var body: some View {
         Group {
             if viewModel.isLoading || viewModel.isFiltering {
-                ProgressView()
-                    .progressViewStyle(.circular)
+                VStack(spacing: 0) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
+                                FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
+                                    viewModel.selectedFilter = option
+                                    Task {
+                                        await viewModel.filterAndSearch()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(10)
+                    .cornerRadius(10)
+                    
+                    HomeworkListSkeleton()
+                }
             } else {
                 VStack(spacing: 0) {
                     

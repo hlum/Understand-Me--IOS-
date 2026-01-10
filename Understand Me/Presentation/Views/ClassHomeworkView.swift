@@ -33,8 +33,26 @@ struct ClassHomeworkView: View {
         
         Group {
             if viewModel.isLoading || viewModel.isFiltering {
-                ProgressView()
-                    .progressViewStyle(.circular)
+                VStack {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
+                                FilterButton(title: option.displayName, isSelected: viewModel.selectedFilterOption == option) {
+                                    viewModel.selectedFilterOption = option
+                                    Task {
+                                        await viewModel.filterHomeworks()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 30)
+                    .padding(10)
+                    .cornerRadius(10)
+                    
+                    HomeworkListSkeleton()
+                }
             } else {
                 VStack {
                     
