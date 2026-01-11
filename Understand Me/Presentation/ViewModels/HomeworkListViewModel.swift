@@ -46,6 +46,7 @@ class HomeworkListViewModel: ObservableObject {
     @Published var isFiltering: Bool = false
     
     private var cancellables: Set<AnyCancellable> = []
+    private var filterTask: Task<Void, Never>?
     
     
     
@@ -67,9 +68,7 @@ class HomeworkListViewModel: ObservableObject {
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                Task { @MainActor in
-                    await self?.filterAndSearch()
-                }
+                self?.filterAndSearch()
             }
             .store(in: &cancellables)
     }
@@ -109,16 +108,24 @@ class HomeworkListViewModel: ObservableObject {
 extension HomeworkListViewModel {
     
     @MainActor
-    func filterAndSearch() async {
+    func filterAndSearch() {
+        // Cancel previous filter task
+        filterTask?.cancel()
+        
         isFiltering = true
-        defer { isFiltering = false }
         
         let homeworks = allHomeworks
         let filter = selectedFilter
         let search = searchText
         
-        let result = await performFilterAndSearch(homeworks: homeworks, filter: filter, searchText: search)
-        filteredHomeworks = result
+        filterTask = Task {
+            let result = await performFilterAndSearch(homeworks: homeworks, filter: filter, searchText: search)
+            
+            guard !Task.isCancelled else { return }
+            
+            filteredHomeworks = result
+            isFiltering = false
+        }
     }
     
     @concurrent
@@ -127,7 +134,9 @@ extension HomeworkListViewModel {
         filter: HomeworkFilterOption,
         searchText: String
     ) async -> [HomeworkWithStatus] {
+        guard !Task.isCancelled else { return [] }
         var result = await filterHomeworks(homeworks: homeworks, filter: filter)
+        guard !Task.isCancelled else { return [] }
         result = await searchHomeworks(homeworks: result, searchText: searchText)
         return result
     }

@@ -31,9 +31,7 @@ struct HomeworkListView: View {
                             ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
                                 FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
                                     viewModel.selectedFilter = option
-                                    Task {
-                                        await viewModel.filterAndSearch()
-                                    }
+                                    viewModel.filterAndSearch()
                                 }
                             }
                         }
@@ -52,9 +50,7 @@ struct HomeworkListView: View {
                             ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
                                 FilterButton(title: option.displayName, isSelected: viewModel.selectedFilter == option) {
                                     viewModel.selectedFilter = option
-                                    Task {
-                                        await viewModel.filterAndSearch()
-                                    }
+                                    viewModel.filterAndSearch()
                                 }
                             }
                         }
@@ -85,7 +81,7 @@ struct HomeworkListView: View {
         .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "課題を検索")
         .task {
             await viewModel.loadHomeworks()
-            await viewModel.filterAndSearch()
+            viewModel.filterAndSearch()
         }
     }
 }

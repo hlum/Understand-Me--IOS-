@@ -39,9 +39,7 @@ struct ClassHomeworkView: View {
                             ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
                                 FilterButton(title: option.displayName, isSelected: viewModel.selectedFilterOption == option) {
                                     viewModel.selectedFilterOption = option
-                                    Task {
-                                        await viewModel.filterHomeworks()
-                                    }
+                                    viewModel.filterHomeworks()
                                 }
                             }
                         }
@@ -61,9 +59,7 @@ struct ClassHomeworkView: View {
                             ForEach(HomeworkFilterOption.allCases, id: \.self) { option in
                                 FilterButton(title: option.displayName, isSelected: viewModel.selectedFilterOption == option) {
                                     viewModel.selectedFilterOption = option
-                                    Task {
-                                        await viewModel.filterHomeworks()
-                                    }
+                                    viewModel.filterHomeworks()
                                 }
                             }
                         }
@@ -94,7 +90,7 @@ struct ClassHomeworkView: View {
         .task {
             await viewModel.loadClassInfos()
             await viewModel.loadHomeworks(classID: classID)
-            await viewModel.filterHomeworks()
+            viewModel.filterHomeworks()
         }
     }
 }

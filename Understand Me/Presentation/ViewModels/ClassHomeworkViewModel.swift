@@ -21,6 +21,7 @@ class ClassHomeworkViewModel: ObservableObject {
     private var authenticationUseCase: AuthenticationUseCase
     private var classUseCase: ClassUseCase
     private var classID: String
+    private var filterTask: Task<Void, Never>?
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
     
@@ -66,18 +67,28 @@ class ClassHomeworkViewModel: ObservableObject {
     
     
     @MainActor
-    func filterHomeworks() async {
+    func filterHomeworks() {
+        // Cancel previous filter task
+        filterTask?.cancel()
+        
         isFiltering = true
-        defer { isFiltering = false }
         
         let homeworks = self.homeworks
         let filter = selectedFilterOption
         
-        filteredHomeworks = await performFilterHomeworks(homeworks: homeworks, filter: filter)
+        filterTask = Task {
+            let result = await performFilterHomeworks(homeworks: homeworks, filter: filter)
+            
+            guard !Task.isCancelled else { return }
+            
+            filteredHomeworks = result
+            isFiltering = false
+        }
     }
     
     @concurrent
     private func performFilterHomeworks(homeworks: [HomeworkWithStatus], filter: HomeworkFilterOption) async -> [HomeworkWithStatus] {
+        guard !Task.isCancelled else { return [] }
         switch filter {
         case .all:
             return homeworks.sorted { $0.createdAt > $1.createdAt }

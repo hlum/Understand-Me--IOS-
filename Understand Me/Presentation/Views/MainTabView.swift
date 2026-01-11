@@ -59,7 +59,7 @@ struct MainTabView: View {
                     }
             }
             .tabItem {
-                Image(systemName: "house.fill")
+                Image(systemName: "house")
                 Text("ホーム")
             }
             .tag(0)
@@ -80,7 +80,7 @@ struct MainTabView: View {
                 
             }
             .tabItem {
-                Image(systemName: "list.bullet.rectangle.portrait")
+                Image(systemName: "list.bullet")
                 Text("課題")
             }
             .tag(2)
