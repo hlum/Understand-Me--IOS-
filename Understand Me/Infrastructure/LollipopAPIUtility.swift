@@ -10,10 +10,11 @@ import OSLog
 
 class LollipopAPIUtility {
     private let secretLoader = SecretLoader.shared
+    private let remoteConfigManager = RemoteConfigManager.shared
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "API")
     
     func makeURL(_ path: String) throws -> URL {
-        let base = secretLoader.fetchSecret(from: "Secrets", forKey: "endpoint")
+        let base = remoteConfigManager.apiEndpoint
         guard let baseURL = URL(string: base)?.appendingPathComponent(path) else {
             throw LollipopError.InvalidURL
         }

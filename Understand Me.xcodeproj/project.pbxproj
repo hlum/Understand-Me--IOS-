@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F55FD442F135367002FAEBC /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 7F55FD432F135367002FAEBC /* FirebaseRemoteConfig */; };
 		7FBAD4C42E9888B3006807B8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD4C32E9888B3006807B8 /* FirebaseAuth */; };
 		7FBAD4C52E9888B3006807B8 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD4C62E9888B3006807B8 /* FirebaseMessaging */; };
 		7FBAD62B2E988DEA006807B8 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD62A2E988DEA006807B8 /* GoogleSignIn */; };
@@ -34,6 +35,7 @@
 				7FC8C3272E95375400B4CF5D /* Lottie in Frameworks */,
 				7FBAD4C42E9888B3006807B8 /* FirebaseAuth in Frameworks */,
 				7FBAD4C52E9888B3006807B8 /* FirebaseMessaging in Frameworks */,
+				7F55FD442F135367002FAEBC /* FirebaseRemoteConfig in Frameworks */,
 				7FBAD62B2E988DEA006807B8 /* GoogleSignIn in Frameworks */,
 				7FBAD62D2E988E46006807B8 /* GoogleSignInSwift in Frameworks */,
 			);
@@ -42,10 +44,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7F55FD422F135367002FAEBC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		7FC8C30A2E950FD300B4CF5D = {
 			isa = PBXGroup;
 			children = (
 				7FC8C3152E950FD300B4CF5D /* Understand Me */,
+				7F55FD422F135367002FAEBC /* Frameworks */,
 				7FC8C3142E950FD300B4CF5D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -83,6 +93,7 @@
 				7FBAD4C62E9888B3006807B8 /* FirebaseMessaging */,
 				7FBAD62A2E988DEA006807B8 /* GoogleSignIn */,
 				7FBAD62C2E988E46006807B8 /* GoogleSignInSwift */,
+				7F55FD432F135367002FAEBC /* FirebaseRemoteConfig */,
 			);
 			productName = "Understand Me";
 			productReference = 7FC8C3132E950FD300B4CF5D /* Understand Me.app */;
@@ -390,6 +401,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7F55FD432F135367002FAEBC /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
 		7FBAD4C32E9888B3006807B8 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

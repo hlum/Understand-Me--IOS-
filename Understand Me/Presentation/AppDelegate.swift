@@ -22,6 +22,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
         
+        // Remote Configを取得
+        Task {
+            await RemoteConfigManager.shared.fetchRemoteConfig()
+        }
+        
         // Firebase Cloud Messagingのデリゲートを設定
         Messaging.messaging().delegate = self
         
