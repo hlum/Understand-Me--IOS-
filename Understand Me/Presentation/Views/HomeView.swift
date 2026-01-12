@@ -51,7 +51,7 @@ struct HomeView: View {
                             selectedTab = 1
                         } label: {
                             HStack {
-                                Text("マイクラス")
+                                Text("科目")
                                     .font(.title2.bold())
                                     .padding(.horizontal)
                                 

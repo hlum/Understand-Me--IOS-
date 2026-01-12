@@ -34,7 +34,7 @@ struct ClassListView: View {
                     .foregroundStyle(.secondary.opacity(0.7))
             }
         }
-        .navigationTitle("クラス一覧")
+        .navigationTitle("科目一覧")
         .toolbar(content: {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

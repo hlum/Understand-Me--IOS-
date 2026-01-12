@@ -12,11 +12,13 @@ import OSLog
 class MainTabViewModel: ObservableObject {
     @Published var userData: UserData? = nil
     private let userDataUseCase: UserDataUseCase
+    private let authenticationUseCase: AuthenticationUseCase
     private var fcmTokenObserver: NSObjectProtocol?
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
-    init(userDataUseCase: UserDataUseCase) {
+    init(userDataUseCase: UserDataUseCase, authenticationUseCase: AuthenticationUseCase) {
         self.userDataUseCase = userDataUseCase
+        self.authenticationUseCase = authenticationUseCase
         setupFCMTokenObserver()
     }
     
@@ -134,6 +136,10 @@ class MainTabViewModel: ObservableObject {
         let studentCode = localPart
         
         return (studentCode, className, admissionYear)
+    }
+    
+    func fetchCurrentLoginUser() async -> AuthDataResultModel? {
+        return await authenticationUseCase.fetchCurrentUser()
     }
 
 }

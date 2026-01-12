@@ -182,7 +182,7 @@ struct HomeworkDetailView: View {
             
             HStack {
                 Image(systemName: "graduationcap")
-                Text(classInfo?.name ?? "クラス名")
+                Text(classInfo?.name ?? "科目名")
             }
             
             HStack {

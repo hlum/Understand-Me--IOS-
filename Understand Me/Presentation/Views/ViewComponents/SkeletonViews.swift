@@ -50,7 +50,7 @@ struct ClassItemSkeleton: View {
                 .foregroundStyle(.gray)
             
             VStack(alignment: .leading) {
-                Text("クラス名プレースホルダー")
+                Text("科目名プレースホルダー")
                     .font(.system(size: 20, weight: .bold))
                     .padding(.bottom, 4)
                     .lineLimit(1)
@@ -74,7 +74,7 @@ struct ClassItemSkeleton: View {
 struct ClassCardSkeleton: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("クラス名")
+            Text("科目名")
                 .font(.headline)
             
             Text("先生の名前")
@@ -157,7 +157,7 @@ struct HomeViewSkeleton: View {
             // My Classes Section
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("マイクラス")
+                    Text("科目")
                         .font(.title2.bold())
                         .padding(.horizontal)
                     
@@ -236,7 +236,7 @@ struct HomeworkDetailSkeleton: View {
                 
                 HStack {
                     Image(systemName: "graduationcap")
-                    Text("クラス名")
+                    Text("科目名")
                 }
                 
                 HStack {

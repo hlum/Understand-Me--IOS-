@@ -59,6 +59,7 @@ struct ProfileView: View {
                         statusInfo
                         
                         logoutBtn
+                            .padding(.bottom, 50)
                     }
                     .padding(.horizontal)
                 }

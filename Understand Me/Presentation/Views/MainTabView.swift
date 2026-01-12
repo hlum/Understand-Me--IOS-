@@ -12,16 +12,23 @@ struct MainTabView: View {
     @State private var selectedTab: Int = 0
     @State private var authDataResult: AuthDataResultModel? = nil
     @State private var isHomeworkDetailViewPresentated = false
+    @State private var isCheckingAuth = true
     
     @StateObject private var viewModel = MainTabViewModel(
         userDataUseCase: UserDataUseCase(
             userDataRepository: LollipopUserDataRepository(), fcmTokenRepository: LollipopFCMTokenRepository()
+        ),
+        authenticationUseCase: AuthenticationUseCase(
+            authenticationRepository: FirebaseAuthenticationRepository()
         )
     )
     
     var body: some View {
         Group {
-            if authDataResult == nil {
+            if isCheckingAuth {
+                SplashView()
+                    .transition(.opacity)
+            } else if authDataResult == nil {
                 LoginInView { authDataResult in
                     Task {
                         await viewModel.saveUserDataIfNotExist(authDataResult: authDataResult)
@@ -39,6 +46,15 @@ struct MainTabView: View {
                             await viewModel.loadUserData(userID: authDataResult.id)
                         }
                     }
+            }
+        }
+        .task {
+            let result = await viewModel.fetchCurrentLoginUser()
+            withAnimation(.easeOut(duration: 0.3)) {
+                if let result {
+                    self.authDataResult = result
+                }
+                isCheckingAuth = false
             }
         }
         .onChange(of: router.selectedHomeworkID) { oldValue, newValue in
@@ -71,7 +87,7 @@ struct MainTabView: View {
             }
             .tabItem {
                 Image(systemName: "graduationcap")
-                Text("クラス")
+                Text("科目")
             }
             .tag(1)
             
