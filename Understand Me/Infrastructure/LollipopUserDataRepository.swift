@@ -72,5 +72,25 @@ class LollipopUserDataRepository: UserDataRepository {
         try lollipopAPIUtility.checkResponseForErrors(response)
         logger.info("FCMトークンの更新に成功: userID=\(userID)")
     }
+    
+    
+    func deleteUserData(userID: String) async throws {
+        let url = try lollipopAPIUtility.makeURL("user/delete_user.php")
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "id", value: userID)]
+        
+        guard let finalURL = components?.url else {
+            throw LollipopError.InvalidURL
+        }
+
+        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "DELETE")
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
+        
+        try lollipopAPIUtility.checkResponseForErrors(response)
+        logger.info("Userデータの削除に成功: userID=\(userID)")
+    }
 
 }

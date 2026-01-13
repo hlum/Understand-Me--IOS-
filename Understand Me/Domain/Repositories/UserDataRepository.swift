@@ -10,4 +10,5 @@ import Foundation
 protocol UserDataRepository {
     func saveUserData(userData: UserData) async throws
     func fetchUserData(userID: String) async throws -> UserData
+    func deleteUserData(userID: String) async throws
 }

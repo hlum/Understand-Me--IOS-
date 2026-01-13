@@ -8,6 +8,10 @@
 import Foundation
 
 class TestUserRepository: UserDataRepository {
+    func deleteUserData(userID: String) async throws {
+        return
+    }
+    
     func saveUserData(userData: UserData) async throws {
         return
     }

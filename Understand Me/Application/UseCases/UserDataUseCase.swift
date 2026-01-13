@@ -38,6 +38,12 @@ class UserDataUseCase {
     }
     
     
+    @concurrent
+    func deleteUserData(userID: String) async throws {
+        try await userDataRepository.deleteUserData(userID: userID)
+    }
+    
+    
     
     func fetchUserData(userID: String) async throws -> UserData {
         try await userDataRepository.fetchUserData(userID: userID)

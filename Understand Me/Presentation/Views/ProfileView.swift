@@ -13,6 +13,8 @@ struct ProfileView: View {
     // ユーザがドラッグて選択した日付
     @State private var rawSelectedDate: Date? = nil
     
+    @State private var showAccDeleteAlert: Bool = false
+    
     // 選択された月の平均結果
     var selectedAverageResult: AverageResultPerMonth? {
         // ドラッグで選択されたに付けがなければ、resultも空
@@ -65,8 +67,30 @@ struct ProfileView: View {
                 }
             }
         }
+        .alert(isPresented: $showAccDeleteAlert) {
+            Alert(
+                title: Text("アカウントを削除しますか？"),
+                message: Text("この操作は取り消せません。すべてのデータが完全に削除されます。"),
+                primaryButton: .destructive(Text("削除")) {
+                    Task {
+                        await viewModel.deleteAcc()
+                        onSignOut()
+                    }
+                },
+                secondaryButton: .cancel(Text("キャンセル"))
+            )
+        }
         .navigationTitle("プロフィール")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            Menu {
+                Button("アカウントを削除", role: .destructive){
+                    showAccDeleteAlert.toggle()
+                }
+            } label: {
+                Image(systemName: "gear")
+            }
+        }
         .task {
             await viewModel.loadUserData()
             await viewModel.loadResults()
@@ -303,6 +327,22 @@ struct ProfileView: View {
             .foregroundStyle(.foreground)
 
         }
+    }
+    
+    
+    @ViewBuilder
+    private var deleteAccBtn: some View {
+        Button {
+            Task {
+                await viewModel.signOut()
+                onSignOut()
+            }
+        } label: {
+                Text("アカウント削除する")
+                    .foregroundStyle(.red)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 55)
     }
     
     

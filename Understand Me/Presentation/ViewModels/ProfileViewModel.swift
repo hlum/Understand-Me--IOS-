@@ -39,6 +39,32 @@ class ProfileViewModel: ObservableObject {
     }
     
     
+    @MainActor
+    func deleteAcc() async {
+        isLoading = true
+        defer { isLoading = false }
+        guard let authData = await authenticationUseCase.fetchCurrentUser() else {
+            logger.error("AuthDataResultを取得できません。")
+            return
+        }
+        
+        do {
+            try authenticationUseCase.signOut()
+            await deleteUserData(userID: authData.id)
+        } catch {
+            logger.error("アカウント削除に失敗しました。")
+        }
+    }
+    
+    
+    // Delete userdatas from server
+    private func deleteUserData(userID: String) async {
+        do {
+            try await userDataUseCase.deleteUserData(userID: userID)
+        } catch {
+            logger.error("ユーザーユーザーデータの削除に失敗しました。 \(error.localizedDescription)")
+        }
+    }
     
     
     @MainActor
