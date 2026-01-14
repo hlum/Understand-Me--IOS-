@@ -13,13 +13,24 @@ class MainTabViewModel: ObservableObject {
     @Published var userData: UserData? = nil
     private let userDataUseCase: UserDataUseCase
     private let authenticationUseCase: AuthenticationUseCase
+    private let resultUseCase: ResultUseCase
+    private let homeworkUseCase: HomeworkUseCase
+    
     private var fcmTokenObserver: NSObjectProtocol?
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
     
-    init(userDataUseCase: UserDataUseCase, authenticationUseCase: AuthenticationUseCase) {
+    init(
+        userDataUseCase: UserDataUseCase,
+        authenticationUseCase: AuthenticationUseCase,
+        resultUseCase: ResultUseCase,
+        homeworkUseCase: HomeworkUseCase
+    ) {
         self.userDataUseCase = userDataUseCase
         self.authenticationUseCase = authenticationUseCase
+        self.resultUseCase = resultUseCase
+        self.homeworkUseCase = homeworkUseCase
         setupFCMTokenObserver()
+        self.updateWidgetData()
     }
     
     deinit {
@@ -142,4 +153,80 @@ class MainTabViewModel: ObservableObject {
         return await authenticationUseCase.fetchCurrentUser()
     }
 
+}
+
+
+// MARK: - Widget Data Update
+extension MainTabViewModel {
+
+    /// Fetches data needed by the widget and stores it in UserDefaults
+    func updateWidgetData() {
+        Task {
+            guard let authUser = await authenticationUseCase.fetchCurrentUser() else {
+                logger.warning("認証ユーザーが存在しません。")
+                return
+            }
+            
+            do {
+                let results = try await resultUseCase.fetchResults(userID: authUser.id)
+                
+                updateAverageScore(results: results)
+                try await updateHomeworkProgress(results: results, userID: authUser.id)
+                
+            } catch {
+                logger.error("ウィジェット用データの更新に失敗しました: \(error.localizedDescription)")
+            }
+        }
+    }
+}
+
+
+// MARK: - Widget Calculations
+private extension MainTabViewModel {
+
+    func updateAverageScore(results: [ResultData]) {
+        let averageScore = calculateAverageScore(from: results)
+        saveToUserDefaults(key: .AVERAGESCORE, value: averageScore)
+    }
+
+    func updateHomeworkProgress(results: [ResultData], userID: String) async throws {
+        let progress = try await calculateHomeworkProgress(
+            results: results,
+            userID: userID
+        )
+        saveToUserDefaults(key: .HOMEWORK_PROGRESS, value: progress)
+    }
+}
+
+
+// MARK: - Calculation Logic
+private extension MainTabViewModel {
+
+    func calculateAverageScore(from results: [ResultData]) -> Int {
+        guard !results.isEmpty else { return 0 }
+
+        let totalScore = results.reduce(0) { $0 + $1.score }
+        return totalScore / results.count
+    }
+
+    func calculateHomeworkProgress(
+        results: [ResultData],
+        userID: String
+    ) async throws -> Int {
+
+        let homeworks = try await homeworkUseCase.fetchHomeworks(studentID: userID)
+        guard !homeworks.isEmpty else { return 0 }
+
+        let progress = (Double(results.count) / Double(homeworks.count)) * 100
+        return min(Int(progress), 100)
+    }
+}
+
+
+// MARK: - Persistence
+private extension MainTabViewModel {
+
+    func saveToUserDefaults(key: WidgetDataKeys, value: Int) {
+        UserDefaults.standard.set(value, forKey: key.rawValue)
+    }
 }

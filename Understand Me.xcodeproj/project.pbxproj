@@ -62,6 +62,7 @@
 			membershipExceptions = (
 				Domain/Entities/HomeworkState.swift,
 				Domain/Entities/HomeworkWithStatus.swift,
+				Resources/WidgetDataKeys.swift,
 			);
 			target = 7F84D83A2F164B56003885AA /* KnowYourCodeWidgetExtension */;
 		};
