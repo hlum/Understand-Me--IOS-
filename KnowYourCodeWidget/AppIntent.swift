@@ -25,11 +25,21 @@ enum WidgetType: String, AppEnum {
     }
 }
 
-struct ConfigurationAppIntent: WidgetConfigurationIntent {
+struct AverageScoreConfigurationAppIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource { "設定" }
     static var description: IntentDescription { "このウィジェットの設定を行います。" }
 
     // An example configurable parameter.
     @Parameter(title: "種類", default: WidgetType.averageScore)
+    var widgetType: WidgetType
+}
+
+
+struct FinishedHomeworkProgressConfigurationAppIntent: WidgetConfigurationIntent {
+    static var title: LocalizedStringResource { "設定" }
+    static var description: IntentDescription { "このウィジェットの設定を行います。" }
+
+    // An example configurable parameter.
+    @Parameter(title: "種類", default: WidgetType.finishedHomework)
     var widgetType: WidgetType
 }

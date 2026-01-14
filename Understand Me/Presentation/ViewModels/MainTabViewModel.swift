@@ -8,9 +8,13 @@
 import Foundation
 import Combine
 import OSLog
+import WidgetKit
 
 class MainTabViewModel: ObservableObject {
     @Published var userData: UserData? = nil
+    
+    let defaultsGroup: UserDefaults? = UserDefaults(suiteName: "group.jp.ac.jec.24cm0138.understandme")
+
     private let userDataUseCase: UserDataUseCase
     private let authenticationUseCase: AuthenticationUseCase
     private let resultUseCase: ResultUseCase
@@ -227,6 +231,12 @@ private extension MainTabViewModel {
 private extension MainTabViewModel {
 
     func saveToUserDefaults(key: WidgetDataKeys, value: Int) {
-        UserDefaults.standard.set(value, forKey: key.rawValue)
+        defaultsGroup?.set(value, forKey: key.rawValue)
+        switch key {
+            case .AVERAGESCORE:
+                WidgetCenter.shared.reloadTimelines(ofKind: "KnowYourCodeWidgetAverageScore")
+            case .HOMEWORK_PROGRESS:
+                WidgetCenter.shared.reloadTimelines(ofKind: "KnowYourCodeWidgetHomeworkProgress")
+        }
     }
 }

@@ -46,6 +46,7 @@
 		7F84D83B2F164B56003885AA /* KnowYourCodeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KnowYourCodeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F84D83C2F164B56003885AA /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		7F84D83E2F164B56003885AA /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		7F84D85C2F1743B0003885AA /* KnowYourCodeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KnowYourCodeWidgetExtension.entitlements; sourceTree = "<group>"; };
 		7FC8C3132E950FD300B4CF5D /* KnowYourCode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KnowYourCode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -125,6 +126,7 @@
 		7FC8C30A2E950FD300B4CF5D = {
 			isa = PBXGroup;
 			children = (
+				7F84D85C2F1743B0003885AA /* KnowYourCodeWidgetExtension.entitlements */,
 				7FC8C3152E950FD300B4CF5D /* Understand Me */,
 				7F84D8402F164B56003885AA /* KnowYourCodeWidget */,
 				7F55FD422F135367002FAEBC /* Frameworks */,
@@ -287,6 +289,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = KnowYourCodeWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D9BL4WP6X7;
@@ -317,6 +320,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = KnowYourCodeWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D9BL4WP6X7;

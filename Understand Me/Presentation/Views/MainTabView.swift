@@ -20,7 +20,9 @@ struct MainTabView: View {
         ),
         authenticationUseCase: AuthenticationUseCase(
             authenticationRepository: FirebaseAuthenticationRepository()
-        )
+        ),
+        resultUseCase: ResultUseCase(resultRepo: LollipopResultRepository()),
+        homeworkUseCase: HomeworkUseCase(homeworkRepository: LollipopHomeworkRepository())
     )
     
     var body: some View {

@@ -11,7 +11,8 @@ import SwiftUI
 @main
 struct KnowYourCodeWidgetBundle: WidgetBundle {
     var body: some Widget {
-        KnowYourCodeWidget()
+        KnowYourCodeAverageScoreWidget()
+        KnowYourCodeHomeworkProgressWidget()
         KnowYourCodeWidgetControl()
         KnowYourCodeWidgetLiveActivity()
     }
