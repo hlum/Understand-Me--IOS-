@@ -125,6 +125,7 @@ struct QuestionAndChoicesItemView: View {
                     accentColor: .accent,
                     warningColor: .red,
                     onComplete: {
+                        submitted = false
                         selectedChoiceID = nil
                         onClickNext?(nil)
                         restartTimer()
@@ -172,6 +173,7 @@ struct QuestionAndChoicesItemView: View {
             .autoconnect()
             .sink { _ in
                 if remainingTime == 0 {
+                    submitted = false
                     selectedChoiceID = nil
                     onClickNext?(nil)
                     restartTimer()

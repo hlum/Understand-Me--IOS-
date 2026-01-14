@@ -50,22 +50,31 @@ struct LoginInView: View {
                 
                 // Login buttons
                 VStack(spacing: 12) {
+
+                    // MARK: - Google Login
                     Button {
+                        guard !viewModel.isGoogleLoggingIn else { return }
+
                         Task {
                             let authDataResult = await viewModel.signInWithGoogle()
-                            if let authDataResult = authDataResult {
+                            if let authDataResult {
                                 onLoginCompleted(authDataResult)
                             }
                         }
                     } label: {
                         HStack(spacing: 12) {
-                            Image(.google)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20)
-                            
-                            Text("Googleでサインイン")
-                                .font(.system(size: 17, weight: .semibold))
+                            if viewModel.isGoogleLoggingIn {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            } else {
+                                Image(.google)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 20, height: 20)
+
+                                Text("Googleでサインイン")
+                                    .font(.system(size: 17, weight: .semibold))
+                            }
                         }
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity)
@@ -80,8 +89,12 @@ struct LoginInView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    
+                    .disabled(viewModel.isGoogleLoggingIn)
+
+                    // MARK: - Apple Login
                     Button {
+                        guard !viewModel.isAppleLoggingIn else { return }
+
                         Task {
                             let authDataResult = await viewModel.signInWithApple()
                             if let authDataResult {
@@ -89,12 +102,19 @@ struct LoginInView: View {
                             }
                         }
                     } label: {
-                        SignInWithAppleButtonViewRepresentable(type: .default, style: .black)
-                            .frame(height: 54)
+                        ZStack {
+                            SignInWithAppleButtonViewRepresentable(
+                                type: .default,
+                                style: .black
+                            )
                             .cornerRadius(12)
                             .allowsHitTesting(false)
+                        }
+                        .frame(height: 54)
                     }
+                    .disabled(viewModel.isAppleLoggingIn)
                 }
+
                 .padding(.horizontal, 24)
                 .padding(.bottom, 50)
             }

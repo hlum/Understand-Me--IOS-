@@ -75,14 +75,22 @@ struct HomeworkListItemView: View {
                         .cornerRadius(70)
                 }
             } else if state == .generatingQuestions {
-                LottieView(filename: "AI")
+                NavigationLink {
+                  HomeworkDetailView(id: id)
+                }label: {
+                    LottieView(filename: "AI")
+                }
                     .frame(width: 80, height: 80)
             } else if state == .completed {
-                Image(systemName: "checkmark.circle")
-                    .bold()
-                    .font(.title)
-                    .foregroundStyle(.green)
-                    .frame(width: 60, height: 60)
+                NavigationLink {
+                    HomeworkDetailView(id: id)
+                } label: {
+                    Image(systemName: "checkmark.circle")
+                        .bold()
+                        .font(.title)
+                        .foregroundStyle(.green)
+                        .frame(width: 60, height: 60)
+                }
             }
         })
         .padding()
@@ -104,6 +112,6 @@ struct HomeworkListItemView: View {
 
 #Preview {
     NavigationStack {
-        HomeworkListItemView(id: "", title: "Test", dueDate: Date(), state: .questionGenerated)
+        HomeworkListItemView(id: "", title: "Test", dueDate: Date(), state: .completed)
     }
 }

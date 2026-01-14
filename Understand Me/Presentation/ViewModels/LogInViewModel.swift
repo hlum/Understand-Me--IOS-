@@ -17,12 +17,18 @@ class LogInViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     @Published var showErrorAlert: Bool = false
     
+    
+    @Published var isGoogleLoggingIn: Bool = false
+    @Published var isAppleLoggingIn: Bool = false
+    
     init(authenticationUseCase: AuthenticationUseCase) {
         self.authenticationUseCase = authenticationUseCase
     }
     
     
     func signInWithGoogle() async -> AuthDataResultModel? {
+        isGoogleLoggingIn = true
+        defer { isGoogleLoggingIn = false }
         do {
             return try await authenticationUseCase.signInWithGoogle()
         } catch {
@@ -34,6 +40,8 @@ class LogInViewModel: ObservableObject {
     
     
     func signInWithApple() async -> AuthDataResultModel? {
+        isAppleLoggingIn = true
+        defer { isAppleLoggingIn = false }
         do {
             return try await authenticationUseCase.signInWithApple()
         } catch  {

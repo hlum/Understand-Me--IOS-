@@ -361,14 +361,14 @@ struct ProfileView: View {
                 
             }
             .foregroundStyle(.red)
+            .frame(maxWidth: .infinity)
+            .frame(height: 55)
+            .background(
+                RoundedRectangle(cornerRadius: 30)
+                    .stroke(lineWidth: 2)
+                    .foregroundStyle(.gray.opacity(0.2))
+            )
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 55)
-        .background(
-            RoundedRectangle(cornerRadius: 30)
-                .stroke(lineWidth: 2)
-                .foregroundStyle(.gray.opacity(0.2))
-        )
         .padding(.top, 50)
     }
 }

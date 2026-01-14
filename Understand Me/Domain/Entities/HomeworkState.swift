@@ -6,9 +6,24 @@
 //
 
 import SwiftUI
+import AppIntents
 
 // 課題の状況
-enum HomeworkState: String, Codable, CaseIterable {
+enum HomeworkState: String, Codable, CaseIterable, AppEnum {
+    static var typeDisplayRepresentation: TypeDisplayRepresentation {
+        return .init(name: "課題の状況")
+    }
+
+    static var caseDisplayRepresentations: [HomeworkState : DisplayRepresentation] {
+        return [
+            .notAssigned: "未提出",
+            .generatingQuestions: "問題生成中",
+            .questionGenerated: "問題生成完了",
+            .completed: "提出",
+            .failed: "生成失敗"
+        ]
+    }
+    
     case notAssigned
     case generatingQuestions
     case questionGenerated

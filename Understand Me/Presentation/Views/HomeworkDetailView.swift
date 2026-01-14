@@ -11,6 +11,7 @@ struct HomeworkDetailView: View {
     var id: String
     @StateObject private var viewModel: HomeworkDetailViewModel
     
+    @State private var showQuestionViewSheet: Bool = false
     
     init(
         id: String,
@@ -63,6 +64,16 @@ struct HomeworkDetailView: View {
             }
             
         }
+        .fullScreenCover(
+            isPresented: $showQuestionViewSheet,
+            onDismiss: {
+            Task {
+                await viewModel.loadInfoOfHomework(homeworkID: id)
+                await viewModel.loadResult(homeworkID: id)
+            }
+        }, content: {
+            QuestionsView(homeworkID: id)
+        })
         .task(id: id) {
             await viewModel.loadInfoOfHomework(homeworkID: id)
             await viewModel.loadResult(homeworkID: id)
@@ -114,25 +125,25 @@ struct HomeworkDetailView: View {
     
     
     private func reviewNavBtn(homeworkID: String) -> some View {
-        VStack {
-            NavigationLink {
-                QuestionsView(homeworkID: homeworkID, mode: .review)
-            } label: {
-                Text("回答履歴を見る")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 55)
-            .background(.accent)
-            .cornerRadius(70)
+        NavigationLink {
+            QuestionsView(homeworkID: homeworkID, mode: .review)
+        } label: {
+            Text("回答履歴を見る")
+                .font(.headline)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 55)
+                .background(.accent)
+                .cornerRadius(70)
+                .contentShape(Rectangle()) // ensures full tap area
         }
         .padding()
     }
     
+    
     private func answerQuizBtn(homeworkID: String) -> some View {
-        NavigationLink {
-            QuestionsView(homeworkID: homeworkID)
+        Button {
+            showQuestionViewSheet.toggle()
         } label: {
             HStack {
                 LottieView(filename: "AI")
@@ -196,7 +207,7 @@ struct HomeworkDetailView: View {
             .padding(.bottom, 12)
             
             Text(homework.description ?? "説明はありません。")
-                
+            
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -218,11 +229,11 @@ struct HomeworkDetailView: View {
     
     private func githubTxtFieldAndBtn(homeworkID: String) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-
+            
             // Title
             Text("提出リンク (GitHub または Google Drive)")
                 .font(.headline)
-
+            
             // TextField
             VStack(spacing: 4) {
                 TextField(
@@ -245,19 +256,19 @@ struct HomeworkDetailView: View {
                 .keyboardType(.URL)
                 .animation(.easeInOut(duration: 0.15), value: viewModel.homeworkLinkTxt)
             }
-
+            
             // Info message
             HStack(alignment: .top, spacing: 8) {
                 Image(systemName: "info.circle")
                     .font(.caption)
                     .foregroundColor(.secondary)
-
+                
                 Text("Google Driveで提出する場合は、ファイルを圧縮し、\n「リンクを知っている全員がアクセス可能」に設定してください。")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
             .padding(.top, -4)
-
+            
             // Error message
             if viewModel.showInputError {
                 Text(viewModel.inputErrorMessage)
@@ -266,7 +277,7 @@ struct HomeworkDetailView: View {
                     .transition(.opacity)
                     .padding(.top, -8)
             }
-
+            
             // Submit button
             Button {
                 Task {
@@ -288,7 +299,7 @@ struct HomeworkDetailView: View {
                     .animation(.easeInOut, value: viewModel.homeworkLinkTxt.isEmpty)
             }
             .disabled(viewModel.homeworkLinkTxt.isEmpty)
-
+            
         }
         .padding(.horizontal)
         .padding(.vertical, 12)
