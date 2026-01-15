@@ -93,12 +93,12 @@ struct HomeworkDetailView: View {
                 Text("生成やり直す")
                     .font(.headline)
                     .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 55)
+                    .background(.accent)
+                    .cornerRadius(70)
+                    .padding()
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 55)
-            .background(.accent)
-            .cornerRadius(70)
-            .padding()
             
             
             Button {
@@ -110,15 +110,15 @@ struct HomeworkDetailView: View {
                 Text("提出を取り消す")
                     .font(.headline)
                     .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 55)
+                    .background(
+                        RoundedRectangle(cornerRadius: 70)
+                            .stroke(style: .init())
+                    )
+                    .cornerRadius(70)
+                    .padding(.horizontal)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 55)
-            .background(
-                RoundedRectangle(cornerRadius: 70)
-                    .stroke(style: .init())
-            )
-            .cornerRadius(70)
-            .padding(.horizontal)
         }
         
     }
