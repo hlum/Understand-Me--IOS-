@@ -22,6 +22,8 @@ class HomeViewModel: ObservableObject {
     @Published var homeworks: [HomeworkWithStatus] = []
     @Published var classes: [Class] = []
     @Published var isLoading: Bool = false
+    @Published var errorMessage: String? = nil
+    @Published var showError: Bool = false
     
     
     init(
@@ -48,8 +50,9 @@ class HomeViewModel: ObservableObject {
         do {
             self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
         } catch {
-            // TODO: UserにAlertで知らせる
             logger.error("HomeViewModel.loadUserData(): UserDataの取得に失敗しました。")
+            errorMessage = "ユーザーデータの読み込みに失敗しました"
+            showError = true
         }
     }
     
@@ -68,6 +71,8 @@ class HomeViewModel: ObservableObject {
             
         } catch {
             logger.error("HomeViewModel.loadHomeworks(): 宿題の取得に失敗しました。")
+            errorMessage = "課題の読み込みに失敗しました"
+            showError = true
         }
     }
     
@@ -83,7 +88,9 @@ class HomeViewModel: ObservableObject {
             self.classes = try await classUseCase.fetchClassList(studentID: authDataResult.id)
         } catch {
             logger.error("HomeViewModel.loadClasses(): クラスの取得に失敗しました。")
+            errorMessage = "科目の読み込みに失敗しました"
+            showError = true
         }
-        
+
     }
 }

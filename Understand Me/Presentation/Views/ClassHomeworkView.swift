@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct ClassHomeworkView: View {
     
@@ -67,6 +68,14 @@ struct ClassHomeworkView: View {
             await viewModel.loadClassInfos()
             await viewModel.loadHomeworks(classID: classID)
             viewModel.filterHomeworks()
+        }
+        .toast(isPresenting: $viewModel.showError) {
+            AlertToast(
+                displayMode: .alert,
+                type: .error(.red),
+                title: "エラーが発生しました",
+                subTitle: viewModel.errorMessage
+            )
         }
     }
 }

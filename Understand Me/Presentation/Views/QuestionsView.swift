@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct QuestionsView: View {
     @Environment(\.dismiss) var dismiss
@@ -99,6 +100,14 @@ struct QuestionsView: View {
         .navigationBarBackButtonHidden(mode == .answering)
         .task {
             await viewModel.loadALlQuestionsWithChoices(homeworkID: homeworkID)
+        }
+        .toast(isPresenting: $viewModel.showError) {
+            AlertToast(
+                displayMode: .banner(.slide),
+                type: .error(.red),
+                title: "エラーが発生しました",
+                subTitle: viewModel.errorMessage,
+            )
         }
     }
 }

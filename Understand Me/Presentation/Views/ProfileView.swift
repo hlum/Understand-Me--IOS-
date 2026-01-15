@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import AlertToast
 
 
 struct ProfileView: View {
@@ -96,6 +97,14 @@ struct ProfileView: View {
             await viewModel.loadResults()
             viewModel.loadAverageResultsPerMonth()
             viewModel.loadAverageScoreOfAllResults()
+        }
+        .toast(isPresenting: $viewModel.showError) {
+            AlertToast(
+                displayMode: .alert,
+                type: .error(.red),
+                title: "エラーが発生しました",
+                subTitle: viewModel.errorMessage
+            )
         }
     }
     

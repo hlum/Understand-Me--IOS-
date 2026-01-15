@@ -11,6 +11,7 @@
 		7F84D83D2F164B56003885AA /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F84D83C2F164B56003885AA /* WidgetKit.framework */; };
 		7F84D83F2F164B56003885AA /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F84D83E2F164B56003885AA /* SwiftUI.framework */; };
 		7F84D8502F164B57003885AA /* KnowYourCodeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7F84D83B2F164B56003885AA /* KnowYourCodeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7F84D85F2F1892BA003885AA /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = 7F84D85E2F1892BA003885AA /* AlertToast */; };
 		7FBAD4C42E9888B3006807B8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD4C32E9888B3006807B8 /* FirebaseAuth */; };
 		7FBAD4C52E9888B3006807B8 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD4C62E9888B3006807B8 /* FirebaseMessaging */; };
 		7FBAD62B2E988DEA006807B8 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 7FBAD62A2E988DEA006807B8 /* GoogleSignIn */; };
@@ -103,6 +104,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7FC8C3272E95375400B4CF5D /* Lottie in Frameworks */,
+				7F84D85F2F1892BA003885AA /* AlertToast in Frameworks */,
 				7FBAD4C42E9888B3006807B8 /* FirebaseAuth in Frameworks */,
 				7FBAD4C52E9888B3006807B8 /* FirebaseMessaging in Frameworks */,
 				7F55FD442F135367002FAEBC /* FirebaseRemoteConfig in Frameworks */,
@@ -193,6 +195,7 @@
 				7FBAD62A2E988DEA006807B8 /* GoogleSignIn */,
 				7FBAD62C2E988E46006807B8 /* GoogleSignInSwift */,
 				7F55FD432F135367002FAEBC /* FirebaseRemoteConfig */,
+				7F84D85E2F1892BA003885AA /* AlertToast */,
 			);
 			productName = "Understand Me";
 			productReference = 7FC8C3132E950FD300B4CF5D /* KnowYourCode.app */;
@@ -229,6 +232,7 @@
 				7FC8C3252E95375400B4CF5D /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				7FBAD6292E988DEA006807B8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				7F84D85D2F1892BA003885AA /* XCRemoteSwiftPackageReference "AlertToast" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7FC8C3142E950FD300B4CF5D /* Products */;
@@ -572,6 +576,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		7F84D85D2F1892BA003885AA /* XCRemoteSwiftPackageReference "AlertToast" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/elai950/AlertToast.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.9;
+			};
+		};
 		7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -603,6 +615,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7FBAD4C22E9888B3006807B8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
+		};
+		7F84D85E2F1892BA003885AA /* AlertToast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7F84D85D2F1892BA003885AA /* XCRemoteSwiftPackageReference "AlertToast" */;
+			productName = AlertToast;
 		};
 		7FBAD4C32E9888B3006807B8 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;

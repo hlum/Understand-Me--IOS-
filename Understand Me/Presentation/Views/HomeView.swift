@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct HomeView: View {
     @Binding var selectedTab: Int
@@ -128,6 +129,14 @@ struct HomeView: View {
             await viewModel.loadHomeworks()
             await viewModel.loadClasses()
             viewModel.isLoading = false
+        }
+        .toast(isPresenting: $viewModel.showError) {
+            AlertToast(
+                displayMode: .alert,
+                type: .error(.red),
+                title: "エラーが発生しました",
+                subTitle: viewModel.errorMessage
+            )
         }
     }
     

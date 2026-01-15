@@ -14,6 +14,8 @@ class QuestionsViewModel: ObservableObject {
     @Published var currentIndex = 0
     @Published var questionIDAndSelectedChoiceID: [String: String] = [:] // questionID: selectedChoiceID
     @Published var isLoading: Bool = false
+    @Published var errorMessage: String? = nil
+    @Published var showError: Bool = false
     private var authenticationUseCase: AuthenticationUseCase
     private var questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase
     private var answerUseCase: AnswerUseCase
@@ -48,7 +50,8 @@ class QuestionsViewModel: ObservableObject {
             
         } catch {
             logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: \(error.localizedDescription)")
-            // TODO: Show error to the user
+            errorMessage = "質問の読み込みに失敗しました。"
+            showError = true
         }
     }
     
@@ -71,7 +74,8 @@ class QuestionsViewModel: ObservableObject {
             try await answerUseCase.addAnswer(answer: answer, homeworkID: homeworkID, totalQuestions: totalQuestions)
         } catch {
             logger.error("QuestionsViewModel.postAnswer: \(error.localizedDescription)")
-            // TODO: Show error to the user
+            errorMessage = "回答の送信に失敗しました: \n \(error.localizedDescription)"
+            showError = true
         }
     }
     
@@ -88,8 +92,9 @@ class QuestionsViewModel: ObservableObject {
                 self.questionIDAndSelectedChoiceID[answer.questionID] = answer.selectedChoiceID
             }
         } catch {
-            // TODO: Show error to the user
             logger.error("QuestionsViewModel.loadAnswersForReview: \(error.localizedDescription)")
+            errorMessage = "回答履歴の読み込みに失敗しました。 \(error.localizedDescription)"
+            showError = true
         }
     }
 }

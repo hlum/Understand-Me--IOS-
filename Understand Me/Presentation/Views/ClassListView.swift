@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct ClassListView: View {
     
@@ -53,6 +54,14 @@ struct ClassListView: View {
         }
         .task {
             await viewModel.loadClasses()
+        }
+        .toast(isPresenting: $viewModel.showErrorAlert) {
+            AlertToast(
+                displayMode: .alert,
+                type: .error(.red),
+                title: "エラーが発生しました",
+                subTitle: viewModel.errorMessage
+            )
         }
     }
     

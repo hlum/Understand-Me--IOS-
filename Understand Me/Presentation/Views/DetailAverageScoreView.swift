@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 
 struct DetailAverageScoreView: View {
@@ -24,24 +25,31 @@ struct DetailAverageScoreView: View {
         )
     }
     var body: some View {
-        Group {
-            if viewModel.isLoading {
-                ProgressView()
-                    .progressViewStyle(.circular)
-            } else {
-                ScrollView {
-                    ForEach(viewModel.averageScoresPerClass) { averageScorePerClass in
-                        averageScoreForClassItem(className: averageScorePerClass.className, averageScore: averageScorePerClass.averageScore, finishedHomeworkCount: averageScorePerClass.finishedHomeworkCount, maxHomeworkCount: averageScorePerClass.totalHomeworkCount)
+        VStack {
+            Group {
+                if viewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                } else {
+                    ScrollView {
+                        ForEach(viewModel.averageScoresPerClass) { averageScorePerClass in
+                            averageScoreForClassItem(className: averageScorePerClass.className, averageScore: averageScorePerClass.averageScore, finishedHomeworkCount: averageScorePerClass.finishedHomeworkCount, maxHomeworkCount: averageScorePerClass.totalHomeworkCount)
+                        }
                     }
                 }
             }
         }
+        .toast(isPresenting: $viewModel.showAlert) {
+            AlertToast(
+                displayMode: .alert,
+                type: .error(.red),
+                title: "エラーが発生しました",
+                subTitle: viewModel.alertMessage
+            )
+        }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("各科目の平均スコア")
         .navigationBarTitleDisplayMode(.inline)
-        .alert (isPresented: $viewModel.showAlert){
-            Alert(title: Text("エラー"),message: Text(viewModel.alertMessage))
-        }
         .task {
             await viewModel.loadAverageScoresPerClass()
         }
