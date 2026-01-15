@@ -58,7 +58,9 @@ struct HomeworkDetailView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .refreshable {
                     await viewModel.loadInfoOfHomework(homeworkID: id)
-                    await viewModel.loadResult(homeworkID: id)
+                    if viewModel.homework?.submissionState == .completed {
+                        await viewModel.loadResult(homeworkID: id)
+                    }
                 }
             } else {
                 HomeworkDetailSkeleton()
@@ -77,7 +79,9 @@ struct HomeworkDetailView: View {
         })
         .task(id: id) {
             await viewModel.loadInfoOfHomework(homeworkID: id)
-            await viewModel.loadResult(homeworkID: id)
+            if(viewModel.homework?.submissionState == .completed) {
+                await viewModel.loadResult(homeworkID: id)
+            }
         }
         .toast(isPresenting: $viewModel.showErrorAlert) {
             AlertToast(

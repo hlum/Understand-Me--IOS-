@@ -22,12 +22,30 @@ struct QuestionAndChoicesItemView: View {
     var isLastQuestion: Bool = false
     var onClickNext: ((_ selectedChoiceID: String?) -> Void)? = nil
     var selectedChoiceIDFromServer: String? = nil // for review mode
-    
-    @State private var remainingTime: Int = 20
+
+    private let mainTimerDuration: Int = RemoteConfigManager.shared.mainTimerDuration
+    private let arcTimerDuration: Int = RemoteConfigManager.shared.arcTimerDuration
+
+    @State private var remainingTime: Int
     @State private var selectedChoiceID: String? = nil
     @State private var submitted = false
     @State private var timerCancellable: Cancellable? = nil
     @State private var progressFromArcTimer: Double = 0.0
+
+    init(
+        questionAndChoices: QuestionWithChoices,
+        mode: QuestionViewMode = .answering,
+        isLastQuestion: Bool = false,
+        onClickNext: ((_ selectedChoiceID: String?) -> Void)? = nil,
+        selectedChoiceIDFromServer: String? = nil
+    ) {
+        self.questionAndChoices = questionAndChoices
+        self.mode = mode
+        self.isLastQuestion = isLastQuestion
+        self.onClickNext = onClickNext
+        self.selectedChoiceIDFromServer = selectedChoiceIDFromServer
+        self._remainingTime = State(initialValue: RemoteConfigManager.shared.mainTimerDuration)
+    }
     
     var body: some View {
         ScrollView {
@@ -119,7 +137,7 @@ struct QuestionAndChoicesItemView: View {
             if mode == .answering {
                 ArcTimerButton(
                     progress: $progressFromArcTimer,
-                    duration: 10,
+                    duration: TimeInterval(arcTimerDuration),
                     lineWidth: 10,
                     size: 70, label: "PUSH",
                     accentColor: .accent,
@@ -185,7 +203,7 @@ struct QuestionAndChoicesItemView: View {
     
     private func restartTimer() {
         stopTimer()
-        remainingTime = 20
+        remainingTime = mainTimerDuration
         progressFromArcTimer = 0.0
         startTimer()
     }

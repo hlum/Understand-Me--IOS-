@@ -18,6 +18,13 @@ class RemoteConfigManager {
     
     private enum Keys {
         static let apiEndpoint = "cached_api_endpoint"
+        static let mainTimerDuration = "cached_main_timer_duration"
+        static let arcTimerDuration = "cached_arc_timer_duration"
+    }
+
+    private enum DefaultValues {
+        static let mainTimerDuration = 60
+        static let arcTimerDuration = 30
     }
     
     var apiEndpoint: String {
@@ -26,6 +33,26 @@ class RemoteConfigManager {
         }
         set {
             userDefaults.set(newValue, forKey: Keys.apiEndpoint)
+        }
+    }
+
+    var mainTimerDuration: Int {
+        get {
+            let value = userDefaults.integer(forKey: Keys.mainTimerDuration)
+            return value > 0 ? value : DefaultValues.mainTimerDuration
+        }
+        set {
+            userDefaults.set(newValue, forKey: Keys.mainTimerDuration)
+        }
+    }
+
+    var arcTimerDuration: Int {
+        get {
+            let value = userDefaults.integer(forKey: Keys.arcTimerDuration)
+            return value > 0 ? value : DefaultValues.arcTimerDuration
+        }
+        set {
+            userDefaults.set(newValue, forKey: Keys.arcTimerDuration)
         }
     }
     
@@ -52,6 +79,19 @@ class RemoteConfigManager {
             }
             
             let newEndpoint = remoteConfig.configValue(forKey: "API_ENDPOINT").stringValue
+            let newMainTimerDuration = remoteConfig.configValue(forKey: "MAIN_TIMER_DURATION").numberValue.intValue
+            let newArcTimerDuration = remoteConfig.configValue(forKey: "ARC_TIMER_DURATION").numberValue.intValue
+
+            if newMainTimerDuration > 0 {
+                mainTimerDuration = newMainTimerDuration
+                logger.info("MainTimerDurationを更新しました: \(self.mainTimerDuration)")
+            }
+
+            if newArcTimerDuration > 0 {
+                arcTimerDuration = newArcTimerDuration
+                logger.info("ArcTimerDurationを更新しました: \(self.arcTimerDuration)")
+            }
+
             if !newEndpoint.isEmpty {
                 apiEndpoint = newEndpoint
                 logger.info("API_ENDPOINTを更新しました: \(self.apiEndpoint)")
