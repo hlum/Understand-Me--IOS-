@@ -8,6 +8,7 @@
 import SwiftUI
 import AuthenticationServices
 import Combine
+import AlertToast
 
 struct LoginInView: View {
     @StateObject private var viewModel: LogInViewModel = .init(
@@ -119,8 +120,13 @@ struct LoginInView: View {
                 .padding(.bottom, 50)
             }
         }
-        .alert(isPresented: $viewModel.showErrorAlert) {
-            Alert(title: Text("エラー発生"), message: Text(viewModel.errorMessage), dismissButton: .default(Text("OK")))
+        .toast(isPresenting: $viewModel.showErrorAlert) {
+            AlertToast(
+                displayMode: .hud,
+                type: .error(.red),
+                title: "ログインエラー",
+                subTitle: viewModel.errorMessage
+            )
         }
     }
 }

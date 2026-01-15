@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct HomeworkDetailView: View {
     var id: String
@@ -78,6 +79,14 @@ struct HomeworkDetailView: View {
             await viewModel.loadInfoOfHomework(homeworkID: id)
             await viewModel.loadResult(homeworkID: id)
         }
+        .toast(isPresenting: $viewModel.showErrorAlert) {
+            AlertToast(
+                displayMode: .banner(.pop),
+                type: .error(.red),
+                title: "エラーが発生しました",
+                subTitle: viewModel.errorMessage
+            )
+        }
     }
     
     
@@ -93,12 +102,12 @@ struct HomeworkDetailView: View {
                 Text("生成やり直す")
                     .font(.headline)
                     .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 55)
+                    .background(.accent)
+                    .cornerRadius(70)
+                    .padding()
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 55)
-            .background(.accent)
-            .cornerRadius(70)
-            .padding()
             
             
             Button {
@@ -110,15 +119,15 @@ struct HomeworkDetailView: View {
                 Text("提出を取り消す")
                     .font(.headline)
                     .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 55)
+                    .background(
+                        RoundedRectangle(cornerRadius: 70)
+                            .stroke(style: .init())
+                    )
+                    .cornerRadius(70)
+                    .padding(.horizontal)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 55)
-            .background(
-                RoundedRectangle(cornerRadius: 70)
-                    .stroke(style: .init())
-            )
-            .cornerRadius(70)
-            .padding(.horizontal)
         }
         
     }

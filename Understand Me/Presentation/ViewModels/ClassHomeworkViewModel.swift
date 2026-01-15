@@ -16,6 +16,8 @@ class ClassHomeworkViewModel: ObservableObject {
     @Published var selectedFilterOption: HomeworkFilterOption = .all
     @Published var isLoading: Bool = false
     @Published var isFiltering: Bool = false
+    @Published var errorMessage: String? = nil
+    @Published var showError: Bool = false
     
     private var homeworkUseCase: HomeworkUseCase
     private var authenticationUseCase: AuthenticationUseCase
@@ -46,6 +48,8 @@ class ClassHomeworkViewModel: ObservableObject {
             self.classInfo = try await classUseCase.fetchClass(id: classID)
         } catch {
             logger.error("ClassHomeworkViewModel.loadClassInfos: クラス情報の取得に失敗しました。\(error.localizedDescription)")
+            errorMessage = "科目情報の読み込みに失敗しました"
+            showError = true
         }
     }
     
@@ -62,6 +66,8 @@ class ClassHomeworkViewModel: ObservableObject {
             self.homeworks = try await homeworkUseCase.fetchHomeworks(studentID: authDataResult.id, classID: classID)
         } catch {
             logger.error("ClassHomeworkViewModel.loadHomeworks: 宿題の取得に失敗しました。\(error.localizedDescription)")
+            errorMessage = "課題の読み込みに失敗しました"
+            showError = true
         }
     }
     
