@@ -20,9 +20,10 @@ struct ProfileView: View {
     var selectedAverageResult: AverageResultPerMonth? {
         // ドラッグで選択されたに付けがなければ、resultも空
         guard let rawSelectedDate else { return nil }
-        
-        let calendar = Calendar.current
-        
+
+        // 常にグレゴリオ暦を使用（ユーザーの設定が和暦などでも正しく動作させる）
+        var calendar = Calendar(identifier: .gregorian)
+
         // 平均結果配列から、選択された月と同じ月の日付を持つデータを返す
         return viewModel.averageResultsPerMonth.first { calendar.isDate($0.month, equalTo: rawSelectedDate, toGranularity: .month)}
     }

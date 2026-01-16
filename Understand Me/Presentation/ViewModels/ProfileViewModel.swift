@@ -16,7 +16,10 @@ class ProfileViewModel: ObservableObject {
     @Published var averageScoreOfAllResults: Int = 0
 
     // グラフに表示するデータの年
-    @Published var currentYearForGraph: Int = Calendar.current.component(.year, from: Date())
+    @Published var currentYearForGraph: Int = {
+        var gregorianCalendar = Calendar(identifier: .gregorian)
+        return gregorianCalendar.component(.year, from: Date())
+    }()
     
     
     @Published var errorMessage: String = ""

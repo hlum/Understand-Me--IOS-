@@ -26,9 +26,10 @@ class ResultUseCase {
     
     
     func calculateAverageResultsPerMonth(results: [ResultData], year: Int) -> [AverageResultPerMonth] {
-        let calendar = Calendar.current
+        // 常にグレゴリオ暦を使用（ユーザーの設定が和暦などでも正しく動作させる）
+        var calendar = Calendar(identifier: .gregorian)
         var averageResultsPerMonth: [AverageResultPerMonth] = []
-        
+
         // 指定した年の結果を先に抽出
         let yearResults = results.filter {
             calendar.component(.year, from: $0.evaluatedAt) == year
