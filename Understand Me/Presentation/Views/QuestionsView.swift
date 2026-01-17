@@ -48,16 +48,16 @@ struct QuestionsView: View {
                         mode: mode,
                         isLastQuestion: viewModel.currentIndex == viewModel.questionsWithChoices.count - 1,
                         onClickNext: { selectedChoiceID in
-                            
-                            
+
+
                             Task {
                                 await viewModel.postAnswer(
                                     questionID: viewModel.questionsWithChoices[viewModel.currentIndex].id,
                                     homeworkID: viewModel.questionsWithChoices[viewModel.currentIndex].homeworkID,
                                     selectedChoiceID: selectedChoiceID
                                 )
-                                
-                                
+
+
                                 if viewModel.currentIndex < viewModel.questionsWithChoices.count - 1 {
                                     withAnimation(.snappy) {
                                         viewModel.currentIndex += 1
@@ -65,12 +65,13 @@ struct QuestionsView: View {
                                 } else {
                                     // Quiz 終了、前のViewに戻る
                                     dismiss()
-                                    
+
                                 }
 
                             }
-                            
+
                         })
+                    .id(viewModel.questionsWithChoices[viewModel.currentIndex].id)
                     .task {
                         //　回答を始めたのを記録するため空の回答を送信しとく
                         await viewModel.postAnswer(

@@ -92,8 +92,12 @@ struct QuestionAndChoicesItemView: View {
                     Button {
                         withAnimation(.easeInOut) {
                             if !submitted {
-                                submitted = true
+                                // First tap: Submit the answer
+                                if selectedChoiceID != nil {
+                                    submitted = true
+                                }
                             } else {
+                                // Second tap: Move to next question
                                 submitted = false
                                 if let id = selectedChoiceID {
                                     onClickNext?(id)
@@ -110,8 +114,8 @@ struct QuestionAndChoicesItemView: View {
                             .background(buttonColor)
                             .cornerRadius(14)
                     }
-                    .disabled(selectedChoiceID == nil && !submitted)
-                    .opacity(selectedChoiceID == nil && !submitted ? 0.6 : 1)
+                    .disabled(selectedChoiceID == nil)
+                    .opacity(selectedChoiceID == nil ? 0.6 : 1)
                     
                 }
             }

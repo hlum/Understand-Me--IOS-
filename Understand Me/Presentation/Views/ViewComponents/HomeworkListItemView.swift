@@ -64,16 +64,7 @@ struct HomeworkListItemView: View {
         }
         .overlay(alignment: .trailing, content: {
             if state == .questionGenerated {
-                NavigationLink {
-                    QuestionsView(homeworkID: id)
-                } label: {
-                    Text("回答")
-                        .font(.headline)
-                        .frame(width: 70, height: 45)
-                        .background(.accent.opacity(0.3))
-                        .foregroundColor(.primary)
-                        .cornerRadius(70)
-                }
+                AnswerButton(homeworkID: id)
             } else if state == .generatingQuestions {
                 NavigationLink {
                   HomeworkDetailView(id: id)
@@ -107,6 +98,38 @@ struct HomeworkListItemView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy/MM/dd"
         return formatter.string(from: date)
+    }
+}
+
+// MARK: - Answer Button Component with Explanation Flow
+struct AnswerButton: View {
+    let homeworkID: String
+
+    @State private var showExplanation = false
+    @State private var showQuestions = false
+
+    var body: some View {
+        Button {
+            // Check if we should show the explanation
+            if TestExplanationPreference.shared.shouldShowExplanation() {
+                showExplanation = true
+            } else {
+                showQuestions = true
+            }
+        } label: {
+            Text("回答")
+                .font(.headline)
+                .frame(width: 70, height: 45)
+                .background(.accent.opacity(0.3))
+                .foregroundColor(.primary)
+                .cornerRadius(70)
+        }
+        .fullScreenCover(isPresented: $showExplanation) {
+            TestExplanationView(showQuestions: $showQuestions)
+        }
+        .fullScreenCover(isPresented: $showQuestions) {
+            QuestionsView(homeworkID: homeworkID)
+        }
     }
 }
 

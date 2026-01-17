@@ -13,6 +13,7 @@ struct HomeworkDetailView: View {
     @StateObject private var viewModel: HomeworkDetailViewModel
     
     @State private var showQuestionViewSheet: Bool = false
+    @State private var showExplanation: Bool = false
     
     init(
         id: String,
@@ -67,6 +68,13 @@ struct HomeworkDetailView: View {
             }
             
         }
+        .fullScreenCover(
+            isPresented: $showExplanation,
+            onDismiss: {
+                showExplanation = false
+        }, content: {
+            TestExplanationView(showQuestions: $showQuestionViewSheet)
+        })
         .fullScreenCover(
             isPresented: $showQuestionViewSheet,
             onDismiss: {
@@ -156,7 +164,12 @@ struct HomeworkDetailView: View {
     
     private func answerQuizBtn(homeworkID: String) -> some View {
         Button {
-            showQuestionViewSheet.toggle()
+            // Check if we should show the explanation
+            if TestExplanationPreference.shared.shouldShowExplanation() {
+                showExplanation = true
+            } else {
+                showQuestionViewSheet = true
+            }
         } label: {
             HStack {
                 LottieView(filename: "AI")
