@@ -10,7 +10,6 @@ import OSLog
 import FirebaseAuth
 
 class LollipopAPIUtility {
-    private let secretLoader = SecretLoader.shared
     private let remoteConfigManager = RemoteConfigManager.shared
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "API")
     
@@ -23,23 +22,21 @@ class LollipopAPIUtility {
         return baseURL
     }
 
-    /// Get Firebase ID token from current user, fallback to static API key
+    /// Get Firebase ID token from current user
     private func getAuthToken() async throws -> String {
-        // Try to get Firebase ID token
-        if let currentUser = Auth.auth().currentUser {
-            do {
-                let token = try await currentUser.getIDToken()
-                logger.debug("✅ Using Firebase ID token for authentication")
-                return token
-            } catch {
-                logger.warning("⚠️ Failed to get Firebase ID token: \(error.localizedDescription)")
-                // Fall through to static API key
-            }
+        guard let currentUser = Auth.auth().currentUser else {
+            logger.error("❌ User must be authenticated to make API requests")
+            throw LollipopError.auth
         }
 
-        // Fallback to static API key
-        logger.debug("Using static API key as fallback")
-        return secretLoader.fetchSecret(from: "Secrets", forKey: "APIKEY")
+        do {
+            let token = try await currentUser.getIDToken()
+            logger.debug("✅ Using Firebase ID token for authentication")
+            return token
+        } catch {
+            logger.error("❌ Failed to get Firebase ID token: \(error.localizedDescription)")
+            throw error
+        }
     }
 
     func makeRequest(url: URL, method: String, body: Data? = nil) async throws -> URLRequest {
