@@ -37,7 +37,7 @@ class LollipopClassRepository: ClassRepository {
             "class_code": classCode
         ])
         
-        let request = try lollipopAPIUtility.makeRequest(url: url, method: "POST", body: body)
+        let request = try await lollipopAPIUtility.makeRequest(url: url, method: "POST", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
         let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
@@ -59,7 +59,7 @@ class LollipopClassRepository: ClassRepository {
             throw ClassRepositoryError.InvalidURL
         }
         
-        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
+        let request = try await lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let response: APIResponse<Class> = try lollipopAPIUtility.decodeAPIResponse(from: data)
@@ -81,7 +81,7 @@ class LollipopClassRepository: ClassRepository {
             throw ClassRepositoryError.InvalidURL
         }
         
-        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
+        let request = try await lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let response: APIResponse<Class> = try lollipopAPIUtility.decodeAPIResponse(from: data)
@@ -109,7 +109,7 @@ class LollipopClassRepository: ClassRepository {
         }
         
         
-        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
+        let request = try await lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let response: APIResponse<Class> = try lollipopAPIUtility.decodeAPIResponse(from: data)

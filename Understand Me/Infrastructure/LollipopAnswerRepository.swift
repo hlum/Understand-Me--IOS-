@@ -27,7 +27,7 @@ class LollipopAnswerRepository: AnswerRepository {
         ])
         
         
-        let request = try lollipopUtility.makeRequest(url: endPoint, method: "POST", body: body)
+        let request = try await lollipopUtility.makeRequest(url: endPoint, method: "POST", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
@@ -51,7 +51,7 @@ class LollipopAnswerRepository: AnswerRepository {
             throw LollipopError.InvalidURL
         }
 
-        let request = try lollipopUtility.makeRequest(url: finalURL, method: "GET")
+        let request = try await lollipopUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let response: APIResponse<Answer> = try lollipopUtility.decodeAPIResponse(from: data)

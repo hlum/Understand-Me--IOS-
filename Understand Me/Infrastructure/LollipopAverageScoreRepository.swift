@@ -26,7 +26,7 @@ class LollipopAverageScoreRepository: AverageScoreRepository {
         }
         
         
-        let request = try lollipopUtility.makeRequest(url: finalURL, method: "GET")
+        let request = try await lollipopUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let response: APIResponse<AverageScorePerClass> = try lollipopUtility.decodeAPIResponse(from: data)

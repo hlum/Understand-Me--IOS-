@@ -24,35 +24,35 @@ class LollipopResultRepository: ResultRepository {
             throw LollipopError.InvalidURL
         }
         
-        let request = try lollipopUtility.makeRequest(url: finalURL, method: "GET")
-        
+        let request = try await lollipopUtility.makeRequest(url: finalURL, method: "GET")
+
         let (data, _) = try await URLSession.shared.data(for: request)
-        
+
         let response: APIResponse<ResultData> = try lollipopUtility.decodeAPIResponse(from: data)
-        
+
         guard let result = response.dataString else {
             throw URLError(.badServerResponse)
         }
 
        return result
     }
-    
-    
-    
+
+
+
     func fetchResult(userID: String, homeworkID: String) async throws -> ResultData {
         let url = try lollipopUtility.makeURL("result/get_result_userID_homeworkID.php")
-        
+
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.queryItems = [
             URLQueryItem(name: "user_id", value: userID),
             URLQueryItem(name: "homework_id", value: homeworkID)
         ]
-        
+
         guard let finalURL = components?.url else {
             throw LollipopError.InvalidURL
         }
-        
-        let request = try lollipopUtility.makeRequest(url: finalURL, method: "GET")
+
+        let request = try await lollipopUtility.makeRequest(url: finalURL, method: "GET")
         
         let (data, _) = try await URLSession.shared.data(for: request)
         

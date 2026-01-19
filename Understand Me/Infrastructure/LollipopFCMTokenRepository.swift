@@ -27,7 +27,7 @@ class LollipopFCMTokenRepository: FCMTokenRepository {
             "device_type": deviceType,
             "fcm_token": fcmToken
         ])
-        let request = try lollipopUtility.makeRequest(url: url, method: "POST", body: body)
+        let request = try await lollipopUtility.makeRequest(url: url, method: "POST", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
         let response: APIResponse<EmptyResponse> = try lollipopUtility.decodeAPIResponse(from: data)
@@ -42,7 +42,7 @@ class LollipopFCMTokenRepository: FCMTokenRepository {
             "user_id": userID,
             "device_id": deviceID
         ])
-        let request = try lollipopUtility.makeRequest(url: url, method: "DELETE", body: body)
+        let request = try await lollipopUtility.makeRequest(url: url, method: "DELETE", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
         let response: APIResponse<EmptyResponse> = try lollipopUtility.decodeAPIResponse(from: data)

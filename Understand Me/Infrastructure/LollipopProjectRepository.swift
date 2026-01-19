@@ -22,7 +22,7 @@ class LollipopProjectRepository: ProjectRepository {
             "github_file_link": githubURLString
         ])
         
-        let request = try lollipopAPIUtility.makeRequest(url: url, method: "PATCH", body: body)
+        let request = try await lollipopAPIUtility.makeRequest(url: url, method: "PATCH", body: body)
 
         let (data, _) = try await URLSession.shared.data(for: request)
         

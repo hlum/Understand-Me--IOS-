@@ -27,7 +27,7 @@ class LollipopQuestionsWithChoicesRepository: QuestionsWithChoicesRepository {
             throw URLError(.badURL)
         }
         
-        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
+        let request = try await lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         
         let (data, _) = try await URLSession.shared.data(for: request)
         

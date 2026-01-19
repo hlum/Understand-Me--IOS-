@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import FirebaseAuth
 
 class LollipopAPIUtility {
     private let secretLoader = SecretLoader.shared
@@ -15,20 +16,39 @@ class LollipopAPIUtility {
     
     func makeURL(_ path: String) throws -> URL {
         let base = remoteConfigManager.apiEndpoint
+//        let base = "http://localhost:8080"
         guard let baseURL = URL(string: base)?.appendingPathComponent(path) else {
             throw LollipopError.InvalidURL
         }
         return baseURL
     }
-    
-    
-    
-    func makeRequest(url: URL, method: String, body: Data? = nil) throws -> URLRequest {
-        let apiKey = secretLoader.fetchSecret(from: "Secrets", forKey: "APIKEY")
+
+    /// Get Firebase ID token from current user, fallback to static API key
+    private func getAuthToken() async throws -> String {
+        // Try to get Firebase ID token
+        if let currentUser = Auth.auth().currentUser {
+            do {
+                let token = try await currentUser.getIDToken()
+                logger.debug("✅ Using Firebase ID token for authentication")
+                return token
+            } catch {
+                logger.warning("⚠️ Failed to get Firebase ID token: \(error.localizedDescription)")
+                // Fall through to static API key
+            }
+        }
+
+        // Fallback to static API key
+        logger.debug("Using static API key as fallback")
+        return secretLoader.fetchSecret(from: "Secrets", forKey: "APIKEY")
+    }
+
+    func makeRequest(url: URL, method: String, body: Data? = nil) async throws -> URLRequest {
+        let authToken = try await getAuthToken()
+
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(apiKey, forHTTPHeaderField: "Authorization")
+        request.setValue(authToken, forHTTPHeaderField: "Authorization")
         request.httpBody = body
         return request
     }

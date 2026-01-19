@@ -54,7 +54,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
             throw URLError(.badURL)
         }
         
-        let request = try lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
+        let request = try await lollipopAPIUtility.makeRequest(url: finalURL, method: "GET")
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let response: APIResponse<HomeworkWithStatus> = try lollipopAPIUtility.decodeAPIResponse(from: data)
@@ -76,7 +76,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
             "user_id": studentID
         ])
         
-        let request = try lollipopAPIUtility.makeRequest(url: url, method: "PATCH", body: body)
+        let request = try await lollipopAPIUtility.makeRequest(url: url, method: "PATCH", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
@@ -94,7 +94,7 @@ class LollipopHomeworkRepository: HomeworkRepository {
             "homework_id": homeworkID
         ])
         
-        let request = try lollipopAPIUtility.makeRequest(url: url, method: "DELETE", body: body)
+        let request = try await lollipopAPIUtility.makeRequest(url: url, method: "DELETE", body: body)
         let (data, _) = try await URLSession.shared.data(for: request)
         let response: APIResponse<EmptyResponse> = try lollipopAPIUtility.decodeAPIResponse(from: data)
         
