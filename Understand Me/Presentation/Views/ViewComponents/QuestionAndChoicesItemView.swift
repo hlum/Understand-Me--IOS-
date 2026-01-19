@@ -90,19 +90,17 @@ struct QuestionAndChoicesItemView: View {
                 // MARK: Next Button
                 if mode == .answering {
                     Button {
-                        withAnimation(.easeInOut) {
-                            if !submitted {
-                                // First tap: Submit the answer
-                                if selectedChoiceID != nil {
-                                    submitted = true
-                                }
-                            } else {
-                                // Second tap: Move to next question
-                                submitted = false
-                                if let id = selectedChoiceID {
-                                    onClickNext?(id)
-                                    restartTimer()
-                                }
+                        if !submitted {
+                            // First tap: Submit the answer
+                            if selectedChoiceID != nil {
+                                submitted = true
+                            }
+                        } else {
+                            // Second tap: Move to next question
+                            submitted = false
+                            if let id = selectedChoiceID {
+                                onClickNext?(id)
+                                restartTimer()
                             }
                         }
                     } label: {
@@ -116,6 +114,7 @@ struct QuestionAndChoicesItemView: View {
                     }
                     .disabled(selectedChoiceID == nil)
                     .opacity(selectedChoiceID == nil ? 0.6 : 1)
+                    .animation(.easeInOut(duration: 0.2), value: buttonColor)
                     
                 }
             }
@@ -223,7 +222,7 @@ struct ChoiceButton: View {
     let choice: Choice
     let isSelected: Bool
     let submitted: Bool
-    
+
     var body: some View {
         HStack {
             Text(choice.choiceText)
@@ -232,24 +231,31 @@ struct ChoiceButton: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .foregroundStyle(.primary)
                 .lineLimit(nil)
-            
-            Spacer()
-            
-            if submitted {
-                if choice.isCorrect {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                .layoutPriority(1)
+
+            Spacer(minLength: 8)
+
+            ZStack {
+                if submitted {
+                    if choice.isCorrect {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                            .transition(.scale.combined(with: .opacity))
+                    } else if isSelected {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.red)
+                            .transition(.scale.combined(with: .opacity))
+                    }
                 } else if isSelected {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.red)
+                    Image(systemName: "circle.fill")
+                        .foregroundStyle(.blue)
+                } else {
+                    Image(systemName: "circle.fill")
+                        .opacity(0.0001)
                 }
-            } else if isSelected {
-                Image(systemName: "circle.fill")
-                    .foregroundStyle(.blue)
-            } else {
-                Image(systemName: "circle.fill")
-                    .opacity(0.0001)
             }
+            .frame(width: 24, height: 24)
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: submitted)
         }
         .padding()
         .background(
@@ -259,6 +265,7 @@ struct ChoiceButton: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(isSelected ? Color.blue : .clear, lineWidth: 2)
                 )
+                .animation(.easeInOut(duration: 0.2), value: isSelected)
         )
     }
 }
