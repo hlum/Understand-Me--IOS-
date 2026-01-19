@@ -39,7 +39,7 @@ struct ArcTimerButton: View {
     }
     
     private var currentColor: Color {
-        isWarning ? warningColor : .accent
+        isWarning ? warningColor : accentColor
     }
     
     private var animatedSize: CGFloat {
@@ -84,18 +84,13 @@ struct ArcTimerButton: View {
         .buttonStyle(.plain)
         .accessibilityLabel("\(label ?? ""), \(remainingSeconds) seconds remaining")
         .accessibilityHint("Tap to start timer")
-        .onAppear(perform: startBreathingAnimation)
+        .onAppear {
+            startBreathingAnimation()
+            startTimer()
+        }
         .onDisappear(perform: cleanup)
         .onChange(of: remainingSeconds) { _, newValue in
             onTick?(newValue)
-        }
-        .onChange(of: progress) { _, newValue in
-            if newValue == 0 {
-                startTimer()
-            }
-        }
-        .onAppear {
-            startTimer()
         }
     }
     

@@ -35,19 +35,24 @@ class QuestionsViewModel: ObservableObject {
     func loadALlQuestionsWithChoices(homeworkID: String) async {
         isLoading = true
         defer { isLoading = false }
-        
+
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: ログイン中のUserがありません。")
             return
         }
-        
+
         do {
-            
+
             self.questionsWithChoices = try await questionsWithChoicesUseCase.fetchAll(
                 homeworkID: homeworkID,
                 userID: authDataResult.id
             )
-            
+
+        } catch is CancellationError {
+            // Task was cancelled, this is expected behavior
+            logger.debug("QuestionsViewModel.loadAllQuestionsWithChoices: cancelled")
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            logger.debug("QuestionsViewModel.loadAllQuestionsWithChoices: network request cancelled")
         } catch {
             logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: \(error.localizedDescription)")
             errorMessage = "質問の読み込みに失敗しました。"
