@@ -13,7 +13,6 @@ struct KnowYourCodeWidgetBundle: WidgetBundle {
     var body: some Widget {
         KnowYourCodeAverageScoreWidget()
         KnowYourCodeHomeworkProgressWidget()
-        KnowYourCodeWidgetControl()
         KnowYourCodeWidgetLiveActivity()
     }
 }

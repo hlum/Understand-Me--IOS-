@@ -10,6 +10,7 @@ import Firebase
 import FirebaseMessaging
 import UserNotifications
 import OSLog
+import Intents
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "UnderstandMe", category: "Presentation")
@@ -47,6 +48,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         // Apple Push Notificationサービスに登録
         application.registerForRemoteNotifications()
+        
+      
+        // Request Siri permission (available on iOS 16+)
+        if #available(iOS 16.0, *) {
+            INPreferences.requestSiriAuthorization { [weak self] status in
+                guard let self = self else { return }
+                switch status {
+                case .authorized:
+                    self.logger.info("Siri authorization granted")
+                default:
+                    self.logger.info("Siri authorization status: \(String(describing: status))")
+                }
+            }
+        }
         
         return true
     }
