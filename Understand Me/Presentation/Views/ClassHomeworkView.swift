@@ -9,9 +9,10 @@ import SwiftUI
 import AlertToast
 
 struct ClassHomeworkView: View {
-    
+
     @StateObject private var viewModel: ClassHomeworkViewModel
-    
+    @State private var refreshTrigger = UUID()
+
     var classID: String
     
     
@@ -53,7 +54,21 @@ struct ClassHomeworkView: View {
                 ScrollView(showsIndicators: false) {
                     LazyVStack {
                         ForEach(viewModel.filteredHomeworks) { homework in
-                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                            HomeworkListItemView(
+                                id: homework.id,
+                                title: homework.title,
+                                dueDate: homework.dueDate ?? Date(),
+                                state: homework.submissionState,
+                                onTestCompleted: {
+                                    Task {
+                                        guard !Task.isCancelled else { return }
+                                        await viewModel.loadHomeworks(classID: classID)
+
+                                        guard !Task.isCancelled else { return }
+                                        viewModel.filterHomeworks()
+                                    }
+                                }
+                            )
                         }
                     }
                     .padding(.top, 10)
@@ -64,9 +79,28 @@ struct ClassHomeworkView: View {
         }
         .navigationTitle(viewModel.classInfo?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
-        .task {
+        .task(id: refreshTrigger) {
+            guard !Task.isCancelled else { return }
             await viewModel.loadClassInfos()
+
+            guard !Task.isCancelled else { return }
             await viewModel.loadHomeworks(classID: classID)
+
+            guard !Task.isCancelled else { return }
+            viewModel.filterHomeworks()
+        }
+        .onAppear {
+            // Refresh when navigating back
+            refreshTrigger = UUID()
+        }
+        .refreshable {
+            guard !Task.isCancelled else { return }
+            await viewModel.loadClassInfos()
+
+            guard !Task.isCancelled else { return }
+            await viewModel.loadHomeworks(classID: classID)
+
+            guard !Task.isCancelled else { return }
             viewModel.filterHomeworks()
         }
         .toast(isPresenting: $viewModel.showError) {

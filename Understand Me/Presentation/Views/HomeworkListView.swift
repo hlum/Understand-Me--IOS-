@@ -10,8 +10,9 @@ import AlertToast
 
 struct HomeworkListView: View {
     @StateObject private var viewModel: HomeworkListViewModel
-    
-    
+    @State private var refreshTrigger = UUID()
+
+
     init(homeworkRepo: HomeworkRepository = LollipopHomeworkRepository(),
             authRepo: AuthenticationRepository = FirebaseAuthenticationRepository()
     ) {
@@ -45,7 +46,22 @@ struct HomeworkListView: View {
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(viewModel.filteredHomeworks) { homework in
-                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate, state: homework.submissionState)
+                            HomeworkListItemView(
+                                id: homework.id,
+                                title: homework.title,
+                                dueDate: homework.dueDate,
+                                state: homework.submissionState,
+                                onTestCompleted: {
+                                    // Refresh list when test is completed
+                                    Task {
+                                        guard !Task.isCancelled else { return }
+                                        await viewModel.loadHomeworks()
+
+                                        guard !Task.isCancelled else { return }
+                                        viewModel.filterAndSearch()
+                                    }
+                                }
+                            )
                         }
                     }
                     .padding()
@@ -58,8 +74,22 @@ struct HomeworkListView: View {
         .navigationTitle("全ての課題")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "課題を検索")
-        .task {
+        .task(id: refreshTrigger) {
+            guard !Task.isCancelled else { return }
             await viewModel.loadHomeworks()
+
+            guard !Task.isCancelled else { return }
+            viewModel.filterAndSearch()
+        }
+        .onAppear {
+            // Refresh when navigating back
+            refreshTrigger = UUID()
+        }
+        .refreshable {
+            guard !Task.isCancelled else { return }
+            await viewModel.loadHomeworks()
+
+            guard !Task.isCancelled else { return }
             viewModel.filterAndSearch()
         }
         .toast(isPresenting: $viewModel.showErrorAlert) {

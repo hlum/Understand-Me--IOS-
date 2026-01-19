@@ -49,6 +49,8 @@ class HomeViewModel: ObservableObject {
         
         do {
             self.userData = try await userDataUseCase.fetchUserData(userID: authDataResult.id)
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            logger.debug("HomeViewModel.loadUserData: network request cancelled")
         } catch {
             logger.error("HomeViewModel.loadUserData(): UserDataの取得に失敗しました。")
             errorMessage = "ユーザーデータの読み込みに失敗しました"
@@ -69,6 +71,8 @@ class HomeViewModel: ObservableObject {
             
             self.homeworks = homeworks
             
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            logger.debug("HomeViewModel.loadHomeworks: network request cancelled")
         } catch {
             logger.error("HomeViewModel.loadHomeworks(): 宿題の取得に失敗しました。")
             errorMessage = "課題の読み込みに失敗しました"
@@ -86,6 +90,8 @@ class HomeViewModel: ObservableObject {
         }
         do {
             self.classes = try await classUseCase.fetchClassList(studentID: authDataResult.id)
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            logger.debug("HomeViewModel.loadClasses: network request cancelled")
         } catch {
             logger.error("HomeViewModel.loadClasses(): クラスの取得に失敗しました。")
             errorMessage = "科目の読み込みに失敗しました"

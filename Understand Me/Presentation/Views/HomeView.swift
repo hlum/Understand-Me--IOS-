@@ -10,8 +10,9 @@ import AlertToast
 
 struct HomeView: View {
     @Binding var selectedTab: Int
-    
+
     @StateObject private var viewModel: HomeViewModel
+    @State private var refreshTrigger = UUID()
     
     // MARK: Init
     init(
@@ -108,7 +109,18 @@ struct HomeView: View {
                                 ScrollView(showsIndicators: false ) {
                                     LazyVStack {
                                         ForEach(viewModel.homeworks) { homework in
-                                            HomeworkListItemView(id: homework.id, title: homework.title, dueDate: homework.dueDate ?? Date(), state: homework.submissionState)
+                                            HomeworkListItemView(
+                                                id: homework.id,
+                                                title: homework.title,
+                                                dueDate: homework.dueDate ?? Date(),
+                                                state: homework.submissionState,
+                                                onTestCompleted: {
+                                                    Task {
+                                                        guard !Task.isCancelled else { return }
+                                                        await viewModel.loadHomeworks()
+                                                    }
+                                                }
+                                            )
                                         }
                                     }
                                     .padding(.vertical)
@@ -123,12 +135,35 @@ struct HomeView: View {
                 .foregroundStyle(.primary)
             }
         }
-        .task {
+        .task(id: refreshTrigger) {
+            guard !Task.isCancelled else { return }
             viewModel.isLoading = true
+
+            guard !Task.isCancelled else { return }
             await viewModel.loadUserData()
+
+            guard !Task.isCancelled else { return }
             await viewModel.loadHomeworks()
+
+            guard !Task.isCancelled else { return }
             await viewModel.loadClasses()
+
+            guard !Task.isCancelled else { return }
             viewModel.isLoading = false
+        }
+        .onAppear {
+            // Refresh when navigating back
+            refreshTrigger = UUID()
+        }
+        .refreshable {
+            guard !Task.isCancelled else { return }
+            await viewModel.loadUserData()
+
+            guard !Task.isCancelled else { return }
+            await viewModel.loadHomeworks()
+
+            guard !Task.isCancelled else { return }
+            await viewModel.loadClasses()
         }
         .toast(isPresenting: $viewModel.showError) {
             AlertToast(

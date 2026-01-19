@@ -214,6 +214,8 @@ class HomeworkDetailViewModel: ObservableObject {
         } catch let error as LollipopError {
             showAlert(message: error.errorDescription ?? "クラス情報の取得に失敗しました。")
             logger.error("HomeworkDetailViewModel.loadClassDetail: \(error.debugDescription)")
+        } catch let urlError as URLError where urlError.code == .cancelled {
+            logger.debug("HomeworkDetailViewModel.loadClassDetail: network request cancelled")
         } catch {
             showAlert(message: "クラス情報の取得に失敗しました。")
             logger.error("HomeworkDetailViewModel.loadClassDetail: \(error.localizedDescription)")

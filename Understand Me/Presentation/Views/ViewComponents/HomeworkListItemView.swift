@@ -12,6 +12,7 @@ struct HomeworkListItemView: View {
     var title: String
     var dueDate: Date?
     var state: HomeworkState
+    var onTestCompleted: (() -> Void)? = nil
     
     var body: some View {
         NavigationLink {
@@ -64,7 +65,7 @@ struct HomeworkListItemView: View {
         }
         .overlay(alignment: .trailing, content: {
             if state == .questionGenerated {
-                AnswerButton(homeworkID: id)
+                AnswerButton(homeworkID: id, onTestCompleted: onTestCompleted)
             } else if state == .generatingQuestions {
                 NavigationLink {
                   HomeworkDetailView(id: id)
@@ -104,6 +105,7 @@ struct HomeworkListItemView: View {
 // MARK: - Answer Button Component with Explanation Flow
 struct AnswerButton: View {
     let homeworkID: String
+    var onTestCompleted: (() -> Void)? = nil
 
     @State private var showExplanation = false
     @State private var showQuestions = false
@@ -124,10 +126,15 @@ struct AnswerButton: View {
                 .foregroundColor(.primary)
                 .cornerRadius(70)
         }
-        .fullScreenCover(isPresented: $showExplanation) {
+        .fullScreenCover(isPresented: $showExplanation, onDismiss: {
+            // Don't refresh here, only when test is actually completed
+        }) {
             TestExplanationView(showQuestions: $showQuestions)
         }
-        .fullScreenCover(isPresented: $showQuestions) {
+        .fullScreenCover(isPresented: $showQuestions, onDismiss: {
+            // Refresh the list after test completion
+            onTestCompleted?()
+        }) {
             QuestionsView(homeworkID: homeworkID)
         }
     }

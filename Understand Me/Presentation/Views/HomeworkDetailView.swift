@@ -58,7 +58,10 @@ struct HomeworkDetailView: View {
                 .navigationTitle("課題の詳細")
                 .navigationBarTitleDisplayMode(.inline)
                 .refreshable {
+                    guard !Task.isCancelled else { return }
                     await viewModel.loadInfoOfHomework(homeworkID: id)
+
+                    guard !Task.isCancelled else { return }
                     if viewModel.homework?.submissionState == .completed {
                         await viewModel.loadResult(homeworkID: id)
                     }
@@ -79,14 +82,20 @@ struct HomeworkDetailView: View {
             isPresented: $showQuestionViewSheet,
             onDismiss: {
             Task {
+                guard !Task.isCancelled else { return }
                 await viewModel.loadInfoOfHomework(homeworkID: id)
+
+                guard !Task.isCancelled else { return }
                 await viewModel.loadResult(homeworkID: id)
             }
         }, content: {
             QuestionsView(homeworkID: id)
         })
         .task(id: id) {
+            guard !Task.isCancelled else { return }
             await viewModel.loadInfoOfHomework(homeworkID: id)
+
+            guard !Task.isCancelled else { return }
             if(viewModel.homework?.submissionState == .completed) {
                 await viewModel.loadResult(homeworkID: id)
             }
@@ -164,6 +173,11 @@ struct HomeworkDetailView: View {
     
     private func answerQuizBtn(homeworkID: String) -> some View {
         Button {
+            // Double-check state before showing test (prevent retaking)
+            guard viewModel.homework?.submissionState == .questionGenerated else {
+                return
+            }
+
             // Check if we should show the explanation
             if TestExplanationPreference.shared.shouldShowExplanation() {
                 showExplanation = true
