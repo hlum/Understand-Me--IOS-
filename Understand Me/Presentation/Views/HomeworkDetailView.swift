@@ -28,6 +28,9 @@ struct HomeworkDetailView: View {
         self.id = id
     }
     
+    @State private var taskId: UUID = .init()
+
+    
     var body: some View {
         ScrollView {
             if viewModel.isLoading {
@@ -59,17 +62,11 @@ struct HomeworkDetailView: View {
                 }
             }
         }
-        .task {
+        .task(id: taskId) {
             viewModel.isLoading = true
             await viewModel.loadInfoOfHomework(homeworkID: id)
-            
-            if(viewModel.homework?.submissionState == .completed) {
-                await viewModel.loadResult(homeworkID: id)
-            }
-            
             viewModel.isLoading = false
         }
-        
         .navigationTitle("課題の詳細")
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(
@@ -83,21 +80,13 @@ struct HomeworkDetailView: View {
             isPresented: $showQuestionViewSheet,
             onDismiss: {
                 Task {
-                    guard !Task.isCancelled else { return }
                     await viewModel.loadInfoOfHomework(homeworkID: id)
-                    
-                    guard !Task.isCancelled else { return }
-                    await viewModel.loadResult(homeworkID: id)
                 }
             }, content: {
                 QuestionsView(homeworkID: id)
             })
         .refreshable {
-            await viewModel.loadInfoOfHomework(homeworkID: id)
-            
-            if viewModel.homework?.submissionState == .completed {
-                await viewModel.loadResult(homeworkID: id)
-            }
+            taskId = .init()
         }
         .toast(isPresenting: $viewModel.showErrorAlert) {
             AlertToast(
@@ -321,7 +310,7 @@ struct HomeworkDetailView: View {
             Button {
                 Task {
                     viewModel.isUploading = true
-
+                    
                     await viewModel.uploadProject()
                     await viewModel.loadInfoOfHomework(homeworkID: homeworkID)
                     

@@ -93,6 +93,7 @@ class HomeworkDetailViewModel: ObservableObject {
         await loadHomework(id: homeworkID)
         if let homework = self.homework {
             await loadClassDetail(classID: homework.classID)
+            await loadResult(homeworkID: homework.id)
         }
     }
     
@@ -232,7 +233,7 @@ class HomeworkDetailViewModel: ObservableObject {
     
     // TODO: Result should be nullable
     @MainActor
-    func loadResult(homeworkID: String) async {
+    private func loadResult(homeworkID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             showAlert(message: "ログイン情報を取得できませんでした。")
             logger.error("QuestionsViewModel.loadAnswersForReview: ログイン中のUserがありません。")

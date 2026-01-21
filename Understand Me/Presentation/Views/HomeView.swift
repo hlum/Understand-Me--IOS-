@@ -122,9 +122,6 @@ struct HomeView: View {
                                     }
                                     .padding(.vertical)
                                 }
-                                .refreshable {
-                                    await viewModel.loadHomeworks()
-                                }
                             } else {
                                 ContentUnavailableView("提出期限が近い課題はありません。", systemImage: "book.closed")
                                     .foregroundStyle(.secondary.opacity(0.7))

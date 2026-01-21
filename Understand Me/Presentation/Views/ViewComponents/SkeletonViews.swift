@@ -125,14 +125,12 @@ struct HomeworkListSkeleton: View {
     var count: Int = 5
     
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(0..<count, id: \.self) { _ in
-                    HomeworkItemSkeleton()
-                }
+        LazyVStack(spacing: 12) {
+            ForEach(0..<count, id: \.self) { _ in
+                HomeworkItemSkeleton()
             }
-            .padding()
         }
+        .padding()
     }
 }
 

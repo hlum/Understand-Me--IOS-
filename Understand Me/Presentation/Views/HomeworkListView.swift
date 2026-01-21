@@ -10,11 +10,9 @@ import AlertToast
 
 struct HomeworkListView: View {
     @StateObject private var viewModel: HomeworkListViewModel
-    @State private var refreshTrigger = UUID()
-
-
+    
     init(homeworkRepo: HomeworkRepository = LollipopHomeworkRepository(),
-            authRepo: AuthenticationRepository = FirebaseAuthenticationRepository()
+         authRepo: AuthenticationRepository = FirebaseAuthenticationRepository()
     ) {
         self._viewModel = .init(
             wrappedValue: .init(
@@ -24,6 +22,8 @@ struct HomeworkListView: View {
         )
     }
     
+    @State private var taskId: UUID = .init()
+
     var body: some View {
         VStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
@@ -39,11 +39,11 @@ struct HomeworkListView: View {
             .frame(maxWidth: .infinity)
             .padding(10)
             .cornerRadius(10)
-            
-            if viewModel.isLoading || viewModel.isFiltering {
-                HomeworkListSkeleton()
-            } else if !viewModel.filteredHomeworks.isEmpty {
-                ScrollView {
+            ScrollView {
+                
+                if viewModel.isLoading || viewModel.isFiltering {
+                    HomeworkListSkeleton()
+                } else if !viewModel.filteredHomeworks.isEmpty {
                     LazyVStack(spacing: 12) {
                         ForEach(viewModel.filteredHomeworks) { homework in
                             HomeworkListItemView(
@@ -56,7 +56,7 @@ struct HomeworkListView: View {
                                     Task {
                                         guard !Task.isCancelled else { return }
                                         await viewModel.loadHomeworks()
-
+                                        
                                         guard !Task.isCancelled else { return }
                                         viewModel.filterAndSearch()
                                     }
@@ -65,30 +65,22 @@ struct HomeworkListView: View {
                         }
                     }
                     .padding()
+                    
+                } else {
+                    ContentUnavailableView("該当する課題はありません。", systemImage: "book.closed")
+                        .foregroundStyle(.secondary.opacity(0.7))
                 }
-                .refreshable {
-                    await viewModel.loadHomeworks()
-                    viewModel.filterAndSearch()
-                }
-
-            } else {
-                ContentUnavailableView("該当する課題はありません。", systemImage: "book.closed")
-                    .foregroundStyle(.secondary.opacity(0.7))
+            }
+            .refreshable {
+                taskId = .init()
             }
         }
         .navigationTitle("全ての課題")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "課題を検索")
-        .task(id: refreshTrigger) {
-            guard !Task.isCancelled else { return }
+        .task(id: taskId) {
             await viewModel.loadHomeworks()
-
-            guard !Task.isCancelled else { return }
             viewModel.filterAndSearch()
-        }
-        .onAppear {
-            // Refresh when navigating back
-            refreshTrigger = UUID()
         }
         .toast(isPresenting: $viewModel.showErrorAlert) {
             AlertToast(
