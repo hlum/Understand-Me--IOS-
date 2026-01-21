@@ -111,9 +111,7 @@ struct QuestionAndChoicesItemView: View {
                                 }
                             } else {
                                 // Second tap: Move to next question
-                                viewModel.correctChoiceID = nil // remove the correctChoiceID
-                                moveToNextQuestion?()
-                                restartTimer()
+                                restartTheTimersAndMoveToNextQuestion()
                             }
                         } label: {
                             Text(buttonLabel)
@@ -143,6 +141,7 @@ struct QuestionAndChoicesItemView: View {
                 if mode == .answering {
                     ArcTimerButton(
                         progress: $progressFromArcTimer,
+                        isRunning: $viewModel.isArcTimerRunning,
                         duration: TimeInterval(arcTimerDuration),
                         lineWidth: 10,
                         size: 70, label: "PUSH",
@@ -156,16 +155,14 @@ struct QuestionAndChoicesItemView: View {
                                     homeworkID: questionAndChoices.homeworkID,
                                     selectedChoiceID: nil
                                 )
-                                viewModel.correctChoiceID = nil
-                                selectedChoiceID = nil
-                                moveToNextQuestion?()
-                                restartTimer()
+                                restartTheTimersAndMoveToNextQuestion()
                             }
                         }
                     )
                     .padding(.bottom)
                     .onAppear {
-                        startTimer()
+                        viewModel.isArcTimerRunning = true
+                        startMainTimer()
                     }
                 }
             }
@@ -176,6 +173,12 @@ struct QuestionAndChoicesItemView: View {
             selectedChoiceID = selectedChoiceIDFromServer
             await viewModel.loadCorrectChoice(homeworkID: questionAndChoices.homeworkID, questionID: questionAndChoices.id)
         }
+        .onChange(of: viewModel.submittingAnswer) { oldValue, newValue in
+            if viewModel.submittingAnswer {
+                viewModel.isArcTimerRunning = false
+                stopMainTimer()
+            }
+        }
     }
     
     // MARK: Helpers
@@ -185,6 +188,15 @@ struct QuestionAndChoicesItemView: View {
         } else {
             return selectedChoiceIDFromServer == choice.id
         }
+    }
+    
+    
+    private func restartTheTimersAndMoveToNextQuestion() {
+        viewModel.correctChoiceID = nil // remove the correctChoiceID
+        selectedChoiceID = nil
+        viewModel.isArcTimerRunning = true
+        moveToNextQuestion?()
+        restartTimer()
     }
     
     private var isSubmitted: Bool {
@@ -211,8 +223,8 @@ struct QuestionAndChoicesItemView: View {
         }
     }
     
-    private func startTimer() {
-        stopTimer()
+    private func startMainTimer() {
+        stopMainTimer()
         
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
@@ -237,13 +249,13 @@ struct QuestionAndChoicesItemView: View {
     
     
     private func restartTimer() {
-        stopTimer()
+        stopMainTimer()
         remainingTime = mainTimerDuration
         progressFromArcTimer = 0.0
-        startTimer()
+        startMainTimer()
     }
     
-    private func stopTimer() {
+    private func stopMainTimer() {
         timerCancellable?.cancel()
         timerCancellable = nil
     }

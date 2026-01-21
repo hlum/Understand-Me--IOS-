@@ -15,6 +15,9 @@ class QuestionAndChoicesItemViewModel: ObservableObject {
     @Published var correctChoiceID: String? = nil
     @Published var showCorrectAnswer: Bool = false
     
+    @Published var isArcTimerRunning: Bool = false
+
+    
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     @Published var showError: Bool = false

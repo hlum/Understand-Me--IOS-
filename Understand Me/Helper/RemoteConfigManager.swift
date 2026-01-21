@@ -29,8 +29,7 @@ class RemoteConfigManager {
     
     var apiEndpoint: String {
         get {
-//            userDefaults.string(forKey: Keys.apiEndpoint) ?? "https://api.hlumaungphyo.site/"
-            "http://localhost:8080"
+            userDefaults.string(forKey: Keys.apiEndpoint) ?? "https://api.hlumaungphyo.site/"
         }
         set {
             userDefaults.set(newValue, forKey: Keys.apiEndpoint)

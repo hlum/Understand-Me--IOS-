@@ -320,8 +320,12 @@ struct HomeworkDetailView: View {
             // Submit button
             Button {
                 Task {
+                    viewModel.isUploading = true
+
                     await viewModel.uploadProject()
                     await viewModel.loadInfoOfHomework(homeworkID: homeworkID)
+                    
+                    viewModel.isUploading = false
                 }
             } label: {
                 Text("提出する")
@@ -329,7 +333,7 @@ struct HomeworkDetailView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 55)
                     .background(
-                        viewModel.homeworkLinkTxt.isEmpty
+                        viewModel.homeworkLinkTxt.isEmpty || viewModel.isUploading
                         ? Color.gray.opacity(0.4)
                         : Color.accentColor
                     )
@@ -337,7 +341,7 @@ struct HomeworkDetailView: View {
                     .cornerRadius(70)
                     .animation(.easeInOut, value: viewModel.homeworkLinkTxt.isEmpty)
             }
-            .disabled(viewModel.homeworkLinkTxt.isEmpty)
+            .disabled(viewModel.homeworkLinkTxt.isEmpty || viewModel.isUploading)
             
         }
         .padding(.horizontal)

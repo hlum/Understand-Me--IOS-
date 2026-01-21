@@ -61,6 +61,7 @@ class HomeworkDetailViewModel: ObservableObject {
     @Published var showInputError: Bool = false
     @Published var inputErrorMessage: String = ""
     
+    @Published var isUploading:Bool = false
     @Published var isLoading: Bool = false
     
     private let homeworkUseCase: HomeworkUseCase
@@ -98,8 +99,6 @@ class HomeworkDetailViewModel: ObservableObject {
     
     
     func uploadProject() async {
-        isLoading = true
-        defer { isLoading = false }
         
         inputErrorMessage = ""
         showInputError = false
