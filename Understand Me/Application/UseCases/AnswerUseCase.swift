@@ -16,8 +16,8 @@ class AnswerUseCase {
     }
     
     
-    
-    func addAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws {
+    @discardableResult
+    func addAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws -> String  {
         try await answerRepository.postAnswer(answer: answer, homeworkID: homeworkID, totalQuestions: totalQuestions)
     }
     

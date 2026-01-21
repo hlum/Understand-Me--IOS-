@@ -12,7 +12,6 @@ struct HomeView: View {
     @Binding var selectedTab: Int
 
     @StateObject private var viewModel: HomeViewModel
-    @State private var refreshTrigger = UUID()
     
     // MARK: Init
     init(
@@ -37,7 +36,7 @@ struct HomeView: View {
     
     var body: some View {
         
-        Group {
+        VStack {
             if viewModel.isLoading {
                 HomeViewSkeleton()
             } else {
@@ -105,7 +104,6 @@ struct HomeView: View {
                         
                         Group {
                             if !viewModel.homeworks.isEmpty {
-                                
                                 ScrollView(showsIndicators: false ) {
                                     LazyVStack {
                                         ForEach(viewModel.homeworks) { homework in
@@ -116,7 +114,6 @@ struct HomeView: View {
                                                 state: homework.submissionState,
                                                 onTestCompleted: {
                                                     Task {
-                                                        guard !Task.isCancelled else { return }
                                                         await viewModel.loadHomeworks()
                                                     }
                                                 }
@@ -124,6 +121,9 @@ struct HomeView: View {
                                         }
                                     }
                                     .padding(.vertical)
+                                }
+                                .refreshable {
+                                    await viewModel.loadHomeworks()
                                 }
                             } else {
                                 ContentUnavailableView("提出期限が近い課題はありません。", systemImage: "book.closed")
@@ -135,35 +135,12 @@ struct HomeView: View {
                 .foregroundStyle(.primary)
             }
         }
-        .task(id: refreshTrigger) {
-            guard !Task.isCancelled else { return }
+        .task {
             viewModel.isLoading = true
-
-            guard !Task.isCancelled else { return }
             await viewModel.loadUserData()
-
-            guard !Task.isCancelled else { return }
             await viewModel.loadHomeworks()
-
-            guard !Task.isCancelled else { return }
             await viewModel.loadClasses()
-
-            guard !Task.isCancelled else { return }
             viewModel.isLoading = false
-        }
-        .onAppear {
-            // Refresh when navigating back
-            refreshTrigger = UUID()
-        }
-        .refreshable {
-            guard !Task.isCancelled else { return }
-            await viewModel.loadUserData()
-
-            guard !Task.isCancelled else { return }
-            await viewModel.loadHomeworks()
-
-            guard !Task.isCancelled else { return }
-            await viewModel.loadClasses()
         }
         .toast(isPresenting: $viewModel.showError) {
             AlertToast(

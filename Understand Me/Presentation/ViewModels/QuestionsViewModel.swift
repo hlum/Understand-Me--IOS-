@@ -35,19 +35,18 @@ class QuestionsViewModel: ObservableObject {
     func loadALlQuestionsWithChoices(homeworkID: String) async {
         isLoading = true
         defer { isLoading = false }
-
+        
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("QuestionsViewModel.loadAllQuestionsWithChoices: ログイン中のUserがありません。")
             return
         }
-
+        
         do {
-
-            self.questionsWithChoices = try await questionsWithChoicesUseCase.fetchAll(
+            
+            self.questionsWithChoices = try await questionsWithChoicesUseCase.fetchQuestionsChoices(
                 homeworkID: homeworkID,
                 userID: authDataResult.id
             )
-
         } catch is CancellationError {
             // Task was cancelled, this is expected behavior
             logger.debug("QuestionsViewModel.loadAllQuestionsWithChoices: cancelled")
@@ -74,19 +73,18 @@ class QuestionsViewModel: ObservableObject {
             selectedChoiceID: selectedChoiceID
         )
         
-        do {
-            let totalQuestions = questionsWithChoices.count
-            try await answerUseCase.addAnswer(answer: answer, homeworkID: homeworkID, totalQuestions: totalQuestions)
-        } catch {
-            logger.error("QuestionsViewModel.postAnswer: \(error.localizedDescription)")
-            errorMessage = "回答の送信に失敗しました: \n \(error.localizedDescription)"
-            showError = true
-        }
+        let totalQuestions = questionsWithChoices.count
+        try? await answerUseCase.addAnswer(answer: answer, homeworkID: homeworkID, totalQuestions: totalQuestions)
     }
     
     
     
     func loadAnswersForReview(homeworkID: String) async {
+        
+        isLoading = true
+        defer { isLoading = false }
+        
+        
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             logger.error("QuestionsViewModel.loadAnswersForReview: ログイン中のUserがありません。")
             return

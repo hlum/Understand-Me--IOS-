@@ -6,8 +6,7 @@
 //
 
 import SwiftUI
-
-import SwiftUI
+import OSLog
 import Combine
 
 // MARK: - Mode Enum
@@ -16,146 +15,167 @@ enum QuestionViewMode {
     case review
 }
 
+
+
 struct QuestionAndChoicesItemView: View {
     var questionAndChoices: QuestionWithChoices
     var mode: QuestionViewMode = .answering
     var isLastQuestion: Bool = false
-    var onClickNext: ((_ selectedChoiceID: String?) -> Void)? = nil
+    var moveToNextQuestion: (() -> Void)? = nil
     var selectedChoiceIDFromServer: String? = nil // for review mode
-
+    var questionCount: Int
     private let mainTimerDuration: Int = RemoteConfigManager.shared.mainTimerDuration
     private let arcTimerDuration: Int = RemoteConfigManager.shared.arcTimerDuration
-
+    
     @State private var remainingTime: Int
     @State private var selectedChoiceID: String? = nil
-    @State private var submitted = false
     @State private var timerCancellable: Cancellable? = nil
     @State private var progressFromArcTimer: Double = 0.0
-
+    
+    @StateObject var viewModel = QuestionAndChoicesItemViewModel(
+        authenticationUseCase: AuthenticationUseCase(authenticationRepository: FirebaseAuthenticationRepository()),
+        questionsWithChoicesUseCase: QuestionsWIthChoicesUseCase(questionsWithChoicesRepository: LollipopQuestionsWithChoicesRepository()),
+        answerUseCase: AnswerUseCase(answerRepository: LollipopAnswerRepository())
+    )
+    
     init(
         questionAndChoices: QuestionWithChoices,
-        mode: QuestionViewMode = .answering,
+        mode: QuestionViewMode,
         isLastQuestion: Bool = false,
-        onClickNext: ((_ selectedChoiceID: String?) -> Void)? = nil,
+        questionCount: Int,
+        moveToNextQuestion: (() -> Void)? = nil,
         selectedChoiceIDFromServer: String? = nil
     ) {
         self.questionAndChoices = questionAndChoices
         self.mode = mode
         self.isLastQuestion = isLastQuestion
-        self.onClickNext = onClickNext
+        self.moveToNextQuestion = moveToNextQuestion
         self.selectedChoiceIDFromServer = selectedChoiceIDFromServer
+        self.questionCount = questionCount
         self._remainingTime = State(initialValue: RemoteConfigManager.shared.mainTimerDuration)
     }
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                if mode == .answering {
-                    Text("残り時間: \(remainingTime)秒")
-                        .foregroundStyle(.red)
-                }
-                
-                if mode == .review && selectedChoiceIDFromServer == nil {
-                    Text("未回答")
-                        .foregroundStyle(.red)
-                }
-                
-                // MARK: Question
-                Text(questionAndChoices.questionText)
-                    .font(.title3.bold())
-                    .foregroundStyle(.primary)
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true) // Add this
-
-                
-                // MARK: Choices
-                VStack(spacing: 12) {
-                    ForEach(questionAndChoices.choices) { choice in
-                        ChoiceButton(
-                            choice: choice,
-                            isSelected: isChoiceSelected(choice),
-                            submitted: isSubmitted
-                        )
-                        .onTapGesture {
-                            if mode == .answering && !submitted {
-                                withAnimation(.spring()) {
-                                    selectedChoiceID = choice.id
+            if viewModel.isLoading {
+                QuestionItemSkeleton(mode: mode)
+            } else {
+                VStack(alignment: .leading, spacing: 20) {
+                    if mode == .answering {
+                        Text("残り時間: \(remainingTime)秒")
+                            .foregroundStyle(.red)
+                    }
+                    
+                    if mode == .review && selectedChoiceIDFromServer == nil {
+                        Text("未回答")
+                            .foregroundStyle(.red)
+                    }
+                    
+                    // MARK: Question
+                    Text(questionAndChoices.questionText)
+                        .font(.title3.bold())
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    
+                    // MARK: Choices
+                    VStack(spacing: 12) {
+                        ForEach(questionAndChoices.choices) { choice in
+                            ChoiceButton(
+                                choice: choice,
+                                isSelected: isChoiceSelected(choice),
+                                correctChoiceID: $viewModel.correctChoiceID
+                            )
+                            .onTapGesture {
+                                if mode == .answering && viewModel.correctChoiceID == nil {
+                                    withAnimation(.spring()) {
+                                        selectedChoiceID = choice.id
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                
-                // MARK: Next Button
-                if mode == .answering {
-                    Button {
-                        if !submitted {
-                            // First tap: Submit the answer
-                            if selectedChoiceID != nil {
-                                submitted = true
+                    
+                    // MARK: Next Button
+                    if mode == .answering {
+                        Button {
+                            // correctChoiceID がないのは回答を送信してないから
+                            if viewModel.correctChoiceID == nil {
+                                // First tap: Submit the answer
+                                if selectedChoiceID != nil {
+                                    Task {
+                                        await viewModel.postAnswer(questionCount: questionCount, questionID: questionAndChoices.id, homeworkID: questionAndChoices.homeworkID, selectedChoiceID: selectedChoiceID)
+                                    }
+                                }
+                            } else {
+                                // Second tap: Move to next question
+                                viewModel.correctChoiceID = nil // remove the correctChoiceID
+                                moveToNextQuestion?()
+                                restartTimer()
                             }
-                        } else {
-                            // Second tap: Move to next question
-                            submitted = false
-                            if let id = selectedChoiceID {
-                                onClickNext?(id)
+                        } label: {
+                            Text(buttonLabel)
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 55)
+                                .background(buttonColor)
+                                .cornerRadius(14)
+                        }
+                        .disabled(selectedChoiceID == nil || viewModel.isLoading || viewModel.submittingAnswer)
+                        .opacity(selectedChoiceID == nil || viewModel.isLoading || viewModel.submittingAnswer ? 0.6 : 1)
+                        .animation(.easeInOut(duration: 0.2), value: buttonColor)
+                        
+                    }
+                }
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color(.systemBackground))
+                        .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
+                )
+                .padding()
+                
+                Spacer()
+                
+                if mode == .answering {
+                    ArcTimerButton(
+                        progress: $progressFromArcTimer,
+                        duration: TimeInterval(arcTimerDuration),
+                        lineWidth: 10,
+                        size: 70, label: "PUSH",
+                        accentColor: .accent,
+                        warningColor: .red,
+                        onComplete: {
+                            Task {
+                                await viewModel.postAnswer(
+                                    questionCount: questionCount,
+                                    questionID: questionAndChoices.id,
+                                    homeworkID: questionAndChoices.homeworkID,
+                                    selectedChoiceID: nil
+                                )
+                                viewModel.correctChoiceID = nil
+                                selectedChoiceID = nil
+                                moveToNextQuestion?()
                                 restartTimer()
                             }
                         }
-                    } label: {
-                        Text(buttonLabel)
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 55)
-                            .background(buttonColor)
-                            .cornerRadius(14)
+                    )
+                    .padding(.bottom)
+                    .onAppear {
+                        startTimer()
                     }
-                    .disabled(selectedChoiceID == nil)
-                    .opacity(selectedChoiceID == nil ? 0.6 : 1)
-                    .animation(.easeInOut(duration: 0.2), value: buttonColor)
-                    
                 }
-            }
-            .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
-            )
-            .padding()
-            .onAppear {
-                if mode == .review {
-                    submitted = true
-                    selectedChoiceID = selectedChoiceIDFromServer
-                } else if mode == .answering {
-                    startTimer()
-                }
-                
-            }
-            
-            Spacer()
-            
-            if mode == .answering {
-                ArcTimerButton(
-                    progress: $progressFromArcTimer,
-                    duration: TimeInterval(arcTimerDuration),
-                    lineWidth: 10,
-                    size: 70, label: "PUSH",
-                    accentColor: .accent,
-                    warningColor: .red,
-                    onComplete: {
-                        submitted = false
-                        selectedChoiceID = nil
-                        onClickNext?(nil)
-                        restartTimer()
-                    }
-                )
-                .padding(.bottom)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .task {
+            guard mode == .review else { return }
+            selectedChoiceID = selectedChoiceIDFromServer
+            await viewModel.loadCorrectChoice(homeworkID: questionAndChoices.homeworkID, questionID: questionAndChoices.id)
+        }
     }
     
     // MARK: Helpers
@@ -168,11 +188,15 @@ struct QuestionAndChoicesItemView: View {
     }
     
     private var isSubmitted: Bool {
-        mode == .review || submitted
+        mode == .review || viewModel.correctChoiceID != nil
     }
     
     private var buttonLabel: String {
-        if !submitted {
+        if viewModel.submittingAnswer {
+            return "送信中.."
+        }
+        
+        if viewModel.correctChoiceID == nil {
             return "回答を送信"
         } else {
             return isLastQuestion ? "完了" : "次へ"
@@ -180,7 +204,7 @@ struct QuestionAndChoicesItemView: View {
     }
     
     private var buttonColor: Color {
-        if !submitted {
+        if viewModel.correctChoiceID == nil {
             return .blue
         } else {
             return isLastQuestion ? .green : .orange
@@ -194,10 +218,18 @@ struct QuestionAndChoicesItemView: View {
             .autoconnect()
             .sink { _ in
                 if remainingTime == 0 {
-                    submitted = false
-                    selectedChoiceID = nil
-                    onClickNext?(nil)
-                    restartTimer()
+                    Task {
+                        await viewModel.postAnswer(
+                            questionCount: questionCount,
+                            questionID: questionAndChoices.id,
+                            homeworkID: questionAndChoices.homeworkID,
+                            selectedChoiceID: nil
+                        )
+                        viewModel.correctChoiceID = nil
+                        selectedChoiceID = nil
+                        moveToNextQuestion?()
+                        restartTimer()
+                    }
                 }
                 remainingTime -= 1
             }
@@ -217,63 +249,11 @@ struct QuestionAndChoicesItemView: View {
     }
 }
 
-// MARK: - Choice Button
-struct ChoiceButton: View {
-    let choice: Choice
-    let isSelected: Bool
-    let submitted: Bool
-
-    var body: some View {
-        HStack {
-            Text(choice.choiceText)
-                .font(.body)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .foregroundStyle(.primary)
-                .lineLimit(nil)
-                .layoutPriority(1)
-
-            Spacer(minLength: 8)
-
-            ZStack {
-                if submitted {
-                    if choice.isCorrect {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                            .transition(.scale.combined(with: .opacity))
-                    } else if isSelected {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.red)
-                            .transition(.scale.combined(with: .opacity))
-                    }
-                } else if isSelected {
-                    Image(systemName: "circle.fill")
-                        .foregroundStyle(.blue)
-                } else {
-                    Image(systemName: "circle.fill")
-                        .opacity(0.0001)
-                }
-            }
-            .frame(width: 24, height: 24)
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: submitted)
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(isSelected ? Color.blue.opacity(0.15) : Color.gray.opacity(0.1))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? Color.blue : .clear, lineWidth: 2)
-                )
-                .animation(.easeInOut(duration: 0.2), value: isSelected)
-        )
-    }
-}
 
 
 
 #Preview {
     NavigationStack {
-        QuestionAndChoicesItemView(questionAndChoices: .getDummy(), isLastQuestion: true, onClickNext: { selectedChoiceID in })
+        QuestionAndChoicesItemView(questionAndChoices: .getDummy(), mode: .answering, isLastQuestion: true, questionCount: 5)
     }
 }

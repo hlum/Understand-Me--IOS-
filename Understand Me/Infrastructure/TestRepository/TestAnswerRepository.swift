@@ -8,6 +8,10 @@
 import Foundation
 
 class TestAnswerRepository: AnswerRepository {
+    func postAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws -> String {
+        return ""
+    }
+    
     func postAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws {
         return
     }

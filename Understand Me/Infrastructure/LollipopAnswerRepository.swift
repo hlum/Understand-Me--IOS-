@@ -9,6 +9,14 @@ import Foundation
 import OSLog
 
 
+struct PostAnswerResponse: Codable {
+    let correctChoiceID: String
+    
+    enum CodingKeys: String, CodingKey {
+        case correctChoiceID = "correct_choice_id"
+    }
+}
+
 class LollipopAnswerRepository: AnswerRepository {
     
     private let lollipopUtility = LollipopAPIUtility()
@@ -16,7 +24,7 @@ class LollipopAnswerRepository: AnswerRepository {
     
     
     
-    func postAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws {
+    func postAnswer(answer: Answer, homeworkID: String, totalQuestions: Int) async throws -> String{
         let endPoint = try lollipopUtility.makeURL("answer/add_answer.php")
         let body = try JSONEncoder().encode([
             "question_id": answer.questionID,
@@ -30,11 +38,22 @@ class LollipopAnswerRepository: AnswerRepository {
         let request = try await lollipopUtility.makeRequest(url: endPoint, method: "POST", body: body)
         
         let (data, _) = try await URLSession.shared.data(for: request)
-        
-        let response: APIResponse<EmptyResponse> = try lollipopUtility.decodeAPIResponse(from: data)
+        logger.debug("Response raw data: \(String(data: data, encoding: .utf8) ?? "Can't decode data")")
+        let response: APIResponse<PostAnswerResponse> = try lollipopUtility.decodeAPIResponse(from: data)
         
         try lollipopUtility.checkResponseForErrors(response)
-        logger.info("解答の投稿に成功: questionID=\(answer.questionID), homeworkID=\(homeworkID)")
+        
+        guard let answerReponse = response.dataString,
+              let postAnswerResponse = answerReponse.first
+        else {
+            throw LollipopError.NoDataFoundInResponse
+        }
+        
+        logger.info("解答の投稿に成功: questionID=\(answer.questionID), homeworkID=\(homeworkID) 正解ID：\(postAnswerResponse.correctChoiceID)")
+        
+        return postAnswerResponse.correctChoiceID
+        
+        
     }
     
     

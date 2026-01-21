@@ -31,7 +31,6 @@ class LollipopAPIUtility {
 
         do {
             let token = try await currentUser.getIDToken()
-            logger.debug("✅ Using Firebase ID token for authentication")
             return token
         } catch {
             logger.error("❌ Failed to get Firebase ID token: \(error.localizedDescription)")

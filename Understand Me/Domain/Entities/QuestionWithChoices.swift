@@ -47,19 +47,16 @@ struct QuestionWithChoices: Codable, Identifiable {
 struct Choice: Codable, Identifiable {
     let id: String
     let choiceText: String
-    let isCorrect: Bool
 
     enum CodingKeys: String, CodingKey {
         case id = "choice_id"
         case choiceText = "choice_text"
-        case isCorrect = "is_correct"
     }
     
     static func getDummy() -> Self {
         return Choice(
             id: UUID().uuidString,
             choiceText: "選択肢のテキストです。",
-            isCorrect: Bool.random()
         )
     }
 }

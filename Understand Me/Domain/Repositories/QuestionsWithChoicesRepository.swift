@@ -8,5 +8,6 @@
 import Foundation
 
 protocol QuestionsWithChoicesRepository {
-    func fetchAll(homeworkID: String, userID: String) async throws -> [QuestionWithChoices]
+    func fetchQuestionsChoices(homeworkID: String, userID: String) async throws -> [QuestionWithChoices]
+    func fetchCorrectChoice(homeworkID: String, questionID: String) async throws -> Choice
 }

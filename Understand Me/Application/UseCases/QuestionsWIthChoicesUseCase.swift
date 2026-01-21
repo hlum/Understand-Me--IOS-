@@ -14,8 +14,13 @@ class QuestionsWIthChoicesUseCase {
         self.questionsWithChoicesRepository = questionsWithChoicesRepository
     }
     
-    func fetchAll(homeworkID: String, userID: String) async throws -> [QuestionWithChoices] {
-        try await questionsWithChoicesRepository.fetchAll(homeworkID: homeworkID, userID: userID)
+    func fetchQuestionsChoices(homeworkID: String, userID: String) async throws -> [QuestionWithChoices] {
+        try await questionsWithChoicesRepository.fetchQuestionsChoices(homeworkID: homeworkID, userID: userID)
+    }
+    
+    
+    func fetchCorrectChoice(homeworkID: String, questionID: String) async throws -> Choice  {
+        try await questionsWithChoicesRepository.fetchCorrectChoice(homeworkID: homeworkID, questionID: questionID)
     }
     
 }

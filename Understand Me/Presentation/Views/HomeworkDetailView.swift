@@ -29,74 +29,73 @@ struct HomeworkDetailView: View {
     }
     
     var body: some View {
-        Group {
-            if let homework = viewModel.homework {
-                ScrollView {
-                    if let classInfo = viewModel.classDetail {
-                        homeworkTitleDescription(homework: homework, classInfo: classInfo)
-                    } else {
-                        homeworkTitleDescription(homework: homework, classInfo: nil)
-                            .redacted(reason: .placeholder)
-                    }
-                    Divider()
-                    
-                    
-                    if homework.submissionState == .notAssigned {
-                        githubTxtFieldAndBtn(homeworkID: homework.id)
-                    } else if homework.submissionState == .generatingQuestions {
-                        nekoThinking
-                    } else if homework.submissionState == .questionGenerated {
-                        answerQuizBtn(homeworkID: homework.id)
-                    }else if homework.submissionState == .failed {
-                        failedState(homeworkID: homework.id)
-                    } else if homework.submissionState == .completed {
-                        reviewNavBtn(homeworkID: homework.id)
-                    }
-                    
-                    Spacer()
-                }
-                .navigationTitle("課題の詳細")
-                .navigationBarTitleDisplayMode(.inline)
-                .refreshable {
-                    guard !Task.isCancelled else { return }
-                    await viewModel.loadInfoOfHomework(homeworkID: id)
-
-                    guard !Task.isCancelled else { return }
-                    if viewModel.homework?.submissionState == .completed {
-                        await viewModel.loadResult(homeworkID: id)
-                    }
-                }
-            } else {
+        ScrollView {
+            if viewModel.isLoading {
                 HomeworkDetailSkeleton()
+            } else {
+                if let homework = viewModel.homework,
+                   let classInfo = viewModel.classDetail {
+                    VStack {
+                        
+                        homeworkTitleDescription(homework: homework, classInfo: classInfo)
+                        
+                        Divider()
+                        
+                        
+                        if homework.submissionState == .notAssigned {
+                            githubTxtFieldAndBtn(homeworkID: homework.id)
+                        } else if homework.submissionState == .generatingQuestions {
+                            nekoThinking
+                        } else if homework.submissionState == .questionGenerated {
+                            answerQuizBtn(homeworkID: homework.id)
+                        }else if homework.submissionState == .failed {
+                            failedState(homeworkID: homework.id)
+                        } else if homework.submissionState == .completed {
+                            reviewNavBtn(homeworkID: homework.id)
+                        }
+                        
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .task {
+            viewModel.isLoading = true
+            await viewModel.loadInfoOfHomework(homeworkID: id)
+            
+            if(viewModel.homework?.submissionState == .completed) {
+                await viewModel.loadResult(homeworkID: id)
             }
             
+            viewModel.isLoading = false
         }
+        
+        .navigationTitle("課題の詳細")
+        .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(
             isPresented: $showExplanation,
             onDismiss: {
                 showExplanation = false
-        }, content: {
-            TestExplanationView(showQuestions: $showQuestionViewSheet)
-        })
+            }, content: {
+                TestExplanationView(showQuestions: $showQuestionViewSheet)
+            })
         .fullScreenCover(
             isPresented: $showQuestionViewSheet,
             onDismiss: {
-            Task {
-                guard !Task.isCancelled else { return }
-                await viewModel.loadInfoOfHomework(homeworkID: id)
-
-                guard !Task.isCancelled else { return }
-                await viewModel.loadResult(homeworkID: id)
-            }
-        }, content: {
-            QuestionsView(homeworkID: id)
-        })
-        .task(id: id) {
-            guard !Task.isCancelled else { return }
+                Task {
+                    guard !Task.isCancelled else { return }
+                    await viewModel.loadInfoOfHomework(homeworkID: id)
+                    
+                    guard !Task.isCancelled else { return }
+                    await viewModel.loadResult(homeworkID: id)
+                }
+            }, content: {
+                QuestionsView(homeworkID: id)
+            })
+        .refreshable {
             await viewModel.loadInfoOfHomework(homeworkID: id)
-
-            guard !Task.isCancelled else { return }
-            if(viewModel.homework?.submissionState == .completed) {
+            
+            if viewModel.homework?.submissionState == .completed {
                 await viewModel.loadResult(homeworkID: id)
             }
         }
@@ -177,7 +176,7 @@ struct HomeworkDetailView: View {
             guard viewModel.homework?.submissionState == .questionGenerated else {
                 return
             }
-
+            
             // Check if we should show the explanation
             if TestExplanationPreference.shared.shouldShowExplanation() {
                 showExplanation = true

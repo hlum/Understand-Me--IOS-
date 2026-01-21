@@ -224,7 +224,7 @@ struct HomeViewSkeleton: View {
 // MARK: - Homework Detail Skeleton
 struct HomeworkDetailSkeleton: View {
     var body: some View {
-        ScrollView {
+        VStack {
             VStack(alignment: .leading) {
                 HStack {
                     Text("課題のタイトルプレースホルダー")
@@ -274,6 +274,8 @@ struct HomeworkDetailSkeleton: View {
 
 // MARK: - Question Item Skeleton
 struct QuestionItemSkeleton: View {
+    var mode: QuestionViewMode = .answering
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("残り時間: 20秒")
@@ -302,9 +304,11 @@ struct QuestionItemSkeleton: View {
                 }
             }
             
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color.blue)
-                .frame(height: 55)
+            if mode == .answering {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color.blue)
+                    .frame(height: 55)
+            }
         }
         .padding(20)
         .background(

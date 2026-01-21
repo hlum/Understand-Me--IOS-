@@ -66,6 +66,11 @@ struct HomeworkListView: View {
                     }
                     .padding()
                 }
+                .refreshable {
+                    await viewModel.loadHomeworks()
+                    viewModel.filterAndSearch()
+                }
+
             } else {
                 ContentUnavailableView("該当する課題はありません。", systemImage: "book.closed")
                     .foregroundStyle(.secondary.opacity(0.7))
@@ -84,13 +89,6 @@ struct HomeworkListView: View {
         .onAppear {
             // Refresh when navigating back
             refreshTrigger = UUID()
-        }
-        .refreshable {
-            guard !Task.isCancelled else { return }
-            await viewModel.loadHomeworks()
-
-            guard !Task.isCancelled else { return }
-            viewModel.filterAndSearch()
         }
         .toast(isPresenting: $viewModel.showErrorAlert) {
             AlertToast(
