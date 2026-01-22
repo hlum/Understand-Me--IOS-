@@ -61,6 +61,9 @@ class HomeworkDetailViewModel: ObservableObject {
     @Published var showInputError: Bool = false
     @Published var inputErrorMessage: String = ""
     
+    @Published var isUploading:Bool = false
+    @Published var isLoading: Bool = false
+    
     private let homeworkUseCase: HomeworkUseCase
     private let classUseCase: ClassUseCase
     private let projectUseCase: ProjectUseCase
@@ -90,18 +93,20 @@ class HomeworkDetailViewModel: ObservableObject {
         await loadHomework(id: homeworkID)
         if let homework = self.homework {
             await loadClassDetail(classID: homework.classID)
+            await loadResult(homeworkID: homework.id)
         }
     }
     
     
     
     func uploadProject() async {
+        
         inputErrorMessage = ""
         showInputError = false
 
         // Validate URL format
         guard let url = URL(string: homeworkLinkTxt) else {
-            await showInputError(message: "URLの形式が不正です。正しいURLを入力してください。")
+            showInputError(message: "URLの形式が不正です。正しいURLを入力してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: URLの形式が不正です。")
             return
         }
@@ -109,19 +114,19 @@ class HomeworkDetailViewModel: ObservableObject {
         // Validate URL type (GitHub or Google Drive)
         let validationResult = validateRepositoryURL(url)
         if let errorMessage = validationResult {
-            await showInputError(message: errorMessage)
+            showInputError(message: errorMessage)
             logger.error("HomeworkDetailViewModel.uploadProject: \(errorMessage)")
             return
         }
 
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            await showInputError(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
+            showInputError(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: ログインしているユーザーがいません。")
             return
         }
 
         guard let homework = homework else {
-            await showInputError(message: "宿題の情報が見つかりません。")
+            showInputError(message: "宿題の情報が見つかりません。")
             logger.error("HomeworkDetailViewModel.uploadProject: 宿題の情報がありません。")
             return
         }
@@ -133,10 +138,10 @@ class HomeworkDetailViewModel: ObservableObject {
                 githubURLString: homeworkLinkTxt
             )
         } catch let error as UseCaseErrors {
-            await showInputError(message: error.localizedDescription)
+            showInputError(message: error.localizedDescription)
         } catch {
             // unexpected errors
-            await showInputError(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
+            showInputError(message: "予期せぬエラーが発生しました。もう一度やり直してください。")
             logger.error("HomeworkDetailViewModel.uploadProject: \(error.localizedDescription)")
         }
     }
@@ -144,6 +149,8 @@ class HomeworkDetailViewModel: ObservableObject {
     
     
     func retryQuestionGeneration(homeworkID: String) async  {
+        isLoading = true
+        defer { isLoading = false }
         
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             await showAlert(message: "ログイン情報を取得できませんでした。")
@@ -154,10 +161,10 @@ class HomeworkDetailViewModel: ObservableObject {
         do {
             try await homeworkUseCase.retryQuestionGeneration(homeworkID: homeworkID, studentID: authDataResult.id)
         } catch let error as LollipopError {
-            await showAlert(message: error.errorDescription ?? "問題生成の再試行に失敗しました。")
+            showAlert(message: error.errorDescription ?? "問題生成の再試行に失敗しました。")
             logger.error("HomeworkDetailViewModel.retryQuestionGeneration: \(error.debugDescription)")
         } catch {
-            await showAlert(message: "問題生成の再試行に失敗しました。")
+            showAlert(message: "問題生成の再試行に失敗しました。")
             logger.error("HomeworkDetailViewModel.retryQuestionGeneration: \(error.localizedDescription)")
         }
     }
@@ -165,8 +172,11 @@ class HomeworkDetailViewModel: ObservableObject {
     
     
     func cancelHomeworkSubmission(homeworkID: String) async {
+        isLoading = true
+        defer { isLoading = false }
+
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
-            await showAlert(message: "ログイン情報を取得できませんでした。")
+            showAlert(message: "ログイン情報を取得できませんでした。")
             logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: ログインしているユーザーがいません。")
             return
         }
@@ -174,10 +184,10 @@ class HomeworkDetailViewModel: ObservableObject {
         do {
             try await homeworkUseCase.cancelHomeworkSubmission(homeworkID: homeworkID, studentID: authDataResult.id)
         } catch let error as LollipopError {
-            await showAlert(message: error.errorDescription ?? "宿題提出の取り消しに失敗しました。")
+            showAlert(message: error.errorDescription ?? "宿題提出の取り消しに失敗しました。")
             logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: \(error.debugDescription)")
         } catch {
-            await showAlert(message: "宿題提出の取り消しに失敗しました。")
+            showAlert(message: "宿題提出の取り消しに失敗しました。")
             logger.error("HomeworkDetailViewModel.cancelHomeworkSubmission: \(error.localizedDescription)")
         }
     }
@@ -188,7 +198,6 @@ class HomeworkDetailViewModel: ObservableObject {
     @MainActor
     private func loadHomework(id: String) async {
         do {
-            
             guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
                 showAlert(message: "ログイン情報を取得できませんでした。")
                 logger.error("HomeworkDetailViewModel.loadHomework: ログインしているユーザーがいません。")
@@ -224,7 +233,7 @@ class HomeworkDetailViewModel: ObservableObject {
     
     // TODO: Result should be nullable
     @MainActor
-    func loadResult(homeworkID: String) async {
+    private func loadResult(homeworkID: String) async {
         guard let authDataResult = await authenticationUseCase.fetchCurrentUser() else {
             showAlert(message: "ログイン情報を取得できませんでした。")
             logger.error("QuestionsViewModel.loadAnswersForReview: ログイン中のUserがありません。")

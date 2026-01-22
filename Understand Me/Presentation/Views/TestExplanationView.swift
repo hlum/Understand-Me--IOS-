@@ -249,7 +249,7 @@ struct TestExplanationView: View {
                     .padding(.bottom,30)
 
                 ArcTimerButton(
-                    progress: $arcProgress,
+                    progress: $arcProgress, isRunning: .constant(true),
                     duration: 10,
                     lineWidth: 10,
                     size: 80,
@@ -314,7 +314,7 @@ struct TestExplanationView: View {
                     .padding(.bottom, 30)
 
                 ArcTimerButton(
-                    progress: $arcProgress,
+                    progress: $arcProgress, isRunning: .constant(true),
                     duration: 10,
                     lineWidth: 10,
                     size: 80,

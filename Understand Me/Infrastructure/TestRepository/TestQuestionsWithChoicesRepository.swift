@@ -8,7 +8,11 @@
 import Foundation
 
 class TestQuestionsWithChoicesRepository: QuestionsWithChoicesRepository {
-    func fetchAll(homeworkID: String, userID: String) async throws -> [QuestionWithChoices] {
+    func fetchCorrectChoice(homeworkID: String, questionID: String) async throws -> Choice {
+        return Choice.getDummy()
+    }
+    
+    func fetchQuestionsChoices(homeworkID: String, userID: String) async throws -> [QuestionWithChoices] {
         return [.getDummy(), .getDummy(), .getDummy(), .getDummy()]
     }
 }

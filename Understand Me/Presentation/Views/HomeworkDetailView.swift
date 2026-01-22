@@ -28,77 +28,65 @@ struct HomeworkDetailView: View {
         self.id = id
     }
     
-    var body: some View {
-        Group {
-            if let homework = viewModel.homework {
-                ScrollView {
-                    if let classInfo = viewModel.classDetail {
-                        homeworkTitleDescription(homework: homework, classInfo: classInfo)
-                    } else {
-                        homeworkTitleDescription(homework: homework, classInfo: nil)
-                            .redacted(reason: .placeholder)
-                    }
-                    Divider()
-                    
-                    
-                    if homework.submissionState == .notAssigned {
-                        githubTxtFieldAndBtn(homeworkID: homework.id)
-                    } else if homework.submissionState == .generatingQuestions {
-                        nekoThinking
-                    } else if homework.submissionState == .questionGenerated {
-                        answerQuizBtn(homeworkID: homework.id)
-                    }else if homework.submissionState == .failed {
-                        failedState(homeworkID: homework.id)
-                    } else if homework.submissionState == .completed {
-                        reviewNavBtn(homeworkID: homework.id)
-                    }
-                    
-                    Spacer()
-                }
-                .navigationTitle("課題の詳細")
-                .navigationBarTitleDisplayMode(.inline)
-                .refreshable {
-                    guard !Task.isCancelled else { return }
-                    await viewModel.loadInfoOfHomework(homeworkID: id)
+    @State private var taskId: UUID = .init()
 
-                    guard !Task.isCancelled else { return }
-                    if viewModel.homework?.submissionState == .completed {
-                        await viewModel.loadResult(homeworkID: id)
+    
+    var body: some View {
+        ScrollView {
+            if viewModel.isLoading {
+                HomeworkDetailSkeleton()
+            } else {
+                if let homework = viewModel.homework,
+                   let classInfo = viewModel.classDetail {
+                    VStack {
+                        
+                        homeworkTitleDescription(homework: homework, classInfo: classInfo)
+                        
+                        Divider()
+                        
+                        
+                        if homework.submissionState == .notAssigned {
+                            githubTxtFieldAndBtn(homeworkID: homework.id)
+                        } else if homework.submissionState == .generatingQuestions {
+                            nekoThinking
+                        } else if homework.submissionState == .questionGenerated {
+                            answerQuizBtn(homeworkID: homework.id)
+                        }else if homework.submissionState == .failed {
+                            failedState(homeworkID: homework.id)
+                        } else if homework.submissionState == .completed {
+                            reviewNavBtn(homeworkID: homework.id)
+                        }
+                        
+                        Spacer()
                     }
                 }
-            } else {
-                HomeworkDetailSkeleton()
             }
-            
         }
+        .task(id: taskId) {
+            viewModel.isLoading = true
+            await viewModel.loadInfoOfHomework(homeworkID: id)
+            viewModel.isLoading = false
+        }
+        .navigationTitle("課題の詳細")
+        .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(
             isPresented: $showExplanation,
             onDismiss: {
                 showExplanation = false
-        }, content: {
-            TestExplanationView(showQuestions: $showQuestionViewSheet)
-        })
+            }, content: {
+                TestExplanationView(showQuestions: $showQuestionViewSheet)
+            })
         .fullScreenCover(
             isPresented: $showQuestionViewSheet,
             onDismiss: {
-            Task {
-                guard !Task.isCancelled else { return }
-                await viewModel.loadInfoOfHomework(homeworkID: id)
-
-                guard !Task.isCancelled else { return }
-                await viewModel.loadResult(homeworkID: id)
-            }
-        }, content: {
-            QuestionsView(homeworkID: id)
-        })
-        .task(id: id) {
-            guard !Task.isCancelled else { return }
-            await viewModel.loadInfoOfHomework(homeworkID: id)
-
-            guard !Task.isCancelled else { return }
-            if(viewModel.homework?.submissionState == .completed) {
-                await viewModel.loadResult(homeworkID: id)
-            }
+                Task {
+                    await viewModel.loadInfoOfHomework(homeworkID: id)
+                }
+            }, content: {
+                QuestionsView(homeworkID: id)
+            })
+        .refreshable {
+            taskId = .init()
         }
         .toast(isPresenting: $viewModel.showErrorAlert) {
             AlertToast(
@@ -177,7 +165,7 @@ struct HomeworkDetailView: View {
             guard viewModel.homework?.submissionState == .questionGenerated else {
                 return
             }
-
+            
             // Check if we should show the explanation
             if TestExplanationPreference.shared.shouldShowExplanation() {
                 showExplanation = true
@@ -321,8 +309,12 @@ struct HomeworkDetailView: View {
             // Submit button
             Button {
                 Task {
+                    viewModel.isUploading = true
+                    
                     await viewModel.uploadProject()
                     await viewModel.loadInfoOfHomework(homeworkID: homeworkID)
+                    
+                    viewModel.isUploading = false
                 }
             } label: {
                 Text("提出する")
@@ -330,7 +322,7 @@ struct HomeworkDetailView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 55)
                     .background(
-                        viewModel.homeworkLinkTxt.isEmpty
+                        viewModel.homeworkLinkTxt.isEmpty || viewModel.isUploading
                         ? Color.gray.opacity(0.4)
                         : Color.accentColor
                     )
@@ -338,7 +330,7 @@ struct HomeworkDetailView: View {
                     .cornerRadius(70)
                     .animation(.easeInOut, value: viewModel.homeworkLinkTxt.isEmpty)
             }
-            .disabled(viewModel.homeworkLinkTxt.isEmpty)
+            .disabled(viewModel.homeworkLinkTxt.isEmpty || viewModel.isUploading)
             
         }
         .padding(.horizontal)

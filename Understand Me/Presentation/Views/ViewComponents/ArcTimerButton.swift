@@ -12,6 +12,7 @@ import Combine
 /// A reusable button that visually fills an arc into a complete circle over a specified duration.
 struct ArcTimerButton: View {
     @Binding var progress: Double
+    @Binding var isRunning: Bool
 
     // MARK: - Configuration
     let duration: TimeInterval
@@ -25,7 +26,6 @@ struct ArcTimerButton: View {
     var onTick: ((Int) -> Void)? = nil
     
     // MARK: - State
-    @State private var isRunning = false
     @State private var timerCancellable: Cancellable? = nil
     @State private var breathScale: CGFloat = 1.4
     
@@ -86,20 +86,26 @@ struct ArcTimerButton: View {
         .accessibilityHint("Tap to start timer")
         .onAppear {
             startBreathingAnimation()
-            startTimer()
+            if isRunning {
+                startTimer()
+            }
         }
         .onDisappear(perform: cleanup)
         .onChange(of: remainingSeconds) { _, newValue in
             onTick?(newValue)
         }
+        .onChange(of: isRunning) { _, newValue in
+            isRunning ? startTimer() : stopTimer()
+        }
     }
     
     // MARK: - Actions
     private func handleTap() {
-        stopTimer()
-        progress = 0.0
-        isRunning = true
-        startTimer()
+        if isRunning {
+            stopTimer()
+            progress = 0.0
+            startTimer()
+        }
     }
     
     // MARK: - Timer Management
@@ -124,7 +130,6 @@ struct ArcTimerButton: View {
     
     private func completeTimer() {
         stopTimer()
-        isRunning = false
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             onComplete?()
@@ -155,9 +160,10 @@ struct ArcTimerButton: View {
 // MARK: - Preview
 #Preview {
     @Previewable @State var progress: Double = 0.0
+    @Previewable @State var isRunning: Bool = false
     VStack(spacing: 40) {
         ArcTimerButton(
-            progress: $progress, duration: 5,
+            progress: $progress, isRunning: $isRunning, duration: 5,
             lineWidth: 14
         ) {            print("Completed!")
         }

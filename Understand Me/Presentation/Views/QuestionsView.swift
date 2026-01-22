@@ -10,10 +10,9 @@ import AlertToast
 
 struct QuestionsView: View {
     @Environment(\.dismiss) var dismiss
-
+    
     @StateObject private var viewModel: QuestionsViewModel
-    @State private var hasPostedInitialAnswer = false
-
+    
     var homeworkID: String
     var mode: QuestionViewMode
     
@@ -48,57 +47,30 @@ struct QuestionsView: View {
                         questionAndChoices: viewModel.questionsWithChoices[viewModel.currentIndex],
                         mode: mode,
                         isLastQuestion: viewModel.currentIndex == viewModel.questionsWithChoices.count - 1,
-                        onClickNext: { selectedChoiceID in
-
-
-                            Task {
-                                await viewModel.postAnswer(
-                                    questionID: viewModel.questionsWithChoices[viewModel.currentIndex].id,
-                                    homeworkID: viewModel.questionsWithChoices[viewModel.currentIndex].homeworkID,
-                                    selectedChoiceID: selectedChoiceID
-                                )
-
-
-                                if viewModel.currentIndex < viewModel.questionsWithChoices.count - 1 {
-                                    hasPostedInitialAnswer = false
-                                    withAnimation(.snappy) {
-                                        viewModel.currentIndex += 1
-                                    }
-                                } else {
-                                    // Quiz 終了、前のViewに戻る
-                                    dismiss()
-
+                        questionCount: viewModel.questionsWithChoices.count,
+                        moveToNextQuestion: {
+                            if viewModel.currentIndex < viewModel.questionsWithChoices.count - 1 {
+                                withAnimation(.snappy) {
+                                    viewModel.currentIndex += 1
                                 }
-
+                            } else {
+                                // Quiz 終了、前のViewに戻る
+                                dismiss()
                             }
-
-                        })
-                    .id(viewModel.questionsWithChoices[viewModel.currentIndex].id)
-                    .onChange(of: viewModel.currentIndex) { _, _ in
-                        hasPostedInitialAnswer = false
-                    }
-                    .task(id: viewModel.questionsWithChoices[viewModel.currentIndex].id) {
-                        //　回答を始めたのを記録するため空の回答を送信しとく
-                        guard !hasPostedInitialAnswer else { return }
-                        hasPostedInitialAnswer = true
-
-                        await viewModel.postAnswer(
-                            questionID: viewModel.questionsWithChoices[viewModel.currentIndex].id,
-                            homeworkID: viewModel.questionsWithChoices[viewModel.currentIndex].homeworkID,
-                            selectedChoiceID: nil
-                        )
-                    }
+                        }
+                    )
                 } else {
                     ScrollView(.vertical) {
                         ForEach(viewModel.questionsWithChoices) { questionWithChoices in
                             QuestionAndChoicesItemView(
                                 questionAndChoices: questionWithChoices,
                                 mode: .review,
+                                questionCount: viewModel.questionsWithChoices.count,
                                 selectedChoiceIDFromServer: viewModel.questionIDAndSelectedChoiceID[questionWithChoices.id]
                             )
                         }
                     }
-                    .task(id: homeworkID) {
+                    .refreshable {
                         await viewModel.loadAnswersForReview(homeworkID: homeworkID)
                     }
                 }
@@ -107,8 +79,17 @@ struct QuestionsView: View {
         }
         .navigationTitle(mode == .answering ? "質問一覧" : "回答履歴")
         .navigationBarBackButtonHidden(mode == .answering)
-        .task(id: homeworkID) {
+        .task {
             await viewModel.loadALlQuestionsWithChoices(homeworkID: homeworkID)
+
+            guard mode == .review else { return }
+            await viewModel.loadAnswersForReview(homeworkID: homeworkID)
+        }
+        .task {
+            // からの回答を送信
+            guard mode == .answering else { return }
+            guard let questionID = viewModel.questionsWithChoices.first?.id else { return }
+            await viewModel.postAnswer(questionID: questionID, homeworkID: homeworkID, selectedChoiceID: nil)
         }
         .toast(isPresenting: $viewModel.showError) {
             AlertToast(
