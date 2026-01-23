@@ -93,7 +93,9 @@ class HomeworkDetailViewModel: ObservableObject {
         await loadHomework(id: homeworkID)
         if let homework = self.homework {
             await loadClassDetail(classID: homework.classID)
-            await loadResult(homeworkID: homework.id)
+            if homework.submissionState == .completed {
+                await loadResult(homeworkID: homework.id)
+            }
         }
     }
     
