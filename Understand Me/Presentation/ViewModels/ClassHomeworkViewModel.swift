@@ -41,9 +41,6 @@ class ClassHomeworkViewModel: ObservableObject {
     
     @MainActor
     func loadClassInfos() async {
-        isLoading = true
-        defer { isLoading = false }
-        
         do {
             self.classInfo = try await classUseCase.fetchClass(id: classID)
         } catch {

@@ -48,10 +48,10 @@ struct ClassHomeworkView: View {
             .padding(10)
             .cornerRadius(10)
             
-            if viewModel.isLoading || viewModel.isFiltering {
-                HomeworkListSkeleton()
-            } else if !viewModel.filteredHomeworks.isEmpty {
-                ScrollView(showsIndicators: false) {
+            ScrollView(showsIndicators: false) {
+                if viewModel.isLoading || viewModel.isFiltering {
+                    HomeworkListSkeleton()
+                } else if !viewModel.filteredHomeworks.isEmpty {
                     LazyVStack {
                         ForEach(viewModel.filteredHomeworks) { homework in
                             HomeworkListItemView(
@@ -61,10 +61,7 @@ struct ClassHomeworkView: View {
                                 state: homework.submissionState,
                                 onTestCompleted: {
                                     Task {
-                                        guard !Task.isCancelled else { return }
                                         await viewModel.loadHomeworks(classID: classID)
-
-                                        guard !Task.isCancelled else { return }
                                         viewModel.filterHomeworks()
                                     }
                                 }
@@ -72,36 +69,26 @@ struct ClassHomeworkView: View {
                         }
                     }
                     .padding(.top, 10)
+                    
+                } else {
+                    ContentUnavailableView("該当する課題がありません。", systemImage: "book.closed")
                 }
-            } else {
-                ContentUnavailableView("該当する課題がありません。", systemImage: "book.closed") 
             }
+            .refreshable {
+                self.refreshTrigger = UUID()
+            }
+
         }
         .navigationTitle(viewModel.classInfo?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: refreshTrigger) {
-            guard !Task.isCancelled else { return }
+            viewModel.isLoading = true
+            
             await viewModel.loadClassInfos()
-
-            guard !Task.isCancelled else { return }
             await viewModel.loadHomeworks(classID: classID)
-
-            guard !Task.isCancelled else { return }
             viewModel.filterHomeworks()
-        }
-        .onAppear {
-            // Refresh when navigating back
-            refreshTrigger = UUID()
-        }
-        .refreshable {
-            guard !Task.isCancelled else { return }
-            await viewModel.loadClassInfos()
-
-            guard !Task.isCancelled else { return }
-            await viewModel.loadHomeworks(classID: classID)
-
-            guard !Task.isCancelled else { return }
-            viewModel.filterHomeworks()
+            
+            viewModel.isLoading = false
         }
         .toast(isPresenting: $viewModel.showError) {
             AlertToast(
